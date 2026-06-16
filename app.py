@@ -203,6 +203,7 @@ def register():
         # Create default settings for new user
         existing = Settings.query.filter_by(user_id=user.id).first()
         if not existing:
+            if not Settings.query.filter_by(user_id=user.id).first():
             db.session.add(Settings(user_id=user.id))
         db.session.commit()
         login_user(user, remember=True)
