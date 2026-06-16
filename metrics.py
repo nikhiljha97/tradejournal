@@ -139,12 +139,12 @@ def _empty_kpi():
 
 def compute_prop(trades, settings):
     closed  = [t for t in trades if t.get("realized_pnl") is not None]
-    start   = float(settings.get("starting_balance", 10000))
-    dl_lim  = float(settings.get("daily_loss_limit", 500))
-    max_dd  = float(settings.get("max_drawdown", 1000))
-    max_c   = float(settings.get("max_contracts", 3))
-    cons_pct= float(settings.get("consistency_pct", 30))
-    target  = float(settings.get("profit_target", 500))
+    start   = float(settings.get("starting_balance") or 10000)
+    dl_lim  = float(settings.get("daily_loss_limit") or 500)
+    max_dd  = float(settings.get("max_drawdown") or 1000)
+    max_c   = float(settings.get("max_contracts") or 3)
+    cons_pct= float(settings.get("consistency_pct") or 30)
+    target  = float(settings.get("profit_target") or 500)
 
     day_pnl = defaultdict(float)
     for t in closed:

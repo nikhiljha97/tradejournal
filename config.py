@@ -10,6 +10,14 @@ class Config:
         "sqlite:///journal_dev.db"          # local fallback for development
     ).replace("postgres://", "postgresql://")  # fix Render/Neon legacy prefix
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # Neon closes idle connections after ~5 min.
+    # pool_pre_ping tests the connection before use and reconnects if closed.
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+        "pool_recycle": 280,      # recycle connections every 4.5 min
+        "pool_size": 5,
+        "max_overflow": 2,
+    }
 
     # Anthropic — required for LLM sentiment
     ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
