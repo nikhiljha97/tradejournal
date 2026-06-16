@@ -303,7 +303,7 @@ def sentiment_endpoint():
 
 if __name__ == "__main__":
     print(f"\n  TradeJournal  →  http://127.0.0.1:5000")
-    print(f"  AI sentiment: {'ON (Groq llama-3.3-70b)' if sent.groq_available() else 'OFF — set GROQ_API_KEY}")
+    print(f"  AI sentiment: {'ON (Groq llama-3.3-70b)' if sent.groq_available() else 'OFF — set GROQ_API_KEY'}")
     print(f"  DB: {app.config['SQLALCHEMY_DATABASE_URI'][:60]}\n")
     app.run(debug=True, port=5000)
 
