@@ -363,3 +363,74 @@ def update_trade(trade_id):
         "label": t.sentiment_label, "score": t.sentiment_score,
         "source": t.sentiment_source, "summary": t.sentiment_summary,
     }})
+
+# ── Image upload ──────────────────────────────────────────────────────────────
+import uuid
+from werkzeug.utils import secure_filename
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def _allowed(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def _upload_image(file) -> str:
+    """
+    Returns a URL string for the stored image.
+    - If CLOUDINARY_URL env var is set → upload to Cloudinary (works on Render)
+    - Otherwise → save to static/uploads/ (local dev)
+    """
+    cloudinary_url = os.environ.get("CLOUDINARY_URL", "")
+    if cloudinary_url:
+        try:
+            import cloudinary
+            import cloudinary.uploader
+            cloudinary.config(cloudinary_url=cloudinary_url)
+            result = cloudinary.uploader.upload(
+                file,
+                folder="tradejournal",
+                resource_type="image",
+                transformation=[{"width": 1200, "crop": "limit", "quality": "auto"}],
+            )
+            return result["secure_url"]
+        except Exception as e:
+            app.logger.error(f"Cloudinary upload failed: {e}")
+            raise
+
+    # Local storage
+    ext = file.filename.rsplit(".", 1)[1].lower()
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    save_path = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(save_path)
+    return f"/static/uploads/{filename}"
+
+
+@app.route("/api/trades/<int:trade_id>/image", methods=["POST"])
+def upload_trade_image(trade_id):
+    t = Trade.query.filter_by(id=trade_id, user_id=USER_ID).first_or_404()
+    if "image" not in request.files:
+        return jsonify({"error": "No image provided"}), 400
+    file = request.files["image"]
+    if not file.filename or not _allowed(file.filename):
+        return jsonify({"error": "Invalid file type. Use PNG, JPG, GIF or WEBP."}), 400
+    try:
+        url = _upload_image(file)
+        t.image_url = url
+        db.session.commit()
+        return jsonify({"image_url": url})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/trades/<int:trade_id>/image", methods=["DELETE"])
+def delete_trade_image(trade_id):
+    t = Trade.query.filter_by(id=trade_id, user_id=USER_ID).first_or_404()
+    # Delete local file if it's a local path
+    if t.image_url and t.image_url.startswith("/static/uploads/"):
+        local = os.path.join(os.path.dirname(os.path.abspath(__file__)), t.image_url.lstrip("/"))
+        if os.path.exists(local):
+            os.remove(local)
+    t.image_url = None
+    db.session.commit()
+    return jsonify({"deleted": True})

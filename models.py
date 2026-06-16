@@ -56,6 +56,7 @@ class Trade(db.Model):
     sentiment_summary   = db.Column(db.Text)
     sentiment_phrases   = db.Column(db.Text, default="[]")  # JSON: [{phrase, emotion}]
     sentiment_source    = db.Column(db.String(20))   # "llm" / "pending" / "none"
+    image_url           = db.Column(db.String(500))  # local path or Cloudinary URL
 
     created_at          = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -93,6 +94,7 @@ class Trade(db.Model):
             "sentiment_summary": self.sentiment_summary,
             "sentiment_phrases": json.loads(self.sentiment_phrases or "[]"),
             "sentiment_source": self.sentiment_source,
+            "image_url": self.image_url,
         }
 
 
