@@ -201,7 +201,9 @@ def register():
         db.session.add(user)
         db.session.flush()
         # Create default settings for new user
-        db.session.add(Settings(user_id=user.id))
+        existing = Settings.query.filter_by(user_id=user.id).first()
+        if not existing:
+            db.session.add(Settings(user_id=user.id))
         db.session.commit()
         login_user(user, remember=True)
         return jsonify({"ok":True, "username": user.username})
