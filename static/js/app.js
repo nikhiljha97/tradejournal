@@ -911,3 +911,42 @@ initTimePickers();
 resetTimePickers();
 pollEngineStatus();
 refresh();
+
+/* ── TradingView live ticker ─────────────────────────────────── */
+function initLiveTicker() {
+  const wrap = document.getElementById('tickerTrack');
+  if (!wrap) return;
+  const script = document.createElement('script');
+  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
+  script.async = true;
+  script.innerHTML = JSON.stringify({
+    symbols: [
+      {proName:'FOREXCOM:XAUUSD', title:'Gold'},
+      {proName:'FOREXCOM:XAGUSD', title:'Silver'},
+      {proName:'FX:EURUSD',       title:'EUR/USD'},
+      {proName:'FX:GBPUSD',       title:'GBP/USD'},
+      {proName:'FX:USDJPY',       title:'USD/JPY'},
+      {proName:'CRYPTOCAP:BTC',   title:'Bitcoin'},
+      {proName:'CRYPTOCAP:ETH',   title:'Ethereum'},
+      {proName:'FOREXCOM:US30',   title:'US30'},
+      {proName:'FOREXCOM:SPX500', title:'S&P 500'},
+      {proName:'FOREXCOM:NAS100', title:'NASDAQ'},
+      {proName:'TVC:USOIL',       title:'Crude Oil'},
+      {proName:'TVC:DXY',         title:'DXY'},
+    ],
+    showSymbolLogo: false,
+    isTransparent: true,
+    displayMode: 'adaptive',
+    colorTheme: 'dark',
+    locale: 'en',
+  });
+  const container = document.createElement('div');
+  container.className = 'tradingview-widget-container';
+  container.style.cssText = 'width:100%;height:46px;';
+  const inner = document.createElement('div');
+  inner.className = 'tradingview-widget-container__widget';
+  container.appendChild(inner);
+  container.appendChild(script);
+  wrap.appendChild(container);
+}
+initLiveTicker();
