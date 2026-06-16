@@ -316,6 +316,7 @@
             <span class="toggle" data-tag="{{ tag }}">{{ tag }}</span>
             {% endfor %}
           </div>
+          <div style="display:flex;gap:6px;margin-top:8px;align-items:center"><input type="text" id="f_custom_tag" placeholder="Add custom tag…" style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border2);border-radius:999px;padding:5px 12px;font-size:11px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}"><button onclick="addCustomTag()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:999px;padding:5px 10px;cursor:pointer;font-size:11px;">+ Add</button></div>
         </div>
         <div class="field">
           <label>In-trade notes &amp; psychology <span class="label-sub">— LLM reads your mindset</span></label>

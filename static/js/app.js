@@ -654,6 +654,25 @@ function setRiskMode(mode,btn) {
   recalc();
 }
 
+/* ── Custom setup tags ──────────────────────────────────────── */
+function addCustomTag() {
+  const input = $('f_custom_tag');
+  const val = input.value.trim();
+  if (!val) return;
+  if (selectedTags.has(val)) { input.value=''; return; }
+  selectedTags.add(val);
+  const el = document.createElement('span');
+  el.className = 'toggle on';
+  el.dataset.tag = val;
+  el.textContent = val;
+  el.addEventListener('click', () => {
+    el.classList.toggle('on');
+    selectedTags.has(val) ? selectedTags.delete(val) : selectedTags.add(val);
+  });
+  $('setupTags').appendChild(el);
+  input.value = '';
+}
+
 /* ── Sentiment preview ───────────────────────────────────────── */
 async function previewSentiment() {
   const notes=$('f_notes').value;
