@@ -143,8 +143,8 @@ def _save_trade(data: dict) -> Trade:
         stop_price=data.get("stop_price"),
         target_price=data.get("target_price"),
         exit_price=data.get("exit_price"),
-        stop_pips=_num(data.get("stop_pips")),
-        target_pips=_num(data.get("target_pips")),
+        stop_pips=data.get("stop_pips"),
+        target_pips=data.get("target_pips"),
         dollar_risk=data.get("dollar_risk"),
         planned_risk_usd=data.get("planned_risk_usd"),
         planned_rr=data.get("planned_rr"),
@@ -303,7 +303,7 @@ def sentiment_endpoint():
 
 if __name__ == "__main__":
     print(f"\n  TradeJournal  →  http://127.0.0.1:5000")
-    print(f"  AI sentiment: {'ON (claude-sonnet-4-6)' if sent.groq_available() else 'OFF — set ANTHROPIC_API_KEY'}")
+    print(f"  AI sentiment: {'ON (Groq llama-3.3-70b)' if sent.groq_available() else 'OFF — set GROQ_API_KEY}")
     print(f"  DB: {app.config['SQLALCHEMY_DATABASE_URI'][:60]}\n")
     app.run(debug=True, port=5000)
 

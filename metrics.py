@@ -269,7 +269,7 @@ def compute_duration(trades):
 
     most_profitable = max(dur_pnl, key=dur_pnl.get)
     best_avg = max(dur_pnl, key=lambda k: _safe_div(dur_pnl[k], dur_count[k]))
-    best_wr  = max(dur_wins, key=lambda k: _safe_div(dur_wins[k], dur_count[k]))
+    best_wr  = max(dur_wins, key=lambda k: _safe_div(dur_wins[k], dur_count[k])) if dur_wins else most_profitable
     most_common = max(dur_count, key=dur_count.get)
 
     hour_data = {}
