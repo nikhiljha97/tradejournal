@@ -779,7 +779,7 @@ function initTimePickers() {
         `<option value="${String(i).padStart(2,'0')}">${String(i).padStart(2,'0')}</option>`
       ).join('');
     mSel.innerHTML = '<option value="">MM</option>' +
-      ['00','05','10','15','20','25','30','35','40','45','50','55'].map(m=>
+      Array.from({length:60},(_,i)=>String(i).padStart(2,'0')).map(m=>
         `<option value="${m}">${m}</option>`
       ).join('');
   });
