@@ -883,6 +883,7 @@ function editTrade(id) {
     sp.textContent = t.notes ? 'Click "Preview psychology read" to re-analyze.' : '';
   }
 
+  _loadExistingImage(t.image_url || null);
   recalc();
   $('entryModal').classList.add('open');
 }
