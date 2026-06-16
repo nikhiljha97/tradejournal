@@ -200,7 +200,7 @@ def register():
         user = User(email=email, username=username, password_hash=pw_hash)
         db.session.add(user)
         db.session.flush()
-        # Create default settings for new user
+        # Create default settings for new user (guard against duplicate)
         if not Settings.query.filter_by(user_id=user.id).first():
             db.session.add(Settings(user_id=user.id))
         db.session.commit()
@@ -294,16 +294,20 @@ def update_trade(trade_id):
         payload["sentiment_phrases"] = json.loads(t.sentiment_phrases or "[]")
         payload["sentiment_source"]  = t.sentiment_source
         payload["emotions"]          = json.loads(t.emotions or "[]")
-    numeric_fields = ["duration_minutes","lots","contracts","entry_price","stop_price",
-                      "target_price","exit_price","stop_pips","target_pips","dollar_risk",
-                      "planned_risk_usd","planned_rr","realized_pnl","realized_r","commission"]
+    _numeric = {"duration_minutes","lots","contracts","entry_price","stop_price",
+                "target_price","exit_price","stop_pips","target_pips","dollar_risk",
+                "planned_risk_usd","planned_rr","realized_pnl","realized_r","commission"}
     for field in ["trade_date","entry_time","exit_time","duration_minutes","instrument",
                   "session","direction","lots","contracts","entry_price","stop_price",
                   "target_price","exit_price","stop_pips","target_pips","dollar_risk",
                   "planned_risk_usd","planned_rr","realized_pnl","realized_r","commission","order_type"]:
         if field in payload:
             val = payload[field]
-            if field in numeric_fields and val == "": val = None
+            if field in _numeric and (val == "" or val is None):
+                val = None
+            elif field in _numeric and val is not None:
+                try: val = float(val)
+                except (TypeError, ValueError): val = None
             setattr(t, field, val)
     t.setups            = json.dumps(payload.get("setups") or [])
     t.notes             = payload.get("notes")
