@@ -928,6 +928,10 @@ window.saveTrade = async function() {
 };
 
 async function updateTrade(id) {
+  // upload pending image first if any
+  if (_pendingImageFile) {
+    await _uploadPendingImage(id);
+  }
   const isOpen = $('f_open_trade').checked;
   const payload = {
     trade_date: $('f_date').value, entry_time: $('f_entry_time').value,

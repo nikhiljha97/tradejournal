@@ -294,11 +294,17 @@ def update_trade(trade_id):
         payload["sentiment_phrases"] = json.loads(t.sentiment_phrases or "[]")
         payload["sentiment_source"]  = t.sentiment_source
         payload["emotions"]          = json.loads(t.emotions or "[]")
+    numeric_fields = ["duration_minutes","lots","contracts","entry_price","stop_price",
+                      "target_price","exit_price","stop_pips","target_pips","dollar_risk",
+                      "planned_risk_usd","planned_rr","realized_pnl","realized_r","commission"]
     for field in ["trade_date","entry_time","exit_time","duration_minutes","instrument",
                   "session","direction","lots","contracts","entry_price","stop_price",
                   "target_price","exit_price","stop_pips","target_pips","dollar_risk",
                   "planned_risk_usd","planned_rr","realized_pnl","realized_r","commission","order_type"]:
-        if field in payload: setattr(t, field, payload[field])
+        if field in payload:
+            val = payload[field]
+            if field in numeric_fields and val == "": val = None
+            setattr(t, field, val)
     t.setups            = json.dumps(payload.get("setups") or [])
     t.notes             = payload.get("notes")
     t.emotions          = json.dumps(payload.get("emotions") or [])
