@@ -314,3 +314,52 @@ def engine_status():
         "offline_ready": sent.offline_ready(),
         "status": sent.engine_status(),
     })
+
+@app.route("/api/trades/<int:trade_id>", methods=["PUT"])
+def update_trade(trade_id):
+    t = Trade.query.filter_by(id=trade_id, user_id=USER_ID).first_or_404()
+    payload = request.get_json(force=True)
+    payload = _compute_derived(payload)
+
+    # Re-run sentiment if notes changed
+    if payload.get("notes") != t.notes:
+        s = sent.analyze(payload.get("notes", ""))
+        payload.update({
+            "sentiment_label":   s["label"],
+            "sentiment_score":   s["score"],
+            "sentiment_summary": s["summary"],
+            "sentiment_phrases": s["phrases"],
+            "sentiment_source":  s["source"],
+            "emotions": sorted(set(s.get("emotions") or [])),
+        })
+    else:
+        payload["sentiment_label"]   = t.sentiment_label
+        payload["sentiment_score"]   = t.sentiment_score
+        payload["sentiment_summary"] = t.sentiment_summary
+        payload["sentiment_phrases"] = json.loads(t.sentiment_phrases or "[]")
+        payload["sentiment_source"]  = t.sentiment_source
+        payload["emotions"]          = json.loads(t.emotions or "[]")
+
+    # Update all fields
+    for field in ["trade_date","entry_time","exit_time","duration_minutes",
+                  "instrument","session","direction","lots","contracts",
+                  "entry_price","stop_price","target_price","exit_price",
+                  "stop_pips","target_pips","dollar_risk","planned_risk_usd",
+                  "planned_rr","realized_pnl","realized_r","commission","order_type"]:
+        if field in payload:
+            setattr(t, field, payload[field])
+
+    t.setups            = json.dumps(payload.get("setups") or [])
+    t.notes             = payload.get("notes")
+    t.emotions          = json.dumps(payload.get("emotions") or [])
+    t.sentiment_label   = payload.get("sentiment_label")
+    t.sentiment_score   = payload.get("sentiment_score")
+    t.sentiment_summary = payload.get("sentiment_summary")
+    t.sentiment_phrases = json.dumps(payload.get("sentiment_phrases") or [])
+    t.sentiment_source  = payload.get("sentiment_source")
+
+    db.session.commit()
+    return jsonify({"id": t.id, "sentiment": {
+        "label": t.sentiment_label, "score": t.sentiment_score,
+        "source": t.sentiment_source, "summary": t.sentiment_summary,
+    }})
