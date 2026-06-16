@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>TradeJournal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-name">TradeJournal</span>
+    <span class="brand-sub">/ edge &amp; psychology</span>
+  </div>
+  <nav class="tab-nav">
+    <button class="tab active" data-tab="overview">Overview</button>
+    <button class="tab" data-tab="analytics">Analytics</button>
+    <button class="tab" data-tab="psychology">Psychology</button>
+    <button class="tab" data-tab="history">History</button>
+  </nav>
+  <div class="topbar-right">
+    <span class="ai-badge" id="aiBadge">
+      <span class="ai-dot"></span>
+      <span id="aiLabel">{{ 'AI ON' if ai_available else 'No API Key' }}</span>
+    </span>
+    <button class="btn-ghost" onclick="openImport()">↑ Import</button>
+    <button class="btn-ghost" onclick="openSettings()">Settings</button>
+    <button class="btn-gold" onclick="openEntry()">+ Log Trade</button>
+  </div>
+</header>
+
+<!-- DISCIPLINE STRIP -->
+<div class="discipline-strip" id="disciplineStrip">
+  <div class="rule-chip loading"><div class="shimmer"></div></div>
+  <div class="rule-chip loading"><div class="shimmer"></div></div>
+  <div class="rule-chip loading"><div class="shimmer"></div></div>
+  <div class="rule-chip loading"><div class="shimmer"></div></div>
+  <div class="rule-chip loading"><div class="shimmer"></div></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main class="page-content">
+
+  <!-- ── OVERVIEW TAB ── -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <div class="charts-grid-2">
+      <div class="panel">
+        <div class="panel-hdr">Daily Net Cumulative P&L</div>
+        <div class="chart-wrap h260"><canvas id="equityChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">W&L Statistic <span class="panel-sub" id="wlSub"></span></div>
+        <div class="donut-row">
+          <div class="chart-wrap h200 w200"><canvas id="wlChart"></canvas></div>
+          <div class="donut-legend" id="wlLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-grid-3">
+      <div class="panel">
+        <div class="panel-hdr">Risk-to-Reward Ratio</div>
+        <div class="gauge-wrap"><canvas id="rrrGauge"></canvas>
+          <div class="gauge-label" id="rrrLabel"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">Order Types</div>
+        <div class="donut-row">
+          <div class="chart-wrap h180 w180"><canvas id="orderChart"></canvas></div>
+          <div class="donut-legend" id="orderLegend"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">Edge Score</div>
+        <div class="chart-wrap h200"><canvas id="radarChart"></canvas></div>
+        <div class="edge-footer" id="edgeFooter"></div>
+      </div>
+    </div>
+
+    <div class="charts-grid-2">
+      <div class="panel">
+        <div class="panel-hdr">Average Win / Loss</div>
+        <div class="win-loss-display" id="winLossDisplay"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">Best / Worst Trade</div>
+        <div class="win-loss-display" id="bestWorstDisplay"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">Trading Days</div>
+      <div id="tradingDaysTable"></div>
+    </div>
+  </div>
+
+  <!-- ── ANALYTICS TAB ── -->
+  <div class="tab-panel" id="tab-analytics">
+    <div class="cal-header">
+      <span class="cal-nav" onclick="calPrev()">‹</span>
+      <span class="cal-title" id="calTitle"></span>
+      <span class="cal-nav" onclick="calNext()">›</span>
+    </div>
+    <div class="panel">
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <div class="cal-summary" id="calSummary"></div>
+    </div>
+
+    <div class="charts-grid-2" style="margin-top:20px">
+      <div class="panel">
+        <div class="panel-hdr">Intraday Activity</div>
+        <div class="intraday-grid" id="intradayGrid"></div>
+        <div class="chart-wrap h200" style="margin-top:14px"><canvas id="hourChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">Duration Analysis</div>
+        <div class="duration-grid" id="durationGrid"></div>
+        <div class="chart-wrap h200" style="margin-top:14px"><canvas id="durationChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="charts-grid-2">
+      <div class="panel">
+        <div class="panel-hdr">R-Multiple Distribution</div>
+        <div class="chart-wrap h220"><canvas id="rDistChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">By Session</div>
+        <div id="bySession"></div>
+      </div>
+    </div>
+
+    <div class="charts-grid-2">
+      <div class="panel">
+        <div class="panel-hdr">By Weekday</div>
+        <div id="byWeekday"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">By Instrument</div>
+        <div id="byInstrument"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-hdr">By Setup Tag</div>
+      <div id="bySetup"></div>
+    </div>
+  </div>
+
+  <!-- ── PSYCHOLOGY TAB ── -->
+  <div class="tab-panel" id="tab-psychology">
+    <div class="charts-grid-2">
+      <div class="panel">
+        <div class="panel-hdr">Emotion → Avg R &nbsp;<span class="panel-sub">which states cost you money</span></div>
+        <div class="chart-wrap h300"><canvas id="emotionChart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr">Discipline Score over Time</div>
+        <div class="chart-wrap h300"><canvas id="disciplineChart"></canvas></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-hdr">Trade Notes &amp; Psychological Reads</div>
+      <div id="psychBlotter"></div>
+    </div>
+  </div>
+
+  <!-- ── HISTORY TAB ── -->
+  <div class="tab-panel" id="tab-history">
+    <div class="blotter-toolbar">
+      <input class="search-input" id="blotterSearch" placeholder="Search instrument, notes…" oninput="filterBlotter()">
+      <select class="filter-sel" id="blotterDir" onchange="filterBlotter()">
+        <option value="">All directions</option>
+        <option>Long</option><option>Short</option>
+      </select>
+      <button class="btn-ghost" onclick="openImport()">↑ Import file</button>
+    </div>
+    <div class="panel" style="padding:0">
+      <div style="overflow-x:auto"><table class="blotter" id="blotter"></table></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ENTRY MODAL -->
+<div class="modal-bg" id="entryModal">
+  <div class="modal modal-lg">
+    <div class="modal-hdr"><span>Log a Trade</span><button class="modal-close" onclick="closeEntry()">✕</button></div>
+
+    <div class="form-grid">
+      <div class="fg-col">
+        <p class="form-section">Timing</p>
+        <div class="row2">
+          <div class="field"><label>Date</label><input type="date" id="f_date" class="num"></div>
+          <div class="field"><label>Session</label>
+            <select id="f_session">{% for s in sessions %}<option>{{ s }}</option>{% endfor %}</select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Entry time</label><input type="time" id="f_entry_time" step="1"></div>
+          <div class="field"><label>Exit time</label><input type="time" id="f_exit_time" step="1"></div>
+        </div>
+
+        <p class="form-section">Instrument</p>
+        <div class="row2">
+          <div class="field"><label>Symbol</label>
+            <input list="instrument-list" id="f_instrument" placeholder="XAUUSD" oninput="recalc()">
+            <datalist id="instrument-list">
+              {% for i in instruments %}<option value="{{ i }}">{% endfor %}
+            </datalist>
+          </div>
+          <div class="field"><label>Direction</label>
+            <select id="f_direction" onchange="recalc()">
+              <option>Long</option><option>Short</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>Lot size</label><input type="number" step="any" min="0" id="f_lots" class="num" oninput="recalc()"></div>
+
+        <p class="form-section">Prices</p>
+        <div class="row3">
+          <div class="field"><label>Entry</label><input type="number" step="any" id="f_entry" class="num" oninput="recalc()"></div>
+          <div class="field"><label>Stop</label><input type="number" step="any" id="f_stop" class="num" oninput="recalc()"></div>
+          <div class="field"><label>Target</label><input type="number" step="any" id="f_target" class="num" oninput="recalc()"></div>
+        </div>
+        <div class="field"><label>Exit price</label><input type="number" step="any" id="f_exit" class="num" oninput="recalc()"></div>
+      </div>
+
+      <div class="fg-col">
+        <p class="form-section">Risk mode</p>
+        <div class="risk-tabs">
+          <button class="risk-tab active" onclick="setRiskMode('pip',this)">Pip-based</button>
+          <button class="risk-tab" onclick="setRiskMode('dollar',this)">Dollar-based</button>
+          <button class="risk-tab" onclick="setRiskMode('price',this)">Price-derived</button>
+        </div>
+        <div id="riskPip" class="risk-panel">
+          <div class="row2">
+            <div class="field"><label>Stop distance (pips)</label><input type="number" step="any" id="f_stop_pips" class="num" oninput="recalc()"></div>
+            <div class="field"><label>Target distance (pips)</label><input type="number" step="any" id="f_target_pips" class="num" oninput="recalc()"></div>
+          </div>
+        </div>
+        <div id="riskDollar" class="risk-panel hidden">
+          <div class="field"><label>Dollar risk $</label><input type="number" step="any" id="f_dollar_risk" class="num" oninput="recalc()"></div>
+        </div>
+        <div id="riskPrice" class="risk-panel hidden">
+          <div class="faint-note">Risk is derived automatically from Entry / Stop / Lots above.</div>
+        </div>
+
+        <div class="calc-readout" id="calcReadout">
+          <div class="cr-item"><span class="cr-label">Risk</span><b id="crRisk">—</b></div>
+          <div class="cr-item"><span class="cr-label">Planned R:R</span><b id="crRR">—</b></div>
+          <div class="cr-item"><span class="cr-label">Realized P&L</span><b id="crPnL">—</b></div>
+          <div class="cr-item"><span class="cr-label">Realized R</span><b id="crR">—</b></div>
+        </div>
+
+        <div class="field"><label>Realized P&L $ (override)</label><input type="number" step="any" id="f_pnl" class="num" oninput="recalc()"></div>
+        <div class="field"><label>Commission $</label><input type="number" step="any" id="f_commission" class="num" value="0"></div>
+
+        <p class="form-section">Context</p>
+        <div class="field"><label>Setup tags</label>
+          <div class="toggle-grid" id="setupTags">
+            {% for tag in setup_tags %}
+            <span class="toggle" data-tag="{{ tag }}">{{ tag }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="field">
+          <label>In-trade notes <span class="label-sub">— feeds LLM psychology analysis</span></label>
+          <textarea id="f_notes" rows="4" placeholder="Describe how you felt during the trade. FOMO? Waited patiently? Got emotional after a loss?&#10;&#10;The AI will extract your psychological state, emotions, and score your discipline."></textarea>
+        </div>
+
+        <div class="sentiment-preview" id="sentPreview"></div>
+        <button class="btn-preview" onclick="previewSentiment()">Preview psychology read ↗</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeEntry()">Cancel</button>
+      <button class="btn-gold" id="saveBtn" onclick="saveTrade()">Log trade</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-bg" id="importModal">
+  <div class="modal">
+    <div class="modal-hdr"><span>Import Trading History</span><button class="modal-close" onclick="closeImport()">✕</button></div>
+    <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()">
+      <div class="import-icon">↑</div>
+      <p>Drop file here or click to browse</p>
+      <p class="faint-note">Supports: MT5 HTML · CSV · Excel · PDF</p>
+      <input type="file" id="importFile" accept=".csv,.xlsx,.xls,.html,.htm,.pdf" style="display:none" onchange="handleImport(this)">
+    </div>
+    <div id="importStatus"></div>
+    <div class="col-map-section hidden" id="colMapSection">
+      <p class="form-section">Column mapping (auto-detected — adjust if needed)</p>
+      <div id="colMap"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeImport()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <div class="modal-hdr"><span>Account Rules</span><button class="modal-close" onclick="closeSettings()">✕</button></div>
+    <div id="settingsFields"></div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeSettings()">Cancel</button>
+      <button class="btn-gold" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  window.APP = {
+    instruments: {{ instruments | tojson }},
+    setupTags: {{ setup_tags | tojson }},
+    instrumentPip: {
+      "XAUUSD":10,"XAGUSD":50,"EURUSD":10,"GBPUSD":10,"USDJPY":9.09,
+      "AUDUSD":10,"USDCAD":10,"NZDUSD":10,"US30":1,"US500":10,"NAS100":1,
+      "MGC":10,"MES":5,"MNQ":2
+    },
+  };
+</script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
