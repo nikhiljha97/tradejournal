@@ -133,3 +133,21 @@ class ImportLog(db.Model):
     trades_skipped  = db.Column(db.Integer, default=0)
     errors          = db.Column(db.Text)
     imported_at     = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+class User(db.Model):
+    __tablename__ = "users"
+    id            = db.Column(db.Integer, primary_key=True)
+    email         = db.Column(db.String(150), unique=True, nullable=False, index=True)
+    username      = db.Column(db.String(80),  unique=True, nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    is_active     = db.Column(db.Boolean, default=True)
+    created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Flask-Login required
+    def get_id(self):         return str(self.id)
+    def is_authenticated(self): return True
+    def is_anonymous(self):     return False
+
+    def to_dict(self):
+        return {"id": self.id, "email": self.email, "username": self.username}

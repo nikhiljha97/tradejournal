@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>TradeJournal — {{ 'Sign In' if mode == 'login' else 'Create Account' }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b0f14; --panel: #131920; --border: #1e2d3d; --border2: #2a3d52;
+      --text: #d0d8e4; --muted: #6b7c93; --faint: #3d4f63;
+      --green: #00e5a0; --green-dim: #004d38; --red: #ff4757; --gold: #f0c040;
+    }
+    html, body { min-height: 100vh; background: var(--bg); color: var(--text);
+      font-family: "Inter", sans-serif; display: flex; align-items: center;
+      justify-content: center; -webkit-font-smoothing: antialiased; }
+
+    .auth-wrap { width: 100%; max-width: 420px; padding: 24px; }
+
+    .brand { text-align: center; margin-bottom: 32px; }
+    .brand-icon { font-size: 32px; color: var(--green); display: block; margin-bottom: 8px; }
+    .brand-name { font-size: 22px; font-weight: 800; letter-spacing: 0.02em; }
+    .brand-sub  { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    .card { background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 28px 28px 24px; }
+
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 22px;
+      display: flex; align-items: center; gap: 10px; }
+    .card-title span { color: var(--muted); font-weight: 400; font-size: 13px; }
+
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; color: var(--muted);
+      letter-spacing: 0.04em; margin-bottom: 6px; text-transform: uppercase; }
+    .field input {
+      width: 100%; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border2); border-radius: 7px;
+      padding: 10px 12px; font-size: 14px; font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .field input:focus { outline: none; border-color: var(--green-dim);
+      box-shadow: 0 0 0 3px rgba(0,229,160,0.08); }
+
+    .btn-submit {
+      width: 100%; margin-top: 6px; padding: 12px; border-radius: 7px;
+      background: var(--green); color: #012a1e; border: none; cursor: pointer;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.02em;
+      transition: background 0.15s;
+    }
+    .btn-submit:hover { background: #00f0aa; }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-msg { background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3);
+      color: var(--red); border-radius: 7px; padding: 10px 12px;
+      font-size: 13px; margin-bottom: 14px; display: none; }
+    .error-msg.show { display: block; }
+
+    .switch { text-align: center; margin-top: 18px; font-size: 13px; color: var(--muted); }
+    .switch a { color: var(--green); text-decoration: none; font-weight: 600; }
+    .switch a:hover { text-decoration: underline; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px;
+      background: var(--border); }
+    .divider span { color: var(--faint); font-size: 11px; letter-spacing: 0.08em; }
+
+    .features { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; }
+    .feat { background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px; }
+    .feat-icon { font-size: 16px; margin-bottom: 4px; }
+    .feat-label { font-size: 11px; font-weight: 600; color: var(--text); }
+    .feat-sub { font-size: 10px; color: var(--faint); margin-top: 2px; }
+
+    .password-hint { font-size: 11px; color: var(--faint); margin-top: 4px; }
+  </style>
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="brand">
+    <span class="brand-icon">◈</span>
+    <div class="brand-name">TradeJournal</div>
+    <div class="brand-sub">Edge analytics &amp; psychology for serious traders</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      {% if mode == 'login' %}Sign in to your account
+      {% else %}Create your account{% endif %}
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    {% if mode == 'register' %}
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="f_username" placeholder="nikhil" autocomplete="username">
+    </div>
+    {% endif %}
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="f_email" placeholder="you@example.com" autocomplete="email">
+    </div>
+
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="f_password" placeholder="••••••••" autocomplete="{{ 'current-password' if mode == 'login' else 'new-password' }}">
+      {% if mode == 'register' %}
+      <div class="password-hint">Minimum 8 characters</div>
+      {% endif %}
+    </div>
+
+    <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
+      {{ 'Sign in' if mode == 'login' else 'Create account' }}
+    </button>
+
+    <div class="switch">
+      {% if mode == 'login' %}
+        Don't have an account? <a href="/register">Sign up free</a>
+      {% else %}
+        Already have an account? <a href="/login">Sign in</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if mode == 'register' %}
+  <div class="features">
+    <div class="feat"><div class="feat-icon">📊</div>
+      <div class="feat-label">Full Analytics</div>
+      <div class="feat-sub">Equity curve, RRR gauge, Edge Score</div></div>
+    <div class="feat"><div class="feat-icon">🧠</div>
+      <div class="feat-label">AI Psychology</div>
+      <div class="feat-sub">Groq LLM reads your mindset</div></div>
+    <div class="feat"><div class="feat-icon">📈</div>
+      <div class="feat-label">Chart Uploads</div>
+      <div class="feat-sub">Screenshot attached to every trade</div></div>
+    <div class="feat"><div class="feat-icon">🔒</div>
+      <div class="feat-label">Private &amp; Secure</div>
+      <div class="feat-sub">Your data, isolated from others</div></div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  const MODE = "{{ mode }}";
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleSubmit();
+  });
+
+  async function handleSubmit() {
+    const btn = document.getElementById('submitBtn');
+    const err = document.getElementById('errorMsg');
+    err.classList.remove('show');
+    btn.disabled = true;
+    btn.textContent = MODE === 'login' ? 'Signing in…' : 'Creating account…';
+
+    const body = {
+      email:    document.getElementById('f_email').value.trim(),
+      password: document.getElementById('f_password').value,
+    };
+    if (MODE === 'register') {
+      body.username = document.getElementById('f_username').value.trim();
+    }
+
+    try {
+      const res = await fetch(MODE === 'login' ? '/login' : '/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        window.location.href = '/';
+      } else {
+        err.textContent = data.error || 'Something went wrong';
+        err.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = MODE === 'login' ? 'Sign in' : 'Create account';
+      }
+    } catch(e) {
+      err.textContent = 'Network error — please try again';
+      err.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = MODE === 'login' ? 'Sign in' : 'Create account';
+    }
+  }
+</script>
+</body>
+</html>

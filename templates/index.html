@@ -30,7 +30,9 @@
       <span id="aiLabel">{{ 'AI ON' if ai_available else 'No API Key' }}</span>
     </span>
     <button class="btn-ghost" onclick="openImport()">↑ Import</button>
+    <span style="color:var(--muted);font-size:12px">{{ username }}</span>
     <button class="btn-ghost" onclick="openSettings()">Settings</button>
+    <a href="/logout" class="btn-ghost" style="text-decoration:none">Sign out</a>
     <button class="btn-gold" onclick="openEntry()">+ Log Trade</button>
   </div>
 </header>

@@ -25,6 +25,7 @@ class Config:
     # App
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-in-prod")
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024   # 16MB upload limit
+    CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "")
 
     # Prop-firm defaults (overridable per-user in settings)
     DEFAULT_ACCOUNT_SIZE     = 10000
