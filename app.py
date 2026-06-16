@@ -65,7 +65,7 @@ def _num(v):
 
 def _compute_derived(data):
     instrument  = data.get("instrument","")
-    pv          = INSTRUMENT_PIP.get(instrument.upper(), 10.0)
+    inst_up     = instrument.upper()
     lots        = _num(data.get("lots"))
     entry       = _num(data.get("entry_price"))
     stop        = _num(data.get("stop_price"))
@@ -76,14 +76,28 @@ def _compute_derived(data):
     stop_pips   = _num(data.get("stop_pips"))
     target_pips = _num(data.get("target_pips"))
 
+    # Verified from MT5 broker: P&L = price_diff * contract_size * lots
+    # XAUUSD contract_size=100 oz/lot confirmed: 4.67*100*0.01 = $4.67 ✓
+    CONTRACT_SIZE = {
+        "XAUUSD":100,"XAGUSD":100,
+        "EURUSD":100000,"GBPUSD":100000,"AUDUSD":100000,
+        "NZDUSD":100000,"USDCAD":100000,"USDCHF":100000,
+        "USDJPY":100000,"EURGBP":100000,"EURJPY":100000,"GBPJPY":100000,
+        "BTCUSD":1,"ETHUSD":1,
+        "US30":1,"US500":1,"NAS100":1,"UK100":1,"GER40":1,
+    }
+    PIP_SIZE_MAP = {
+        "XAUUSD":0.01,"XAGUSD":0.01,
+        "USDJPY":0.01,"EURJPY":0.01,"GBPJPY":0.01,
+    }
+    contract_size = CONTRACT_SIZE.get(inst_up, 100000)
+    pip_size_val  = PIP_SIZE_MAP.get(inst_up, 0.0001)
+
     planned_risk = dollar_risk
     if planned_risk is None and stop_pips is not None and lots:
-        planned_risk = abs(stop_pips) * pv * lots
+        planned_risk = abs(stop_pips) * pip_size_val * contract_size * lots
     if planned_risk is None and entry is not None and stop is not None and lots:
-        if instrument.upper() in ["XAUUSD","XAGUSD"]:
-            planned_risk = abs(entry - stop) * pv * lots
-        else:
-            planned_risk = abs(entry - stop) * pv * lots / 0.0001
+        planned_risk = abs(entry - stop) * contract_size * lots
 
     planned_rr = None
     if target_pips is not None and stop_pips and stop_pips != 0:
@@ -94,10 +108,7 @@ def _compute_derived(data):
     realized_pnl = _num(data.get("realized_pnl"))
     if realized_pnl is None and exit_price is not None and entry is not None and lots:
         sign = 1 if direction == "Long" else -1
-        if instrument.upper() in ["XAUUSD","XAGUSD"]:
-            realized_pnl = (exit_price - entry) * sign * pv * lots
-        else:
-            realized_pnl = (exit_price - entry) * sign * pv * lots / 0.0001
+        realized_pnl = (exit_price - entry) * sign * contract_size * lots
 
     realized_r = None
     if realized_pnl is not None and planned_risk and planned_risk > 0:

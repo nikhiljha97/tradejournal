@@ -580,9 +580,21 @@ async function _uploadPendingImage(tradeId) {
 
 /* ── Live risk calculator ────────────────────────────────────── */
 const INSTRUMENT_PIP = window.APP.instrumentPip;
+const CONTRACT_SIZE = {
+  XAUUSD:100, XAGUSD:100,
+  EURUSD:100000,GBPUSD:100000,AUDUSD:100000,NZDUSD:100000,
+  USDCAD:100000,USDCHF:100000,USDJPY:100000,
+  EURGBP:100000,EURJPY:100000,GBPJPY:100000,
+  BTCUSD:1,ETHUSD:1,US30:1,US500:1,NAS100:1,UK100:1,GER40:1,
+};
+const PIP_SIZE_JS = {XAUUSD:0.01,XAGUSD:0.01,USDJPY:0.01,EURJPY:0.01,GBPJPY:0.01};
+function getCS(i){return CONTRACT_SIZE[i]||100000;}
+function getPS(i){return PIP_SIZE_JS[i]||0.0001;}
+
 function recalc() {
   const inst=($('f_instrument').value||'').toUpperCase();
-  const pv=INSTRUMENT_PIP[inst]||10;
+  const cs=getCS(inst);
+  const ps=getPS(inst);
   const lots=parseFloat($('f_lots').value)||0;
   const entry=parseFloat($('f_entry').value);
   const stop=parseFloat($('f_stop').value);
@@ -590,26 +602,25 @@ function recalc() {
   const exit=parseFloat($('f_exit').value);
   const dir=$('f_direction').value;
   const pnlOverride=parseFloat($('f_pnl').value);
+  const winLoss=document.querySelector('input[name="win_loss"]:checked')?.value||'auto';
 
   let risk=null;
   if(riskModeEl==='pip'){
     const sp=parseFloat($('f_stop_pips').value);
-    if(sp&&lots) risk=sp*pv*lots;
+    if(sp&&lots) risk=sp*ps*cs*lots;
   } else if(riskModeEl==='dollar'){
     risk=parseFloat($('f_dollar_risk').value)||null;
   } else if(!isNaN(entry)&&!isNaN(stop)&&lots){
-    if(['XAUUSD','XAGUSD'].includes(inst)) risk=Math.abs(entry-stop)*pv*lots;
-    else risk=Math.abs(entry-stop)*pv*lots/0.0001;
+    risk=Math.abs(entry-stop)*cs*lots;
   }
   let plannedRR=null;
   if(!isNaN(entry)&&!isNaN(stop)&&!isNaN(target)&&entry!==stop)
     plannedRR=Math.abs(target-entry)/Math.abs(entry-stop);
   let pnl=null;
-  if(!isNaN(pnlOverride)) pnl=pnlOverride;
+  if(!isNaN(pnlOverride)){pnl=pnlOverride;if(winLoss==='win'&&pnl<0)pnl=Math.abs(pnl);if(winLoss==='loss'&&pnl>0)pnl=-Math.abs(pnl);}
   else if(!isNaN(exit)&&!isNaN(entry)&&lots){
     const sign=dir==='Long'?1:-1;
-    if(['XAUUSD','XAGUSD'].includes(inst)) pnl=(exit-entry)*sign*pv*lots;
-    else pnl=(exit-entry)*sign*pv*lots/0.0001;
+    pnl=(exit-entry)*sign*cs*lots;
   }
   const realR=(pnl!=null&&risk)?pnl/risk:null;
   $('crRisk').textContent=risk?fmt$(risk):'—';

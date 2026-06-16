@@ -263,7 +263,21 @@
         </div>
         <div id="exit_fields">
           <div class="field"><label>Exit price</label><input type="number" step="any" id="f_exit" class="num" oninput="recalc()"></div>
-          <div class="field"><label>Realized P&L $ (override)</label><input type="number" step="any" id="f_pnl" class="num" oninput="recalc()"></div>
+          <div class="field">
+          <label>Trade outcome</label>
+          <div style="display:flex;gap:16px;margin-bottom:8px">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text)">
+              <input type="radio" name="win_loss" id="f_win_loss_auto" value="auto" checked onchange="recalc()" style="width:auto;accent-color:var(--green)"> Auto
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--green)">
+              <input type="radio" name="win_loss" id="f_win_loss_win" value="win" onchange="recalc()" style="width:auto;accent-color:var(--green)"> ✓ Win
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--red)">
+              <input type="radio" name="win_loss" id="f_win_loss_loss" value="loss" onchange="recalc()" style="width:auto;accent-color:var(--red)"> ✗ Loss
+            </label>
+          </div>
+        </div>
+        <div class="field"><label>Realized P&L $ (override)</label><input type="number" step="any" id="f_pnl" class="num" oninput="recalc()"></div>
         </div>
         <div class="field"><label>Commission $</label><input type="number" step="any" id="f_commission" class="num" value="0"></div>
       </div>
