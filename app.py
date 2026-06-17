@@ -247,6 +247,11 @@ def login():
         return jsonify({"ok":True, "username": user.username})
     return render_template("auth.html", mode="login")
 
+
+@app.route("/google18b855e2f453917d.html")
+def google_verification():
+    return "google-site-verification: google18b855e2f453917d.html"
+
 @app.route("/logout")
 @login_required
 def logout():
