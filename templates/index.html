@@ -200,10 +200,21 @@
         <option value="">All directions</option>
         <option>Long</option><option>Short</option>
       </select>
+      <select class="filter-sel" id="blotterSession" onchange="filterBlotter()">
+        <option value="">All sessions</option>
+        <option>Asia</option><option>London</option><option>New York</option><option>Sydney</option>
+      </select>
+      <select class="filter-sel" id="blotterPair" onchange="filterBlotter()">
+        <option value="">All pairs</option>
+      </select>
+      <input class="filter-sel" type="date" id="blotterDate" onchange="filterBlotter()" style="color:var(--muted);background:var(--panel2);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;font-size:12px;">
+      <button class="btn-ghost" style="font-size:11px;padding:6px 10px" onclick="clearBlotterFilters()">✕ Clear</button>
       <button class="btn-ghost" onclick="openImport()">↑ Import file</button>
     </div>
     <div class="panel" style="padding:0">
       <div style="overflow-x:auto"><table class="blotter" id="blotter"></table></div>
+      <!-- Pagination -->
+      <div class="blotter-pagination" id="blotterPagination"></div>
     </div>
   </div>
 

@@ -559,9 +559,16 @@ tbody tr:hover { background: var(--panel2); }
 }
 .coach-send:hover { background: #00f0aa; }
 
-/* ── Pattern analysis cards ──────────────────────────────────── */
+/* ── Pattern analysis carousel ───────────────────────────────── */
+.pattern-carousel {
+  position: relative; overflow: hidden;
+}
+.pattern-track {
+  display: flex; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
 .pattern-card {
-  border-radius: 10px; padding: 16px 18px; margin-bottom: 12px;
+  min-width: 100%; box-sizing: border-box;
+  border-radius: 10px; padding: 20px 22px;
   border: 1px solid var(--border);
   background: var(--panel2);
   position: relative; overflow: hidden;
@@ -572,33 +579,88 @@ tbody tr:hover { background: var(--panel2); }
 .pattern-card.high::before   { background: var(--red); }
 .pattern-card.medium::before { background: var(--amber); }
 .pattern-card.low::before    { background: var(--blue); }
+.pattern-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 14px;
+}
+.pattern-dots {
+  display: flex; gap: 6px; align-items: center;
+}
+.pattern-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border2); transition: all 0.2s; cursor: pointer;
+}
+.pattern-dot.active { background: var(--green); width: 18px; border-radius: 3px; }
+.pattern-arrow {
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 14px;
+  transition: all 0.15s;
+}
+.pattern-arrow:hover { border-color: var(--green); color: var(--green); }
+.pattern-arrow:disabled { opacity: 0.2; cursor: not-allowed; }
+.pattern-counter { font-size: 11px; color: var(--faint); }
 .pattern-top {
   display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 8px; gap: 12px;
+  margin-bottom: 10px; gap: 12px;
 }
-.pattern-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.pattern-title { font-size: 15px; font-weight: 700; color: var(--text); }
 .pattern-cost  {
-  font-size: 13px; font-weight: 700; color: var(--red); white-space: nowrap;
+  font-size: 14px; font-weight: 700; color: var(--red); white-space: nowrap;
   font-family: "JetBrains Mono", monospace;
 }
-.pattern-meta {
-  display: flex; gap: 12px; margin-bottom: 10px;
-}
+.pattern-meta { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
 .pattern-confidence {
   font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--muted); padding: 2px 8px; border-radius: 4px;
   background: var(--panel); border: 1px solid var(--border);
 }
-.pattern-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
+.pattern-desc { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 10px; }
 .pattern-evidence {
   font-size: 11px; color: var(--faint); font-style: italic;
-  padding: 6px 10px; background: var(--panel); border-radius: 6px;
-  margin-bottom: 8px; border-left: 2px solid var(--border2);
+  padding: 8px 12px; background: var(--panel); border-radius: 6px;
+  margin-bottom: 10px; border-left: 2px solid var(--border2); line-height: 1.5;
 }
 .pattern-rule {
-  font-size: 12px; color: var(--green); font-weight: 600;
-  display: flex; align-items: flex-start; gap: 6px;
+  font-size: 13px; color: var(--green); font-weight: 600;
+  display: flex; align-items: flex-start; gap: 6px; line-height: 1.5;
 }
-.pattern-rule::before { content: "→"; color: var(--green-dim); }
-.pattern-empty { text-align: center; color: var(--faint); padding: 32px; font-size: 13px; }
+.pattern-rule::before { content: "→"; color: var(--green-dim); flex-shrink: 0; }
+.pattern-empty { text-align: center; color: var(--faint); padding: 40px 20px; font-size: 13px; }
 .pattern-loading { padding: 8px 0; }
+
+/* ── Blotter pagination ───────────────────────────────────────── */
+.blotter-pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-top: 1px solid var(--border);
+}
+.blotter-pagination.hidden { display: none; }
+.page-info { font-size: 12px; color: var(--muted); }
+.page-btns { display: flex; gap: 6px; align-items: center; }
+.page-btn {
+  background: var(--panel2); border: 1px solid var(--border2);
+  color: var(--muted); border-radius: 6px; padding: 5px 12px;
+  cursor: pointer; font-size: 12px; transition: all 0.15s;
+}
+.page-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.page-btn.active { background: var(--green-dim); border-color: var(--green); color: var(--green); font-weight: 700; }
+
+/* ── Blotter pagination ───────────────────────────────────────── */
+.blotter-pagination { padding: 12px 16px; border-top: 1px solid var(--border); }
+.blotter-pag-inner  { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px; }
+.pag-pages  { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.pag-btn    {
+  background: var(--panel2); border: 1px solid var(--border2); color: var(--muted);
+  border-radius: 6px; padding: 5px 12px; cursor: pointer; font-size: 12px;
+  transition: all 0.15s;
+}
+.pag-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+.pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.pag-num    {
+  background: var(--panel2); border: 1px solid var(--border); color: var(--muted);
+  border-radius: 5px; padding: 4px 9px; cursor: pointer; font-size: 12px;
+  transition: all 0.15s; min-width: 28px; text-align: center;
+}
+.pag-num:hover  { border-color: var(--green-dim); color: var(--text); }
+.pag-num.active { background: var(--green-dim); border-color: var(--green); color: var(--green); font-weight: 700; }
+.pag-info   { text-align: center; font-size: 11px; color: var(--faint); }

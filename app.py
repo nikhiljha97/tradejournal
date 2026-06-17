@@ -453,6 +453,8 @@ if __name__ == "__main__":
     app.run(debug=True, port=5000)
 
 # ── AI Coach & Pattern Analysis ───────────────────────────────────────────────
+import anthropic as _anthropic_unused  # already imported via groq path
+
 def _trades_context(trades, limit=50):
     """Compact trade summary for LLM context."""
     recent = sorted(trades, key=lambda t: t.get('trade_date',''), reverse=True)[:limit]
@@ -570,22 +572,29 @@ Account: {settings.get('account_label','')} | Target: ${settings.get('profit_tar
 ALL TRADES:
 {ctx}"""
 
-    prompt = """Analyze ALL trades and return a JSON array of patterns. Find 3-5 patterns, sorted by dollar damage (most expensive first).
+    prompt = """Analyze ALL trades and return a JSON array of max 5 patterns, sorted by dollar damage (most expensive first).
+
+IMPORTANT ADAPTIVE RULES:
+- Only include patterns with ACTUAL evidence in the current data — not generic advice
+- If a pattern exists in early trades but NOT in recent trades, reduce its severity or drop it entirely (trader may have fixed it)
+- Prioritize recency: a pattern that cost $100 last week beats one that cost $500 three months ago
+- Never pad with low-confidence patterns just to reach 5. 2-3 strong insights beat 5 weak ones
+- If sample size is too small to confirm a pattern, say so in description and set confidence below 50%
 
 Return ONLY valid JSON, no prose, no markdown:
 [
   {
-    "title": "Short pattern name",
+    "title": "Short pattern name (≤5 words)",
     "severity": "high|medium|low",
     "cost_usd": 123.45,
     "confidence": 87,
-    "description": "What the pattern is and why it costs money (2 sentences)",
-    "evidence": "Specific trades that prove this (dates, amounts)",
-    "rule": "One concrete rule to fix this"
+    "description": "What the pattern is, why it costs money, whether it is improving or worsening (2 sentences)",
+    "evidence": "Specific trades: dates, instruments, P&L amounts",
+    "rule": "One concrete actionable rule (not generic advice)"
   }
 ]
 
-Focus on: streak effects, session timing, emotion-to-loss correlation, RR discipline, setup performance, revenge trading, overtrading after losses, time-of-day patterns. Only include patterns actually visible in the data."""
+Focus on: streak effects, session timing, emotion-to-loss correlation, RR discipline, setup performance, revenge trading, overtrading after losses, time-of-day patterns, partial profit taking, stop placement."""
 
     try:
         from groq import Groq

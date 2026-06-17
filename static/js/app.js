@@ -83,7 +83,10 @@ async function refresh() {
   renderEmotionChart(m.emotion);
   renderDisciplineChart(allTrades);
   renderPsychBlotter(allTrades);
-  renderBlotter(allTrades);
+  blotterFiltered = [...allTrades].reverse();
+  _populatePairFilter();
+  blotterPage = 0;
+  renderBlotterPage();
 }
 
 /* ── Discipline strip ────────────────────────────────────────── */
@@ -413,9 +416,9 @@ function renderPsychBlotter(trades) {
 }
 
 /* ── Blotter ─────────────────────────────────────────────────── */
-function renderBlotter(trades) {
+function renderBlotter(trades, total, start) {
   if(!trades.length){
-    $('blotter').innerHTML='<tbody><tr><td><div class="empty">No trades. Log one or import a file.</div></td></tr></tbody>';
+    $('blotter').innerHTML='<tbody><tr><td colspan="13"><div class="empty">No trades match your filters.</div></td></tr></tbody>';
     return;
   }
   $('blotter').innerHTML=`
@@ -450,12 +453,93 @@ function renderBlotter(trades) {
     }).join('')}</tbody>`;
 }
 
+const BLOTTER_PAGE_SIZE = 10;
+let blotterPage = 0;
+let blotterFiltered = [];
+
+function _getBlotterFiltered() {
+  const q    = ($('blotterSearch')?.value||'').toLowerCase();
+  const dir  = $('blotterDir')?.value||'';
+  const sess = $('blotterSession')?.value||'';
+  const pair = $('blotterPair')?.value||'';
+  const date = $('blotterDate')?.value||'';
+  return [...allTrades].reverse().filter(t=>
+    (!q    || (t.instrument||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q)) &&
+    (!dir  || t.direction === dir) &&
+    (!sess || t.session === sess) &&
+    (!pair || t.instrument === pair) &&
+    (!date || t.trade_date === date)
+  );
+}
+
 function filterBlotter() {
-  const q=$('blotterSearch').value.toLowerCase();
-  const dir=$('blotterDir').value;
-  renderBlotter(allTrades.filter(t=>
-    (!q||(t.instrument||'').toLowerCase().includes(q)||(t.notes||'').toLowerCase().includes(q))&&
-    (!dir||t.direction===dir)));
+  blotterPage = 0;
+  blotterFiltered = _getBlotterFiltered();
+  renderBlotterPage();
+}
+
+function clearBlotterFilters() {
+  ['blotterSearch','blotterDate'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  ['blotterDir','blotterSession','blotterPair'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  blotterPage = 0;
+  blotterFiltered = _getBlotterFiltered();
+  renderBlotterPage();
+}
+
+function _populatePairFilter() {
+  const sel = $('blotterPair');
+  if (!sel) return;
+  const instruments = [...new Set(allTrades.map(t=>t.instrument).filter(Boolean))].sort();
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All pairs</option>' +
+    instruments.map(i=>`<option value="${i}">${i}</option>`).join('');
+  if (current) sel.value = current;
+}
+
+function renderBlotterPage() {
+  const total = blotterFiltered.length;
+  const totalPages = Math.ceil(total / BLOTTER_PAGE_SIZE);
+  const start = blotterPage * BLOTTER_PAGE_SIZE;
+  const page  = blotterFiltered.slice(start, start + BLOTTER_PAGE_SIZE);
+
+  renderBlotter(page, total, start);
+
+  // Render pagination
+  const pg = $('blotterPagination');
+  if (!pg) return;
+  if (total <= BLOTTER_PAGE_SIZE) { pg.innerHTML=''; return; }
+
+  pg.innerHTML = `
+    <div class="blotter-pag-inner">
+      <button class="pag-btn" onclick="blotterGoPage(${blotterPage-1})" ${blotterPage===0?'disabled':''}>← Prev</button>
+      <div class="pag-pages">
+        ${Array.from({length:totalPages},(_,i)=>
+          `<button class="pag-num ${i===blotterPage?'active':''}" onclick="blotterGoPage(${i})">${i+1}</button>`
+        ).join('')}
+      </div>
+      <button class="pag-btn" onclick="blotterGoPage(${blotterPage+1})" ${blotterPage>=totalPages-1?'disabled':''}>Next →</button>
+    </div>
+    <div class="pag-info">${start+1}–${Math.min(start+BLOTTER_PAGE_SIZE,total)} of ${total} trades</div>`;
+}
+
+function blotterGoPage(n) {
+  const totalPages = Math.ceil(blotterFiltered.length / BLOTTER_PAGE_SIZE);
+  blotterPage = Math.max(0, Math.min(totalPages-1, n));
+  // Animate the blotter table slide
+  const tbl = $('blotter');
+  if (tbl) {
+    tbl.style.opacity = '0';
+    tbl.style.transform = 'translateX(30px)';
+    setTimeout(() => {
+      renderBlotterPage();
+      tbl.style.transition = 'opacity 0.25s, transform 0.25s';
+      tbl.style.opacity = '1';
+      tbl.style.transform = 'translateX(0)';
+      setTimeout(()=>{ tbl.style.transition=''; }, 300);
+    }, 120);
+  } else {
+    renderBlotterPage();
+  }
 }
 
 /* ── Lightbox ────────────────────────────────────────────────── */
@@ -1039,8 +1123,26 @@ async function triggerCoachOnTrade(tradeId) {
   }
 }
 
-/* ── Pattern Analysis ────────────────────────────────────────── */
+/* ── Pattern Analysis Carousel ───────────────────────────────── */
 let patternLoaded = false;
+let patternIndex  = 0;
+let patternTotal  = 0;
+
+function goPattern(dir) {
+  patternIndex = Math.max(0, Math.min(patternTotal - 1, patternIndex + dir));
+  const track = document.getElementById('patternTrack');
+  if (track) track.style.transform = `translateX(-${patternIndex * 100}%)`;
+  updatePatternNav();
+}
+
+function updatePatternNav() {
+  document.getElementById('patternCounter').textContent = `${patternIndex+1} of ${patternTotal}`;
+  document.getElementById('patternPrev').disabled = patternIndex === 0;
+  document.getElementById('patternNext').disabled = patternIndex === patternTotal - 1;
+  document.querySelectorAll('.pattern-dot').forEach((d,i) => {
+    d.classList.toggle('active', i === patternIndex);
+  });
+}
 
 async function loadPatterns() {
   if (patternLoaded) return;
@@ -1049,11 +1151,9 @@ async function loadPatterns() {
   if (!results) return;
 
   results.innerHTML = `<div class="pattern-loading">
-    <div class="shimmer" style="height:100px;border-radius:8px;margin-bottom:10px"></div>
-    <div class="shimmer" style="height:100px;border-radius:8px;margin-bottom:10px"></div>
-    <div class="shimmer" style="height:100px;border-radius:8px"></div>
+    <div class="shimmer" style="height:160px;border-radius:10px"></div>
   </div>`;
-  status.textContent = 'Scanning your trades…';
+  status.textContent = 'AI scanning your trades…';
 
   try {
     const r = await fetch('/api/coach/patterns');
@@ -1065,8 +1165,12 @@ async function loadPatterns() {
       return;
     }
 
+    const patterns = d.patterns.slice(0, 5); // max 5
+    patternTotal = patterns.length;
+    patternIndex = 0;
+
     const severityLabel = {high:'🔴 High Impact', medium:'🟡 Medium Impact', low:'🔵 Low Impact'};
-    results.innerHTML = d.patterns.map(p => `
+    const cards = patterns.map(p => `
       <div class="pattern-card ${p.severity}">
         <div class="pattern-top">
           <div class="pattern-title">${p.title}</div>
@@ -1081,10 +1185,27 @@ async function loadPatterns() {
         <div class="pattern-rule">${p.rule}</div>
       </div>`).join('');
 
-    status.textContent = `${d.patterns.length} patterns found · sorted by cost`;
+    const dots = patterns.map((_,i) =>
+      `<span class="pattern-dot ${i===0?'active':''}" onclick="goPattern(${i - patternIndex})"></span>`
+    ).join('');
+
+    results.innerHTML = `
+      <div class="pattern-carousel">
+        <div class="pattern-track" id="patternTrack">${cards}</div>
+      </div>
+      <div class="pattern-nav">
+        <button class="pattern-arrow" id="patternPrev" onclick="goPattern(-1)" disabled>←</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div class="pattern-dots">${dots}</div>
+          <span class="pattern-counter" id="patternCounter">1 of ${patternTotal}</span>
+        </div>
+        <button class="pattern-arrow" id="patternNext" onclick="goPattern(1)" ${patternTotal<=1?'disabled':''}>→</button>
+      </div>`;
+
+    status.textContent = `${patternTotal} patterns · sorted by cost · refreshes with new trades`;
     patternLoaded = true;
   } catch(e) {
-    results.innerHTML = `<div class="pattern-empty">Pattern analysis unavailable. Check your Groq API key.</div>`;
+    results.innerHTML = `<div class="pattern-empty">Pattern analysis unavailable.</div>`;
     status.textContent = '';
   }
 }
