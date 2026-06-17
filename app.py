@@ -29,6 +29,7 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = ""
+login_manager.login_message = ""
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -247,17 +248,6 @@ def login():
         return jsonify({"ok":True, "username": user.username})
     return render_template("auth.html", mode="login")
 
-
-@app.route("/sitemap.xml")
-def sitemap():
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://tradejournal-n3hn.onrender.com/</loc></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/register</loc></url>
-</urlset>"""
-    return xml, 200, {"Content-Type": "application/xml"}
-
-
 @app.route("/google18b855e2f453917d.html")
 def google_verification():
     return "google-site-verification: google18b855e2f453917d.html"
@@ -276,6 +266,16 @@ def me():
 
 # ── Main app ──────────────────────────────────────────────────────────────────
 @app.route("/")
+def home():
+    if current_user.is_authenticated:
+        return render_template("index.html",
+            sessions=SESSIONS, setup_tags=SETUP_TAGS,
+            instruments=list(INSTRUMENT_PIP.keys()),
+            ai_available=sent.groq_available(),
+            username=current_user.username)
+    return render_template("landing.html")
+
+@app.route("/app")
 @login_required
 def index():
     return render_template("index.html",
