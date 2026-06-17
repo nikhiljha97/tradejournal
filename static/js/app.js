@@ -642,6 +642,20 @@ function recalc() {
  'f_stop_pips','f_target_pips','f_dollar_risk','f_direction','f_pnl']
   .forEach(id=>{const el=$(id);if(el)el.addEventListener('input',recalc);});
 
+// Auto-analyze notes on blur (when trader finishes typing)
+document.addEventListener('DOMContentLoaded', () => {
+  const notesEl = $('f_notes');
+  if(notesEl) {
+    let _noteTimer;
+    notesEl.addEventListener('input', () => {
+      clearTimeout(_noteTimer);
+      _noteTimer = setTimeout(() => {
+        if(notesEl.value.trim().length > 30) previewSentiment();
+      }, 1500); // 1.5s after stop typing
+    });
+  }
+});
+
 /* ── Setup tags ──────────────────────────────────────────────── */
 document.querySelectorAll('#setupTags .toggle').forEach(el=>{
   el.addEventListener('click',()=>{
@@ -670,9 +684,44 @@ async function previewSentiment() {
   try {
     const r=await fetch('/api/sentiment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:notes})});
     const s=await r.json();
-    $('sentPreview').innerHTML=s.source==='error'?`<span style="color:var(--red)">${s.summary}</span>`:
-      `<b style="color:var(--${s.score>=0?'green':'red'})">${s.label}</b> (${s.score>0?'+':''}${s.score})<br>
+    if(s.source==='error'){
+      $('sentPreview').innerHTML=`<span style="color:var(--red)">${s.summary}</span>`;
+      return;
+    }
+    let html = `<b style="color:var(--${s.score>=0?'green':'red'})">${s.label}</b> (${s.score>0?'+':''}${s.score})<br>
        <span style="color:var(--muted)">${s.summary||''}${s.emotions?.length?' · '+s.emotions.join(', '):''}</span>`;
+
+    // Auto-apply extracted setup tags
+    if(s.setups?.length) {
+      const added = [];
+      s.setups.forEach(tag => {
+        if(selectedTags.has(tag)) return; // already selected
+        selectedTags.add(tag);
+        // Try to find existing toggle button
+        const existing = [...document.querySelectorAll('#setupTags .toggle')]
+          .find(el => el.dataset.tag === tag);
+        if(existing) {
+          existing.classList.add('on');
+        } else {
+          // Create new custom tag button
+          const el = document.createElement('span');
+          el.className = 'toggle on';
+          el.dataset.tag = tag;
+          el.textContent = tag;
+          el.addEventListener('click', () => {
+            el.classList.toggle('on');
+            selectedTags.has(tag) ? selectedTags.delete(tag) : selectedTags.add(tag);
+          });
+          $('setupTags').appendChild(el);
+        }
+        added.push(tag);
+      });
+      if(added.length) {
+        html += `<br><span style="color:var(--green);font-size:11px">🏷 Auto-tagged: ${added.join(', ')}</span>`;
+        if(s.setup_notes) html += `<br><span style="color:var(--faint);font-size:11px">${s.setup_notes}</span>`;
+      }
+    }
+    $('sentPreview').innerHTML = html;
   } catch(e){$('sentPreview').textContent='Error: '+e.message;}
 }
 

@@ -280,11 +280,16 @@ def create_trade():
     payload = request.get_json(force=True)
     payload = _compute_derived(payload)
     s = sent.analyze(payload.get("notes",""))
+    # Merge LLM-extracted setup tags with manually selected ones
+    manual_setups = set(payload.get("setups") or [])
+    llm_setups    = set(s.get("setups") or [])
+    merged_setups = sorted(manual_setups | llm_setups)
     payload.update({
-        "sentiment_label": s["label"], "sentiment_score": s["score"],
-        "sentiment_summary": s["summary"], "sentiment_phrases": s["phrases"],
+        "sentiment_label":  s["label"], "sentiment_score":   s["score"],
+        "sentiment_summary":s["summary"], "sentiment_phrases": s["phrases"],
         "sentiment_source": s["source"],
         "emotions": sorted(set(payload.get("emotions") or []) | set(s.get("emotions") or [])),
+        "setups": merged_setups,
     })
     t = _save_trade(payload)
     db.session.commit()
@@ -448,6 +453,8 @@ if __name__ == "__main__":
     app.run(debug=True, port=5000)
 
 # ── AI Coach & Pattern Analysis ───────────────────────────────────────────────
+import anthropic as _anthropic_unused  # already imported via groq path
+
 def _trades_context(trades, limit=50):
     """Compact trade summary for LLM context."""
     recent = sorted(trades, key=lambda t: t.get('trade_date',''), reverse=True)[:limit]

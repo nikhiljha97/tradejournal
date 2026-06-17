@@ -22,19 +22,30 @@ KNOWN_EMOTIONS = [
     "satisfaction","regret","excitement","boredom",
 ]
 
+KNOWN_SETUPS = [
+    "Fair Value Gap","Order Block","Breaker Block","Mitigation Block",
+    "Liquidity Sweep","BOS","CHoCH","Inducement","Imbalance",
+    "Premium/Discount","Equal Highs/Lows","Turtle Soup","OTE",
+    "Session Open","NY Killzone","London Killzone",
+]
+
 GROQ_SYSTEM = (
-    "You are a trading psychology analyst for futures and forex traders. "
-    "Analyze in-trade journal notes for psychological state. "
+    "You are a trading psychology analyst AND setup classifier for futures and forex traders. "
+    "Analyze in-trade journal notes for psychological state AND identify trading setups mentioned. "
     "Return ONLY valid JSON, no markdown, no prose.\n\n"
     "Schema:\n"
     '{"emotions":["emotion1"],"score":0.0,"label":"3-5 word label",'
     '"summary":"1 honest sentence ≤20 words",'
-    '"phrases":[{"phrase":"exact text","emotion":"which emotion"}]}\n\n'
+    '"phrases":[{"phrase":"exact text","emotion":"which emotion"}],'
+    '"setups":["Setup Name"],'
+    '"setup_notes":"brief note on timeframe/context if mentioned"}\n\n'
     "Rules:\n"
     f"- emotions: 0-4 from: {', '.join(KNOWN_EMOTIONS)}\n"
     "- score: -1.0=revenge/tilt/FOMO/fear-driven  0=neutral  1.0=disciplined/patient/calm\n"
     "- phrases: 1-3 exact quotes. [] if no notes.\n"
-    "- Very short/empty text: score 0, [] emotions, label 'No notes'"
+    f"- setups: identify any from {KNOWN_SETUPS} OR extract custom ones (e.g. '4H OB', '15min FVG', 'Weekly OB')\n"
+    "- setup_notes: if trader mentions a timeframe (4H, 15min, 1H etc) with a setup, note it briefly (e.g. '4H FVG tap, 15min OB entry')\n"
+    "- Very short/empty text: score 0, [] emotions, label 'No notes', [] setups"
 )
 
 # Hartmann Ekman label → trading emotion + minimum confidence threshold
@@ -135,13 +146,23 @@ def _groq(notes: str) -> dict:
     emotions = [e for e in data.get("emotions",[]) if e in KNOWN_EMOTIONS]
     phrases  = [p for p in data.get("phrases",[])
                 if isinstance(p,dict) and "phrase" in p and "emotion" in p][:3]
+    # Extract setup tags — match against known list + allow custom timeframe tags
+    raw_setups = data.get("setups", [])
+    extracted_setups = []
+    for s in raw_setups:
+        if isinstance(s, str) and s.strip():
+            extracted_setups.append(s.strip())
+    setup_notes = str(data.get("setup_notes", ""))[:200]
+
     return {
-        "emotions": emotions,
-        "score":    _clamp(data.get("score", 0.0)),
-        "label":    str(data.get("label",""))[:100],
-        "summary":  str(data.get("summary",""))[:300],
-        "phrases":  phrases,
-        "source":   "groq",
+        "emotions":     emotions,
+        "score":        _clamp(data.get("score", 0.0)),
+        "label":        str(data.get("label",""))[:100],
+        "summary":      str(data.get("summary",""))[:300],
+        "phrases":      phrases,
+        "source":       "groq",
+        "setups":       extracted_setups,
+        "setup_notes":  setup_notes,
     }
 
 
