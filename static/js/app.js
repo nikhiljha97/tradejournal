@@ -579,22 +579,24 @@ async function _uploadPendingImage(tradeId) {
 }
 
 /* ── Live risk calculator ────────────────────────────────────── */
-const INSTRUMENT_PIP = window.APP.instrumentPip;
+// Contract size per lot (verified from MT5 broker properties)
+// P&L = price_distance × contract_size × lots
 const CONTRACT_SIZE = {
-  XAUUSD:100, XAGUSD:100,
-  EURUSD:100000,GBPUSD:100000,AUDUSD:100000,NZDUSD:100000,
-  USDCAD:100000,USDCHF:100000,USDJPY:100000,
-  EURGBP:100000,EURJPY:100000,GBPJPY:100000,
-  BTCUSD:1,ETHUSD:1,US30:1,US500:1,NAS100:1,UK100:1,GER40:1,
+  XAUUSD:100, XAGUSD:100,           // 100 oz/lot (verified: 4.67×100×0.01=$4.67 ✓)
+  EURUSD:100000, GBPUSD:100000, AUDUSD:100000, NZDUSD:100000,
+  USDCAD:100000, USDCHF:100000, USDJPY:100000,
+  EURGBP:100000, EURJPY:100000, GBPJPY:100000,
+  BTCUSD:1, ETHUSD:1,
+  US30:1, US500:1, NAS100:1, UK100:1, GER40:1,
 };
-const PIP_SIZE_JS = {XAUUSD:0.01,XAGUSD:0.01,USDJPY:0.01,EURJPY:0.01,GBPJPY:0.01};
-function getCS(i){return CONTRACT_SIZE[i]||100000;}
-function getPS(i){return PIP_SIZE_JS[i]||0.0001;}
+const PIP_SIZE = {
+  XAUUSD:0.01, XAGUSD:0.01, USDJPY:0.01, EURJPY:0.01, GBPJPY:0.01,
+};
+function getContractSize(inst) { return CONTRACT_SIZE[inst] || 100000; }
+function getPipSize(inst)       { return PIP_SIZE[inst] || 0.0001; }
 
 function recalc() {
   const inst=($('f_instrument').value||'').toUpperCase();
-  const cs=getCS(inst);
-  const ps=getPS(inst);
   const lots=parseFloat($('f_lots').value)||0;
   const entry=parseFloat($('f_entry').value);
   const stop=parseFloat($('f_stop').value);
@@ -604,10 +606,12 @@ function recalc() {
   const pnlOverride=parseFloat($('f_pnl').value);
   const winLoss=document.querySelector('input[name="win_loss"]:checked')?.value||'auto';
 
+  const cs=getContractSize(inst);
+  const ps=getPipSize(inst);
   let risk=null;
   if(riskModeEl==='pip'){
     const sp=parseFloat($('f_stop_pips').value);
-    if(sp&&lots) risk=sp*ps*cs*lots;
+    if(sp&&lots) risk=sp*ps*cs*lots; // pips→price×contract_size×lots
   } else if(riskModeEl==='dollar'){
     risk=parseFloat($('f_dollar_risk').value)||null;
   } else if(!isNaN(entry)&&!isNaN(stop)&&lots){
@@ -617,8 +621,12 @@ function recalc() {
   if(!isNaN(entry)&&!isNaN(stop)&&!isNaN(target)&&entry!==stop)
     plannedRR=Math.abs(target-entry)/Math.abs(entry-stop);
   let pnl=null;
-  if(!isNaN(pnlOverride)){pnl=pnlOverride;if(winLoss==='win'&&pnl<0)pnl=Math.abs(pnl);if(winLoss==='loss'&&pnl>0)pnl=-Math.abs(pnl);}
-  else if(!isNaN(exit)&&!isNaN(entry)&&lots){
+  if(!isNaN(pnlOverride)) {
+    pnl=pnlOverride;
+    // Apply win/loss sign from toggle
+    if(winLoss==='win' && pnl<0) pnl=Math.abs(pnl);
+    if(winLoss==='loss' && pnl>0) pnl=-Math.abs(pnl);
+  } else if(!isNaN(exit)&&!isNaN(entry)&&lots){
     const sign=dir==='Long'?1:-1;
     pnl=(exit-entry)*sign*cs*lots;
   }
@@ -652,25 +660,6 @@ function setRiskMode(mode,btn) {
   $('riskDollar').classList.toggle('hidden',mode!=='dollar');
   $('riskPrice').classList.toggle('hidden',mode!=='price');
   recalc();
-}
-
-/* ── Custom setup tags ──────────────────────────────────────── */
-function addCustomTag() {
-  const input = $('f_custom_tag');
-  const val = input.value.trim();
-  if (!val) return;
-  if (selectedTags.has(val)) { input.value=''; return; }
-  selectedTags.add(val);
-  const el = document.createElement('span');
-  el.className = 'toggle on';
-  el.dataset.tag = val;
-  el.textContent = val;
-  el.addEventListener('click', () => {
-    el.classList.toggle('on');
-    selectedTags.has(val) ? selectedTags.delete(val) : selectedTags.add(val);
-  });
-  $('setupTags').appendChild(el);
-  input.value = '';
 }
 
 /* ── Sentiment preview ───────────────────────────────────────── */
@@ -771,6 +760,9 @@ function editTrade(id) {
   $('f_pnl').value=t.realized_pnl!=null?t.realized_pnl:'';
   $('f_commission').value=t.commission||'0';
   $('f_notes').value=t.notes||'';
+  // Set win/loss radio
+  const wl = t.realized_pnl==null?'auto':t.realized_pnl>=0?'win':'loss';
+  const wr=$(`f_win_loss_${wl}`); if(wr) wr.checked=true;
   setTimePicker('entry',t.entry_time);
   setTimePicker('exit',t.exit_time);
   const isOpen=t.realized_pnl==null&&!t.exit_price;
@@ -821,6 +813,7 @@ function clearEntryForm() {
     .forEach(id=>{const el=$(id);if(el)el.value='';});
   selectedTags.clear();
   document.querySelectorAll('#setupTags .toggle.on').forEach(e=>e.classList.remove('on'));
+  const autoRadio=$('f_win_loss_auto'); if(autoRadio) autoRadio.checked=true;
   _resetImageUpload();
   $('sentPreview').textContent='';
   resetTimePickers();
@@ -912,44 +905,185 @@ resetTimePickers();
 pollEngineStatus();
 refresh();
 
-/* ── TradingView live ticker ─────────────────────────────────── */
-function initLiveTicker() {
-  const wrap = document.getElementById('tickerTrack');
-  if (!wrap) return;
-  const script = document.createElement('script');
-  script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
-  script.async = true;
-  script.innerHTML = JSON.stringify({
-    symbols: [
-      {proName:'OANDA:XAUUSD',    title:'Gold'},
-      {proName:'OANDA:XAGUSD',    title:'Silver'},
-      {proName:'OANDA:EURUSD',    title:'EUR/USD'},
-      {proName:'OANDA:GBPUSD',    title:'GBP/USD'},
-      {proName:'OANDA:USDJPY',    title:'USD/JPY'},
-      {proName:'OANDA:AUDUSD',    title:'AUD/USD'},
-      {proName:'OANDA:USDCAD',    title:'USD/CAD'},
-      {proName:'BINANCE:BTCUSDT', title:'BTC/USD'},
-      {proName:'BINANCE:ETHUSDT', title:'ETH/USD'},
-      {proName:'BINANCE:SOLUSDT', title:'SOL/USD'},
-      {proName:'OANDA:US30USD',   title:'US30'},
-      {proName:'OANDA:SPX500USD', title:'S&P 500'},
-      {proName:'OANDA:NAS100USD', title:'NASDAQ'},
-      {proName:'TVC:USOIL',       title:'Crude Oil'},
-      {proName:'TVC:DXY',         title:'DXY'},
-    ],
-    showSymbolLogo: false,
-    isTransparent: true,
-    displayMode: 'adaptive',
-    colorTheme: 'dark',
-    locale: 'en',
-  });
-  const container = document.createElement('div');
-  container.className = 'tradingview-widget-container';
-  container.style.cssText = 'width:100%;height:46px;';
-  const inner = document.createElement('div');
-  inner.className = 'tradingview-widget-container__widget';
-  container.appendChild(inner);
-  container.appendChild(script);
-  wrap.appendChild(container);
+/* ── AI Coach ────────────────────────────────────────────────── */
+let coachOpen = false;
+let unreadCoach = 0;
+
+function toggleCoach() {
+  coachOpen = !coachOpen;
+  document.getElementById('coachPanel').classList.toggle('open', coachOpen);
+  if (coachOpen) {
+    unreadCoach = 0;
+    updateCoachBadge();
+    document.getElementById('coachInput').focus();
+  }
 }
-initLiveTicker();
+
+function updateCoachBadge() {
+  const badge = document.getElementById('coachBadge');
+  if (unreadCoach > 0) {
+    badge.textContent = unreadCoach;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+function addCoachMessage(text, role='ai', label='') {
+  const msgs = document.getElementById('coachMessages');
+  const div = document.createElement('div');
+  div.className = `coach-msg ${role}`;
+  if (label) div.innerHTML = `<div class="coach-msg-label">${label}</div>${text.replace(/\n/g,'<br>')}`;
+  else div.innerHTML = text.replace(/\n/g,'<br>');
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  if (!coachOpen) {
+    unreadCoach++;
+    updateCoachBadge();
+  }
+  return div;
+}
+
+async function sendCoachMessage() {
+  const input = document.getElementById('coachInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addCoachMessage(msg, 'user');
+  const loading = addCoachMessage('Thinking…', 'loading');
+  try {
+    const r = await fetch('/api/coach/insights', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({trigger:'chat', message: msg})
+    });
+    const d = await r.json();
+    loading.remove();
+    addCoachMessage(d.reply, 'ai', 'COACH');
+  } catch(e) {
+    loading.remove();
+    addCoachMessage('Error reaching coach — check your connection.', 'ai');
+  }
+}
+
+async function triggerCoachOnTrade(tradeId) {
+  // Called automatically after a trade is logged
+  const loading = addCoachMessage('Analyzing your trade…', 'loading');
+  try {
+    const r = await fetch('/api/coach/insights', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({trigger:'trade_logged', trade_id: tradeId})
+    });
+    const d = await r.json();
+    loading.remove();
+    addCoachMessage(d.reply, 'ai', 'COACH — TRADE ANALYSIS');
+    // Auto-open panel to show insight
+    if (!coachOpen) {
+      document.getElementById('coachPanel').classList.add('open');
+      coachOpen = true;
+      unreadCoach = 0;
+      updateCoachBadge();
+    }
+  } catch(e) {
+    loading.remove();
+  }
+}
+
+/* ── Pattern Analysis ────────────────────────────────────────── */
+let patternLoaded = false;
+
+async function loadPatterns() {
+  if (patternLoaded) return;
+  const results = document.getElementById('patternResults');
+  const status  = document.getElementById('patternStatus');
+  if (!results) return;
+
+  results.innerHTML = `<div class="pattern-loading">
+    <div class="shimmer" style="height:100px;border-radius:8px;margin-bottom:10px"></div>
+    <div class="shimmer" style="height:100px;border-radius:8px;margin-bottom:10px"></div>
+    <div class="shimmer" style="height:100px;border-radius:8px"></div>
+  </div>`;
+  status.textContent = 'Scanning your trades…';
+
+  try {
+    const r = await fetch('/api/coach/patterns');
+    const d = await r.json();
+
+    if (d.message && !d.patterns?.length) {
+      results.innerHTML = `<div class="pattern-empty">${d.message}</div>`;
+      status.textContent = '';
+      return;
+    }
+
+    const severityLabel = {high:'🔴 High Impact', medium:'🟡 Medium Impact', low:'🔵 Low Impact'};
+    results.innerHTML = d.patterns.map(p => `
+      <div class="pattern-card ${p.severity}">
+        <div class="pattern-top">
+          <div class="pattern-title">${p.title}</div>
+          <div class="pattern-cost">${p.cost_usd ? '-$'+Math.abs(p.cost_usd).toFixed(2) : ''}</div>
+        </div>
+        <div class="pattern-meta">
+          <span class="pattern-confidence">${severityLabel[p.severity]||p.severity}</span>
+          <span class="pattern-confidence">AI Confidence: ${p.confidence}%</span>
+        </div>
+        <div class="pattern-desc">${p.description}</div>
+        ${p.evidence ? `<div class="pattern-evidence">${p.evidence}</div>` : ''}
+        <div class="pattern-rule">${p.rule}</div>
+      </div>`).join('');
+
+    status.textContent = `${d.patterns.length} patterns found · sorted by cost`;
+    patternLoaded = true;
+  } catch(e) {
+    results.innerHTML = `<div class="pattern-empty">Pattern analysis unavailable. Check your Groq API key.</div>`;
+    status.textContent = '';
+  }
+}
+
+/* ── Patch tab click to trigger pattern load ─────────────────── */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.tab === 'psychology') {
+      setTimeout(loadPatterns, 100);
+    }
+  });
+});
+
+/* ── Patch saveTrade to trigger coach after logging ──────────── */
+const _origSave = window.saveTrade;
+window.saveTrade = async function() {
+  // We need to intercept the trade ID after save
+  const editId = $('f_edit_id')?.value;
+  if (editId) { await updateTrade(parseInt(editId)); return; }
+
+  if (!$('f_date').value){toast('Pick a date first');return;}
+  if (!$('f_instrument').value){toast('Enter an instrument');return;}
+  const isOpen=$('f_open_trade').checked;
+  const payload={
+    trade_date:$('f_date').value, entry_time:$('f_entry_time').value,
+    exit_time:isOpen?null:$('f_exit_time').value, session:$('f_session').value,
+    instrument:($('f_instrument').value||'').toUpperCase(), direction:$('f_direction').value,
+    lots:$('f_lots').value, entry_price:$('f_entry').value,
+    stop_price:$('f_stop').value, target_price:$('f_target').value,
+    exit_price:isOpen?null:$('f_exit').value,
+    realized_pnl:isOpen?null:$('f_pnl').value,
+    commission:$('f_commission').value,
+    stop_pips:riskModeEl==='pip'?$('f_stop_pips').value:null,
+    target_pips:riskModeEl==='pip'?$('f_target_pips').value:null,
+    dollar_risk:riskModeEl==='dollar'?$('f_dollar_risk').value:null,
+    setups:[...selectedTags], notes:$('f_notes').value, emotions:[],
+  };
+  $('saveBtn').disabled=true; $('saveBtn').textContent='Saving…';
+  try {
+    const r=await fetch('/api/trades',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(_pendingImageFile) await _uploadPendingImage(d.id);
+    toast(`Logged · ${d.sentiment?.source==='groq'?'Groq analyzed':'saved'}`,3000);
+    clearEntryForm(); closeEntry(); await refresh();
+    // Trigger coach analysis on new trade
+    patternLoaded = false; // Reset so patterns refresh
+    triggerCoachOnTrade(d.id);
+  } catch(e){toast('Save failed: '+e.message);}
+  finally{$('saveBtn').disabled=false;$('saveBtn').textContent='Save';}
+};

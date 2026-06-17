@@ -76,28 +76,41 @@ def _compute_derived(data):
     stop_pips   = _num(data.get("stop_pips"))
     target_pips = _num(data.get("target_pips"))
 
-    # Verified from MT5 broker: P&L = price_diff * contract_size * lots
-    # XAUUSD contract_size=100 oz/lot confirmed: 4.67*100*0.01 = $4.67 ✓
+    # Pip value per lot lookup ($ per 1 pip movement per standard lot)
+    # pip_val_per_lot = pip_value / pip_size
+    # XAUUSD: pip = 0.01, $10/pip/lot → price_unit_value = 10/0.01 = $1000/lot
+    # Forex:  pip = 0.0001, $10/pip/lot → price_unit_value = 10/0.0001 = $100,000/lot (×lots = standard)
+    # MT5 P&L formula: price_distance × contract_size × lots
+    # contract_size = oz/lot for metals, units/lot for forex
+    # Verified against broker: XAUUSD contract_size=100, P&L=price_diff×100×lots
     CONTRACT_SIZE = {
-        "XAUUSD":100,"XAGUSD":100,
-        "EURUSD":100000,"GBPUSD":100000,"AUDUSD":100000,
-        "NZDUSD":100000,"USDCAD":100000,"USDCHF":100000,
-        "USDJPY":100000,"EURGBP":100000,"EURJPY":100000,"GBPJPY":100000,
-        "BTCUSD":1,"ETHUSD":1,
-        "US30":1,"US500":1,"NAS100":1,"UK100":1,"GER40":1,
+        "XAUUSD": 100,    # 100 oz/lot  ← verified from broker MT5 properties
+        "XAGUSD": 100,    # 100 oz/lot
+        "EURUSD": 100000, "GBPUSD": 100000, "AUDUSD": 100000,
+        "NZDUSD": 100000, "USDCAD": 100000, "USDCHF": 100000,
+        "USDJPY": 100000, "EURGBP": 100000, "EURJPY": 100000, "GBPJPY": 100000,
+        "BTCUSD": 1, "ETHUSD": 1,
+        "US30": 1, "US500": 1, "NAS100": 1, "UK100": 1, "GER40": 1,
     }
-    PIP_SIZE_MAP = {
-        "XAUUSD":0.01,"XAGUSD":0.01,
-        "USDJPY":0.01,"EURJPY":0.01,"GBPJPY":0.01,
+    # For forex: P&L in quote currency, convert to USD
+    # For XAUUSD/metals: P&L directly in USD
+    # pip_size used only for pip-mode risk entry
+    PIP_SIZE = {
+        "XAUUSD": 0.01, "XAGUSD": 0.01,
+        "USDJPY": 0.01, "EURJPY": 0.01, "GBPJPY": 0.01,
     }
-    contract_size = CONTRACT_SIZE.get(inst_up, 100000)
-    pip_size_val  = PIP_SIZE_MAP.get(inst_up, 0.0001)
+    contract_size = CONTRACT_SIZE.get(inst_up, 100000)  # default forex
+    pip_size_val  = PIP_SIZE.get(inst_up, 0.0001)
+
+    def _dollar_move(price_diff, n_lots):
+        return abs(price_diff) * contract_size * n_lots
 
     planned_risk = dollar_risk
     if planned_risk is None and stop_pips is not None and lots:
+        # pip-mode: convert pips to price units then to dollars
         planned_risk = abs(stop_pips) * pip_size_val * contract_size * lots
     if planned_risk is None and entry is not None and stop is not None and lots:
-        planned_risk = abs(entry - stop) * contract_size * lots
+        planned_risk = _dollar_move(entry - stop, lots)
 
     planned_rr = None
     if target_pips is not None and stop_pips and stop_pips != 0:
@@ -108,7 +121,7 @@ def _compute_derived(data):
     realized_pnl = _num(data.get("realized_pnl"))
     if realized_pnl is None and exit_price is not None and entry is not None and lots:
         sign = 1 if direction == "Long" else -1
-        realized_pnl = (exit_price - entry) * sign * contract_size * lots
+        realized_pnl = sign * (exit_price - entry) * contract_size * lots
 
     realized_r = None
     if realized_pnl is not None and planned_risk and planned_risk > 0:
@@ -433,3 +446,161 @@ if __name__ == "__main__":
     print(f"  AI sentiment: {'ON (Groq)' if sent.groq_available() else 'OFF'}")
     print(f"  DB: {app.config['SQLALCHEMY_DATABASE_URI'][:60]}\n")
     app.run(debug=True, port=5000)
+
+# ── AI Coach & Pattern Analysis ───────────────────────────────────────────────
+import anthropic as _anthropic_unused  # already imported via groq path
+
+def _trades_context(trades, limit=50):
+    """Compact trade summary for LLM context."""
+    recent = sorted(trades, key=lambda t: t.get('trade_date',''), reverse=True)[:limit]
+    lines = []
+    for t in recent:
+        lines.append(
+            f"{t.get('trade_date')} | {t.get('instrument')} {t.get('direction')} "
+            f"| lots={t.get('lots')} | entry={t.get('entry_price')} sl={t.get('stop_price')} tp={t.get('target_price')} "
+            f"| exit={t.get('exit_price')} pnl=${t.get('realized_pnl')} R={t.get('realized_r')} "
+            f"| RR={t.get('planned_rr')} session={t.get('session')} "
+            f"| setups={t.get('setups')} emotions={t.get('emotions')} "
+            f"| sentiment={t.get('sentiment_label')} score={t.get('sentiment_score')} "
+            f"| notes={str(t.get('notes',''))[:120]}"
+        )
+    return "\n".join(lines)
+
+
+@app.route("/api/coach/insights", methods=["POST"])
+@login_required
+def coach_insights():
+    """Generate proactive insights after a trade or on demand."""
+    body = request.get_json(force=True)
+    trigger = body.get("trigger", "on_demand")  # "trade_logged", "on_demand", "chat"
+    user_message = body.get("message", "")
+    trade_id = body.get("trade_id")
+
+    trades = _get_trades()
+    settings = _get_settings()
+    if not trades:
+        return jsonify({"insights": [], "reply": "Log some trades first and I'll start finding patterns."})
+
+    ctx = _trades_context(trades)
+    total_pnl = sum(t.get('realized_pnl') or 0 for t in trades if t.get('realized_pnl') is not None)
+    wins  = sum(1 for t in trades if (t.get('realized_pnl') or 0) > 0)
+    losses= sum(1 for t in trades if (t.get('realized_pnl') or 0) < 0)
+    win_rate = round(wins/(wins+losses)*100, 1) if (wins+losses) else 0
+
+    # Find the specific trade if triggered by logging
+    trade_context = ""
+    if trade_id:
+        t = next((x for x in trades if x['id'] == trade_id), None)
+        if t:
+            trade_context = f"\nMOST RECENT TRADE JUST LOGGED: {t.get('trade_date')} {t.get('instrument')} {t.get('direction')} | P&L=${t.get('realized_pnl')} R={t.get('realized_r')} | sentiment: {t.get('sentiment_label')} | notes: {t.get('notes','')[:200]}"
+
+    system = f"""You are a brutally honest trading coach with deep knowledge of SMC/ICT methodology, prop firm rules, and trading psychology.
+You have full access to this trader's journal. Your job is to find patterns they haven't noticed and tell them things they might not want to hear.
+
+TRADER STATS:
+- Total trades: {len(trades)}
+- Win rate: {win_rate}%
+- Total P&L: ${round(total_pnl,2)}
+- Account: {settings.get('account_label','')}
+- Profit target: ${settings.get('profit_target',500)}
+
+ALL TRADES (most recent first):
+{ctx}
+{trade_context}
+
+RULES:
+- Be specific: cite actual trade dates, P&L amounts, patterns from the data
+- Don't hallucinate trades that aren't in the data
+- Prioritize insights by dollar damage
+- Keep each insight concise and actionable
+- For chat mode: answer the question directly using real trade data
+- Trigger mode "trade_logged": give 2-3 immediate insights about this specific trade + any pattern it fits
+- Trigger mode "on_demand": give top 3 most expensive patterns you see
+- Always end proactive insights with one concrete rule the trader should follow"""
+
+    if trigger == "chat" and user_message:
+        prompt = f"Trader asks: {user_message}\n\nAnswer using their actual trade data. Be specific with dates, amounts, and patterns."
+    elif trigger == "trade_logged":
+        prompt = "A new trade was just logged. Give 2-3 immediate insights: what this trade reveals, any pattern it fits, and one thing they should do differently."
+    else:
+        prompt = "Scan all trades and surface the top 3 most expensive behavioral patterns. For each: name it, quantify the dollar cost, give 1-2 specific trade examples, and give one actionable rule."
+
+    try:
+        from groq import Groq
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY",""))
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=800,
+            temperature=0.3,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user",   "content": prompt},
+            ],
+        )
+        reply = resp.choices[0].message.content.strip()
+        return jsonify({"reply": reply, "trigger": trigger})
+    except Exception as e:
+        return jsonify({"reply": f"Coach unavailable: {str(e)[:80]}", "trigger": trigger}), 500
+
+
+@app.route("/api/coach/patterns", methods=["GET"])
+@login_required
+def coach_patterns():
+    """Deep pattern analysis — runs on Psychology tab open."""
+    trades = _get_trades()
+    settings = _get_settings()
+    if len(trades) < 3:
+        return jsonify({"patterns": [], "message": "Log at least 3 trades to unlock pattern analysis."})
+
+    ctx = _trades_context(trades, limit=100)
+    total_pnl = sum(t.get('realized_pnl') or 0 for t in trades if t.get('realized_pnl') is not None)
+    wins  = sum(1 for t in trades if (t.get('realized_pnl') or 0) > 0)
+    losses= sum(1 for t in trades if (t.get('realized_pnl') or 0) < 0)
+
+    system = f"""You are a quantitative trading coach analyzing a trader's complete journal.
+Find SPECIFIC patterns backed by actual data — no generic advice.
+
+TRADER DATA:
+Trades: {len(trades)} | Wins: {wins} | Losses: {losses} | Total P&L: ${round(total_pnl,2)}
+Account: {settings.get('account_label','')} | Target: ${settings.get('profit_target',500)}
+
+ALL TRADES:
+{ctx}"""
+
+    prompt = """Analyze ALL trades and return a JSON array of patterns. Find 3-5 patterns, sorted by dollar damage (most expensive first).
+
+Return ONLY valid JSON, no prose, no markdown:
+[
+  {
+    "title": "Short pattern name",
+    "severity": "high|medium|low",
+    "cost_usd": 123.45,
+    "confidence": 87,
+    "description": "What the pattern is and why it costs money (2 sentences)",
+    "evidence": "Specific trades that prove this (dates, amounts)",
+    "rule": "One concrete rule to fix this"
+  }
+]
+
+Focus on: streak effects, session timing, emotion-to-loss correlation, RR discipline, setup performance, revenge trading, overtrading after losses, time-of-day patterns. Only include patterns actually visible in the data."""
+
+    try:
+        from groq import Groq
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY",""))
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=1200,
+            temperature=0.2,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user",   "content": prompt},
+            ],
+        )
+        raw = resp.choices[0].message.content.strip()
+        raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+        patterns = json.loads(raw)
+        return jsonify({"patterns": patterns})
+    except json.JSONDecodeError:
+        return jsonify({"patterns": [], "message": "Pattern analysis returned unexpected format."})
+    except Exception as e:
+        return jsonify({"patterns": [], "message": f"Analysis unavailable: {str(e)[:80]}"}), 500

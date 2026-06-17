@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=1781624491">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
@@ -36,11 +36,6 @@
     <button class="btn-gold" onclick="openEntry()">+ Log Trade</button>
   </div>
 </header>
-
-<!-- Live ticker tape -->
-<div class="ticker-wrap">
-  <div id="tickerTrack"></div>
-</div>
 
 <!-- DISCIPLINE STRIP -->
 <div class="discipline-strip" id="disciplineStrip">
@@ -165,6 +160,22 @@
 
   <!-- ── PSYCHOLOGY TAB ── -->
   <div class="tab-panel" id="tab-psychology">
+
+    <!-- Pattern Analysis -->
+    <div class="panel" id="patternPanel">
+      <div class="panel-hdr">
+        AI Pattern Analysis
+        <span class="panel-sub" id="patternStatus">Loading patterns…</span>
+      </div>
+      <div id="patternResults">
+        <div class="pattern-loading">
+          <div class="shimmer" style="height:80px;border-radius:8px;margin-bottom:10px"></div>
+          <div class="shimmer" style="height:80px;border-radius:8px;margin-bottom:10px"></div>
+          <div class="shimmer" style="height:80px;border-radius:8px"></div>
+        </div>
+      </div>
+    </div>
+
     <div class="charts-grid-2">
       <div class="panel">
         <div class="panel-hdr">Emotion → Avg R &nbsp;<span class="panel-sub">which states cost you money</span></div>
@@ -270,7 +281,7 @@
           <div class="field"><label>Exit price</label><input type="number" step="any" id="f_exit" class="num" oninput="recalc()"></div>
           <div class="field">
           <label>Trade outcome</label>
-          <div style="display:flex;gap:16px;margin-bottom:8px">
+          <div style="display:flex;gap:10px;margin-bottom:8px">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text)">
               <input type="radio" name="win_loss" id="f_win_loss_auto" value="auto" checked onchange="recalc()" style="width:auto;accent-color:var(--green)"> Auto
             </label>
@@ -321,7 +332,6 @@
             <span class="toggle" data-tag="{{ tag }}">{{ tag }}</span>
             {% endfor %}
           </div>
-          <div style="display:flex;gap:6px;margin-top:8px;align-items:center"><input type="text" id="f_custom_tag" placeholder="Add custom tag…" style="flex:1;background:var(--bg);color:var(--text);border:1px solid var(--border2);border-radius:999px;padding:5px 12px;font-size:11px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomTag();}"><button onclick="addCustomTag()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:999px;padding:5px 10px;cursor:pointer;font-size:11px;">+ Add</button></div>
         </div>
         <div class="field">
           <label>In-trade notes &amp; psychology <span class="label-sub">— LLM reads your mindset</span></label>
@@ -389,6 +399,34 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- AI Coach floating panel -->
+<button class="coach-fab" id="coachFab" onclick="toggleCoach()" title="AI Trading Coach">
+  <span class="coach-fab-icon">🧠</span>
+  <span class="coach-badge hidden" id="coachBadge">0</span>
+</button>
+
+<div class="coach-panel" id="coachPanel">
+  <div class="coach-header">
+    <div class="coach-title">
+      <span class="coach-icon">🧠</span>
+      <span>AI Trading Coach</span>
+      <span class="coach-sub">powered by Groq LLaMA 3.3</span>
+    </div>
+    <button class="coach-close" onclick="toggleCoach()">✕</button>
+  </div>
+  <div class="coach-messages" id="coachMessages">
+    <div class="coach-welcome">
+      <p>I'm watching your journal. I'll surface patterns you haven't noticed — even ones you might not want to see.</p>
+      <p style="margin-top:8px;color:var(--faint)">Ask me anything about your trades, or wait for me to find something.</p>
+    </div>
+  </div>
+  <div class="coach-input-row">
+    <input class="coach-input" id="coachInput" placeholder="Ask about your trades…"
+      onkeydown="if(event.key==='Enter')sendCoachMessage()">
+    <button class="coach-send" onclick="sendCoachMessage()">→</button>
+  </div>
+</div>
+
 <script>
   window.APP = {
     instruments: {{ instruments | tojson }},
@@ -400,6 +438,6 @@
     },
   };
 </script>
-<script src="{{ url_for('static', filename='js/app.js') }}?v=1781624491"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
