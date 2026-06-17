@@ -453,8 +453,6 @@ if __name__ == "__main__":
     app.run(debug=True, port=5000)
 
 # ── AI Coach & Pattern Analysis ───────────────────────────────────────────────
-import anthropic as _anthropic_unused  # already imported via groq path
-
 def _trades_context(trades, limit=50):
     """Compact trade summary for LLM context."""
     recent = sorted(trades, key=lambda t: t.get('trade_date',''), reverse=True)[:limit]
