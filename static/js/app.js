@@ -199,7 +199,7 @@ function renderBalanceChart(trades) {
 
 function renderRecoveryFactor(m) {
   const k = m.kpi || {};
-  const maxDD = Math.abs(k.max_drawdown_usd || 0);
+  const maxDD = Math.abs(k.max_drawdown || 0);
   const pnl = k.net_pnl || 0;
   const rf = maxDD > 0 ? (pnl / maxDD) : 0;
   const rfAbs = Math.abs(rf);
@@ -208,11 +208,17 @@ function renderRecoveryFactor(m) {
   const breakeven = pnl < 0 ? Math.abs(pnl) : 0;
 
   if($('rf_maxdd')) $('rf_maxdd').textContent = '$' + fmt(maxDD);
-  if($('rf_maxdd_pct')) $('rf_maxdd_pct').textContent = k.max_drawdown_pct ? (fmt(k.max_drawdown_pct,2) + '% of peak') : '';
+  if($('rf_maxdd_pct')) $('rf_maxdd_pct').textContent = k.max_drawdown_r ? (fmt(k.max_drawdown_r,2) + 'R worst') : '';
   if($('rf_breakeven')) $('rf_breakeven').textContent = breakeven > 0 ? '$' + fmt(breakeven) : pnl >= 0 ? '+$' + fmt(pnl) : '—';
   if($('rf_be_sub')) $('rf_be_sub').textContent = pnl >= 0 ? 'Already profitable' : 'needed to break even';
-  if($('rf_val')) { $('rf_val').textContent = fmt(rfAbs, 2); $('rf_val').style.color = stateColor; }
-  if($('rf_state')) { $('rf_state').textContent = state; $('rf_state').style.color = stateColor; }
+  if($('rf_val')) {
+    $('rf_val').textContent = maxDD === 0 ? '—' : fmt(rfAbs, 2);
+    $('rf_val').style.color = maxDD === 0 ? 'var(--muted)' : stateColor;
+  }
+  if($('rf_state')) {
+    $('rf_state').textContent = maxDD === 0 ? '—' : state;
+    $('rf_state').style.color = maxDD === 0 ? 'var(--muted)' : stateColor;
+  }
 
   // Layman sentence
   const rfSentence = document.getElementById('rf_sentence');
@@ -237,13 +243,19 @@ function renderRecoveryFactor(m) {
 
 function renderTiltControl(trades) {
   if (!$('tilt_multiplier') || !trades || trades.length < 5) return;
-  const sorted = [...trades].filter(t => t.dollar_risk > 0)
+  const getRisk = t => t.dollar_risk || t.planned_risk_usd || 0;
+  const sorted = [...trades].filter(t => getRisk(t) > 0)
     .sort((a,b) => new Date(a.trade_date) - new Date(b.trade_date));
-  if (sorted.length < 5) { $('tilt_multiplier').textContent = 'N/A'; return; }
+  if (sorted.length < 5) {
+    $('tilt_multiplier').textContent = 'N/A';
+    const ts = document.getElementById('tilt_sentence');
+    if (ts) ts.textContent = 'Need at least 5 trades with a risk amount logged to detect tilt. Fill in the Risk field when logging trades.';
+    return;
+  }
   const baseline = sorted.slice(0, Math.max(1, sorted.length - 10));
   const recent = sorted.slice(-10);
-  const avgBase = baseline.reduce((s,t) => s + (t.dollar_risk||0), 0) / baseline.length;
-  const avgRecent = recent.reduce((s,t) => s + (t.dollar_risk||0), 0) / recent.length;
+  const avgBase = baseline.reduce((s,t) => s + getRisk(t), 0) / baseline.length;
+  const avgRecent = recent.reduce((s,t) => s + getRisk(t), 0) / recent.length;
   const mult = avgBase > 0 ? avgRecent / avgBase : 1;
   const color = mult > 1.3 ? 'var(--red)' : mult > 1.1 ? 'var(--amber)' : 'var(--green)';
   $('tilt_multiplier').textContent = fmt(mult, 2) + 'x';
