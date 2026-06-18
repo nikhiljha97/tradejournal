@@ -185,7 +185,7 @@ function renderBalanceChart(trades) {
     }
   });
   if (!$('balanceChart')) return;
-  console.log('Balance chart data:', data.length, 'points, start:', startBal, 'trades with pnl:', sorted.filter(t=>t.pnl!=null).length);
+
   charts.balance = new Chart($('balanceChart'), {
     type: 'line',
     data: {
