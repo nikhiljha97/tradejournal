@@ -281,6 +281,43 @@ def public_prices():
 
     return jsonify(prices)
 
+
+@app.route("/sitemap.xml")
+def sitemap():
+    xml = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://tradejournal-n3hn.onrender.com/</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://tradejournal-n3hn.onrender.com/register</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://tradejournal-n3hn.onrender.com/login</loc>
+    <lastmod>2026-06-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+</urlset>""", 200, {"Content-Type": "application/xml"}
+    return xml
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    return """User-agent: *
+Allow: /
+Allow: /register
+Allow: /login
+Disallow: /api/
+
+Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
+
 @app.route("/google18b855e2f453917d.html")
 def google_verification():
     return "google-site-verification: google18b855e2f453917d.html"
