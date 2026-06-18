@@ -305,6 +305,10 @@ def sitemap():
   <url><loc>https://tradejournal-n3hn.onrender.com/blog/prop-firm-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://tradejournal-n3hn.onrender.com/blog/xauusd-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://tradejournal-n3hn.onrender.com/blog/trading-psychology-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/free-trading-journal-app</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/what-to-write-in-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/how-to-start-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/tradezella-vs-edgewonk-vs-tradersync-alternatives</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
 
@@ -318,6 +322,17 @@ Allow: /blog
 Disallow: /api/
 
 Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
+
+@app.route("/blog")
+def blog_index():
+    return render_template("blog.html", posts=POSTS, post=None)
+
+@app.route("/blog/<slug>")
+def blog_post(slug):
+    post = get_post(slug)
+    if not post:
+        return redirect(url_for("blog_index"))
+    return render_template("blog.html", post=post, posts=None)
 
 @app.route("/google18b855e2f453917d.html")
 def google_verification():

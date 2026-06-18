@@ -223,3 +223,291 @@ POSTS = [
 
 def get_post(slug):
     return next((p for p in POSTS if p["slug"] == slug), None)
+
+# ── New keyword-targeted posts ─────────────────────────────────────────────
+
+POSTS += [
+  {
+    "slug": "free-trading-journal-app",
+    "tag": "Trading Journal",
+    "title": "Best Free Trading Journal App in 2026 (No Excel, No Spreadsheet)",
+    "excerpt": "Most free trading journals are just spreadsheets in disguise. Here's what a real free trading journal app looks like — and why the best ones cost nothing.",
+    "meta_desc": "Looking for a free trading journal app? TradeJournal is 100% free forever — AI psychology analysis, MT5 import, prop firm tracking. No Excel needed.",
+    "date": "2026-06-18",
+    "read_time": 6,
+    "content": """
+<p>Search for "free trading journal" and you'll find one of three things: a spreadsheet template, a free trial that locks you out after 30 days, or a "freemium" app where every useful feature costs extra. None of those are actually free.</p>
+<p>A genuinely free trading journal app should do everything you need — log trades, track psychology, calculate real R multiples, import from your broker — without ever asking for a credit card.</p>
+
+<h2>What Makes a Trading Journal App Worth Using</h2>
+<p>Before comparing options, here's what separates useful trading journals from digital notebooks:</p>
+<ul>
+  <li><strong>Automatic P&L calculation</strong> — you enter entry, exit, and size. It does the math.</li>
+  <li><strong>Real R multiples</strong> — not just win/loss, but how many R you made vs planned</li>
+  <li><strong>Psychology tracking</strong> — notes + emotion tagging, not just price data</li>
+  <li><strong>Broker import</strong> — MT5, CSV, or XLSX so you're not manually entering 200 trades</li>
+  <li><strong>Pattern detection</strong> — what behaviour is actually costing you money</li>
+</ul>
+
+<h2>Why Excel and Notion Templates Fall Short</h2>
+<p>Trading journal Excel templates are everywhere and they're free to download. But they have a fundamental problem: they're static. You have to manually enter every trade, manually calculate R multiples, manually build charts. After a week of active trading you'll have 50 rows to update and you'll stop doing it.</p>
+<p><strong>Notion trading journals</strong> have the same problem. They look beautiful in screenshots and fall apart in daily use. There's no automatic calculation, no broker import, no AI analysis. It's just a table.</p>
+<blockquote>The best trading journal is the one you actually use every day. Friction kills habits — which is why importing from MT5 beats manual entry every time.</blockquote>
+
+<h2>Trading Journal Free vs Paid — What You Actually Get</h2>
+<p><strong>Tradervue</strong> — free plan limited to 30 trades/month. Useful for beginners, useless for active traders.</p>
+<p><strong>Edgewonk</strong> — $169/year one-time. Good analytics, no AI, no SMC tags, desktop only.</p>
+<p><strong>TradeZella</strong> — $49/month. Strong broker sync, good AI features, but expensive for prop firm traders on tight budgets.</p>
+<p><strong>TradeJournal</strong> — completely free. AI psychology analysis, MT5 import, prop firm tracking, SMC setup tags, unlimited trades. No trial. No card.</p>
+
+<h2>Key Features to Look for in a Free Trading Journal</h2>
+<h3>1. Correct Instrument Math</h3>
+<p>XAUUSD has a 100 oz/lot contract size. EURUSD is 100,000 units/lot. A journal that gets this wrong will show you inaccurate P&L and wrong R multiples — which makes all your analysis meaningless. Always verify a journal's P&L against your broker statement before trusting it.</p>
+
+<h3>2. Psychology Notes + Analysis</h3>
+<p>The difference between a trading log and a trading journal is psychology. Log what you were thinking at entry, not just what price did. Over 50 trades, patterns emerge — and the costliest ones are almost always psychological, not technical.</p>
+
+<h3>3. Prop Firm Compatibility</h3>
+<p>If you're trading prop firm challenges (FTMO, Funded Next, Upcomers, Apex), your journal needs to track drawdown, daily loss limits, and consistency percentage in real time — not just at the end of the day when it's too late.</p>
+
+<h2>How to Start Your Trading Journal Today</h2>
+<ol>
+  <li>Export your MT5 trade history as a detailed HTML report</li>
+  <li>Import it into TradeJournal — takes about 2 minutes</li>
+  <li>Add psychology notes to your last 10 trades</li>
+  <li>Check the AI pattern analysis — your top cost pattern will surprise you</li>
+</ol>
+<p>That's it. No setup fee, no onboarding call, no credit card form. Just your trades, analysed.</p>
+"""
+  },
+  {
+    "slug": "what-to-write-in-trading-journal",
+    "tag": "Getting Started",
+    "title": "What to Write in a Trading Journal (With Real Examples)",
+    "excerpt": "Most traders write 'entered long, hit TP' and wonder why their journal isn't helping. Here's exactly what to write — with examples that actually improve your trading.",
+    "meta_desc": "Learn what to write in a trading journal with real examples. Setup, entry reason, psychology notes, exit review — the complete trading journal format that actually works.",
+    "date": "2026-06-18",
+    "read_time": 7,
+    "content": """
+<p>The most common trading journal mistake isn't failing to journal — it's journaling the wrong things. "Bought XAUUSD at 2320, sold at 2340, profit $200" tells you nothing useful. A year of entries like that produces zero insight.</p>
+<p>Here's exactly what to write, with before/after examples.</p>
+
+<h2>The Trading Journal Format That Actually Works</h2>
+<p>Every trade entry should capture six things:</p>
+<ol>
+  <li><strong>Setup</strong> — what technical reason made you consider this trade</li>
+  <li><strong>Entry reason</strong> — what specific trigger confirmed the entry</li>
+  <li><strong>Risk definition</strong> — exact stop loss level and dollar risk</li>
+  <li><strong>Target</strong> — where you planned to exit at profit</li>
+  <li><strong>Psychology at entry</strong> — what were you thinking and feeling</li>
+  <li><strong>Post-trade review</strong> — what actually happened and what you'd do differently</li>
+</ol>
+
+<h2>What NOT to Write (And Why)</h2>
+<p>❌ <em>"Bought gold, made profit"</em> — zero context, zero learning</p>
+<p>❌ <em>"Setup looked good"</em> — what setup? Good how?</p>
+<p>❌ <em>"Stopped out again"</em> — what caused it? Was the stop placement wrong?</p>
+<p>❌ <em>"Followed my plan"</em> — which part? All of it?</p>
+
+<h2>What TO Write — Real Examples</h2>
+
+<h3>Setup Description (Good vs Bad)</h3>
+<p>❌ Bad: <em>"Order block trade on gold"</em></p>
+<p>✅ Good: <em>"4H bearish Order Block at 2347 — formed after a strong displacement down on June 14. Price returned to OB during NY session with a 15min Market Structure Shift confirming short bias."</em></p>
+
+<h3>Psychology Notes (Good vs Bad)</h3>
+<p>❌ Bad: <em>"Felt confident"</em></p>
+<p>✅ Good: <em>"I entered this trade even though the 1H structure hadn't fully confirmed yet. I think I was eager because I'd missed the last two setups. This might be FOMO — I should have waited for the 15min MSS."</em></p>
+
+<h3>Post-Trade Review (Good vs Bad)</h3>
+<p>❌ Bad: <em>"Win. Nice trade."</em></p>
+<p>✅ Good: <em>"Won but took profits at 1.8R instead of planned 3R target. Price continued to my original target. Premature exit cost me $80. Why did I close early? I was watching the news ticker and got nervous. Rule: no news checking during trade."</em></p>
+
+<h2>The One Sentence That Changes Everything</h2>
+<p>After every trade, write this sentence: <strong>"If I took this exact setup 100 times, would I be profitable?"</strong></p>
+<p>If the answer is yes, you have a repeatable edge. If the answer is "I'm not sure," you need more data. If the answer is no, you know what to stop doing.</p>
+
+<h2>How Often Should You Write in Your Trading Journal?</h2>
+<p><strong>During the trade:</strong> Log entry price, stop, target, and a one-sentence psychology note before you're in profit or loss — it's more honest that way.</p>
+<p><strong>After the trade closes:</strong> Write your post-trade review while the emotions are still fresh. What you felt at entry vs what actually happened.</p>
+<p><strong>Weekly:</strong> Review all entries. Look for patterns — not in price, in you.</p>
+
+<h2>Trading Journal Prompts to Get You Started</h2>
+<p>Stuck on what to write? Use these prompts:</p>
+<ul>
+  <li>"I took this trade because..."</li>
+  <li>"My confidence level was ___ out of 10 because..."</li>
+  <li>"The one thing I'd change about this entry is..."</li>
+  <li>"If I lost this trade, it would be because..."</li>
+  <li>"My emotional state right now is ___ and that's affecting me by..."</li>
+</ul>
+<blockquote>The goal of a trading journal isn't to make you feel bad about your losses. It's to make the patterns visible so you can fix the ones that cost you the most.</blockquote>
+
+<h2>Using AI to Analyse Your Journal Notes</h2>
+<p>Writing honest psychology notes is powerful on its own. But AI can take it further — reading your notes across 50+ trades and identifying which emotional states correlate with your losses, which setups actually have edge, and which behaviours cost you the most in dollar terms. That's pattern detection you can't do manually.</p>
+"""
+  },
+  {
+    "slug": "how-to-start-trading-journal",
+    "tag": "Getting Started",
+    "title": "How to Start a Trading Journal in 2026 (Step-by-Step for Beginners)",
+    "excerpt": "Starting a trading journal sounds simple but most traders quit within a week. Here's the exact system — tools, format, review process — that actually sticks.",
+    "meta_desc": "How to start a trading journal step by step. The right format, what to track, how to review, and free tools that make journaling take less than 5 minutes per trade.",
+    "date": "2026-06-18",
+    "read_time": 6,
+    "content": """
+<p>Most traders start a trading journal, keep it for two weeks, then abandon it. Not because journaling doesn't work — it's one of the most evidence-backed ways to improve trading performance — but because their system has too much friction.</p>
+<p>Here's how to start a trading journal that you'll actually maintain.</p>
+
+<h2>Step 1: Choose Your Tool</h2>
+<p>The wrong tool kills the habit. Here's the honest breakdown:</p>
+<p><strong>Excel / Google Sheets</strong> — maximum flexibility, maximum friction. You build it once, maintain it forever, manually. Good for data analysts, bad for traders who want to focus on trading.</p>
+<p><strong>Notion</strong> — beautiful templates, no calculation. Great for notes, useless for R multiples and performance analytics.</p>
+<p><strong>Paper / Notebook</strong> — surprisingly effective for psychology notes. Terrible for data analysis. Good as a supplement, not a primary journal.</p>
+<p><strong>Dedicated app</strong> — lowest friction, built-in calculations, importable from your broker. The only option if you want to journal consistently for more than a month.</p>
+<p>Start with the tool that has the least friction for your daily workflow. If you trade on MT5, you want something that imports directly from MT5.</p>
+
+<h2>Step 2: Decide What to Track</h2>
+<p>Don't try to track everything on day one. Start with these five fields only:</p>
+<ol>
+  <li><strong>Date and instrument</strong></li>
+  <li><strong>Entry price, stop loss, take profit</strong></li>
+  <li><strong>Position size (lots)</strong></li>
+  <li><strong>Setup name</strong> (Order Block, FVG, breakout, etc.)</li>
+  <li><strong>One sentence of psychology</strong></li>
+</ol>
+<p>Everything else — session, emotion tags, screenshots, detailed notes — add those after the habit is established. Complexity kills consistency.</p>
+
+<h2>Step 3: Import Your Historical Trades First</h2>
+<p>Don't start from scratch. Import your last 3 months of trades from your broker first. This gives you:</p>
+<ul>
+  <li>Immediate data to analyse — you don't have to wait</li>
+  <li>Baseline metrics to measure improvement against</li>
+  <li>Existing patterns to identify before your next trade</li>
+</ul>
+<p>Most brokers (especially MT5) let you export trade history as a CSV or HTML report. A good journal imports this in under 2 minutes.</p>
+
+<h2>Step 4: Set a Daily Journaling Ritual</h2>
+<p>The traders who journal consistently all share one habit: they tie journaling to something they already do. The most common ritual:</p>
+<ul>
+  <li><strong>Before trading:</strong> review yesterday's entries, check your current drawdown and risk metrics</li>
+  <li><strong>After each trade:</strong> log entry while the context is fresh — takes 3 minutes max</li>
+  <li><strong>End of week:</strong> 15-minute review of all entries, identify top pattern to fix</li>
+</ul>
+
+<h2>Step 5: Review — The Part Everyone Skips</h2>
+<p>Journaling without reviewing is like taking notes in class and never reading them before the exam. The review is where the learning happens.</p>
+<p>Every week, answer these four questions from your data:</p>
+<ol>
+  <li>Which setup had the highest win rate this week?</li>
+  <li>Which session was most profitable?</li>
+  <li>What emotion appeared most before losing trades?</li>
+  <li>Did I follow my risk rules on every trade?</li>
+</ol>
+<p>One insight from one weekly review can be worth more than a year of random journaling.</p>
+
+<h2>How Long Before You See Results?</h2>
+<p>Most traders notice meaningful patterns after <strong>30-50 trades</strong>. At that sample size, statistical patterns start to emerge — which setups work, which sessions are profitable, which psychological states to avoid.</p>
+<p>At 100+ trades, your journal becomes a genuine edge document — a data-backed playbook of exactly what works for you, in your markets, at your times.</p>
+<blockquote>You don't need to journal perfectly. You need to journal consistently. 3 months of imperfect entries beats 2 weeks of perfect ones every time.</blockquote>
+"""
+  },
+  {
+    "slug": "tradezella-vs-edgewonk-vs-tradersync-alternatives",
+    "tag": "Comparison",
+    "title": "TradeZella vs Edgewonk vs TraderSync — And the Free Alternative Nobody Talks About",
+    "excerpt": "Comparing the top trading journal apps in 2026. Honest breakdown of features, pricing, and who each one is actually built for — plus one completely free option.",
+    "meta_desc": "TradeZella vs Edgewonk vs TraderSync comparison 2026. Features, pricing, pros and cons — plus a free trading journal alternative with AI psychology analysis.",
+    "date": "2026-06-18",
+    "read_time": 8,
+    "content": """
+<p>Choosing a trading journal app is harder than it should be. Most review sites are affiliate-driven — they rank whichever app pays the highest commission, not the best one for your actual needs. Here's an honest breakdown.</p>
+
+<h2>The Quick Summary</h2>
+<p>If you want our honest take upfront: <strong>TradeZella</strong> is the best-designed paid option for most traders. <strong>Edgewonk</strong> is solid for analytics-focused traders who don't need AI. <strong>TraderSync</strong> is good for US stock traders. And if you trade SMC/ICT or are on a prop firm challenge, <strong>TradeJournal</strong> is free and built specifically for you.</p>
+
+<h2>TradeZella Review</h2>
+<p><strong>Price:</strong> $49/month or $349/year</p>
+<p><strong>Best for:</strong> Futures and forex traders who want automated broker sync and a polished UI</p>
+<p><strong>Strengths:</strong></p>
+<ul>
+  <li>500+ broker integrations with auto-sync — trades appear without manual import</li>
+  <li>AI insights and pattern detection</li>
+  <li>Backtesting and trade replay features</li>
+  <li>Strong community and educational content</li>
+  <li>Prop firm sync for FTMO, TopStep, Apex</li>
+</ul>
+<p><strong>Weaknesses:</strong></p>
+<ul>
+  <li>Expensive — $49/month adds up fast if you're a prop trader reinvesting profits</li>
+  <li>No SMC/ICT-specific setup tags</li>
+  <li>AI analysis is generic, not tailored to your notes</li>
+  <li>Overkill for traders who just need solid journaling without the ecosystem</li>
+</ul>
+
+<h2>Edgewonk Review</h2>
+<p><strong>Price:</strong> $169/year (one-time annual)</p>
+<p><strong>Best for:</strong> Systematic traders who want deep analytics and don't need AI</p>
+<p><strong>Strengths:</strong></p>
+<ul>
+  <li>Excellent statistical analytics — edge ratio, tilt indicator, setup performance</li>
+  <li>One-time annual payment (not monthly subscription)</li>
+  <li>Works offline — desktop app</li>
+  <li>Detailed trade simulation features</li>
+</ul>
+<p><strong>Weaknesses:</strong></p>
+<ul>
+  <li>No AI psychology analysis</li>
+  <li>No SMC/ICT setup tags</li>
+  <li>UI feels dated compared to newer apps</li>
+  <li>Manual CSV import only — no broker sync</li>
+  <li>No prop firm real-time compliance dashboard</li>
+</ul>
+
+<h2>TraderSync Review</h2>
+<p><strong>Price:</strong> $29.95/month (Pro) or $49.95/month (Elite)</p>
+<p><strong>Best for:</strong> US stock and options traders</p>
+<p><strong>Strengths:</strong></p>
+<ul>
+  <li>Strong broker integrations for US brokers (TD Ameritrade, Interactive Brokers, etc.)</li>
+  <li>Options-specific analytics — P&L by expiry, strike analysis</li>
+  <li>Good mobile app</li>
+</ul>
+<p><strong>Weaknesses:</strong></p>
+<ul>
+  <li>Not built for forex or gold — pip math issues for XAUUSD</li>
+  <li>No SMC/ICT concept support</li>
+  <li>Expensive for what you get if you're not a US stock trader</li>
+  <li>Limited psychology tools</li>
+</ul>
+
+<h2>The Free Alternative: TradeJournal</h2>
+<p><strong>Price:</strong> Free, forever. No trial. No credit card.</p>
+<p><strong>Best for:</strong> SMC/ICT traders, XAUUSD traders, prop firm challenge traders</p>
+<p><strong>What it does:</strong></p>
+<ul>
+  <li>AI psychology analysis via Groq's llama-3.3-70b — reads your trade notes and detects emotional patterns</li>
+  <li>13 SMC/ICT setup tags (Order Block, FVG, BOS, CHoCH, Liquidity Sweep, and more)</li>
+  <li>Auto-tagging — write "4H FVG tap" in your notes and it tags Fair Value Gap automatically</li>
+  <li>MT5 import (HTML, CSV, XLSX)</li>
+  <li>Correct XAUUSD pip math (100 oz/lot contract size)</li>
+  <li>Real-time prop firm compliance — drawdown, daily loss, consistency %</li>
+  <li>Recovery Factor and Tilt Control metrics</li>
+  <li>Pattern carousel — up to 5 AI insights sorted by dollar damage</li>
+</ul>
+<p><strong>What it doesn't do (yet):</strong></p>
+<ul>
+  <li>Automated broker sync (you import manually from MT5)</li>
+  <li>Options-specific analytics</li>
+  <li>Mobile app (web-based, works on mobile browser)</li>
+</ul>
+
+<h2>Which One Should You Choose?</h2>
+<p>Choose <strong>TradeZella</strong> if: you have consistent income from trading and want the smoothest automated experience with broker sync.</p>
+<p>Choose <strong>Edgewonk</strong> if: you're a systematic trader who loves statistics and prefers a one-time payment over subscriptions.</p>
+<p>Choose <strong>TraderSync</strong> if: you trade US stocks and options and need US broker integrations.</p>
+<p>Choose <strong>TradeJournal</strong> if: you trade SMC/ICT, XAUUSD, or forex on prop firm challenges — and you want AI psychology analysis without paying $49/month for it.</p>
+<blockquote>The best trading journal isn't the most expensive one. It's the one that fits your instruments, your style, and your budget — and that you actually use every day.</blockquote>
+"""
+  },
+]
