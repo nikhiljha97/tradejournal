@@ -195,7 +195,12 @@ function renderBalanceChart(trades) {
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' $' + c.raw.toLocaleString() } } },
       scales: {
         x: { display: false },
-        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: C.muted, callback: v => '$' + (v/1000).toFixed(0) + 'K', font: { family: 'JetBrains Mono', size: 10 } } }
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: C.muted, callback: v => '$' + v.toFixed(0), font: { family: 'JetBrains Mono', size: 10 } },
+          min: Math.min(...data) - Math.abs(Math.min(...data) * 0.02),
+          max: Math.max(...data) + Math.abs(Math.max(...data) * 0.02),
+        }
       }
     }
   });
