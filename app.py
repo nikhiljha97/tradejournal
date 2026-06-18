@@ -3,6 +3,7 @@ TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 """
 import os, json, uuid
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
+from blog_posts import POSTS, get_post
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
@@ -281,32 +282,31 @@ def public_prices():
 
     return jsonify(prices)
 
+@app.route("/blog")
+def blog_index():
+    return render_template("blog.html", posts=POSTS, post=None)
+
+@app.route("/blog/<slug>")
+def blog_post(slug):
+    post = get_post(slug)
+    if not post:
+        return redirect(url_for("blog_index"))
+    return render_template("blog.html", post=post, posts=None)
 
 @app.route("/sitemap.xml")
 def sitemap():
     xml = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://tradejournal-n3hn.onrender.com/</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://tradejournal-n3hn.onrender.com/register</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://tradejournal-n3hn.onrender.com/login</loc>
-    <lastmod>2026-06-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/</loc><lastmod>2026-06-18</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/register</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/login</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog</loc><lastmod>2026-06-18</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/smc-trading-journal-guide</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/prop-firm-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/xauusd-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog/trading-psychology-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
-
 
 @app.route("/robots.txt")
 def robots_txt():
@@ -314,9 +314,21 @@ def robots_txt():
 Allow: /
 Allow: /register
 Allow: /login
+Allow: /blog
 Disallow: /api/
 
 Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
+
+@app.route("/blog")
+def blog_index():
+    return render_template("blog.html", posts=POSTS, post=None)
+
+@app.route("/blog/<slug>")
+def blog_post(slug):
+    post = get_post(slug)
+    if not post:
+        return redirect(url_for("blog_index"))
+    return render_template("blog.html", post=post, posts=None)
 
 @app.route("/google18b855e2f453917d.html")
 def google_verification():

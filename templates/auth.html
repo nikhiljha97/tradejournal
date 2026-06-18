@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>TradeJournal — {{ 'Sign In' if mode == 'login' else 'Create Account' }}</title>
+  <title>{% if mode == 'login' %}Sign In — TradeJournal{% else %}Create Free Account — TradeJournal{% endif %}</title>
+  <meta name="description" content="{% if mode == 'login' %}Sign in to your TradeJournal account — AI trading journal for SMC and ICT traders.{% else %}Create your free TradeJournal account. AI-powered trading journal for SMC, ICT and prop firm traders. No credit card required.{% endif %}"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://tradejournal-n3hn.onrender.com/{% if mode == 'login' %}login{% else %}register{% endif %}"/>
+  <meta property="og:title" content="{% if mode == 'login' %}Sign In — TradeJournal{% else %}Create Free Account — TradeJournal{% endif %}"/>
+  <meta property="og:description" content="Free AI trading journal for SMC and ICT traders. Track trades, analyse psychology, beat prop firm rules."/>
+  <meta property="og:url" content="https://tradejournal-n3hn.onrender.com/{% if mode == 'login' %}login{% else %}register{% endif %}"/>
+  <meta property="og:type" content="website"/>
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="TradeJournal — Free AI Trading Journal for SMC Traders"/>
+  <meta name="twitter:description" content="Track trades, read your psychology, beat prop firm rules. Free forever."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <style>

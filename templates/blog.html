@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{% if post %}{{ post.title }} — TradeJournal Blog{% else %}Trading Journal Blog — SMC & ICT Tips, Prop Firm Guides{% endif %}</title>
+  <meta name="description" content="{% if post %}{{ post.meta_desc }}{% else %}Free guides for SMC and ICT traders. Learn how to journal trades, track psychology, beat prop firm rules, and improve your XAUUSD trading.{% endif %}"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://tradejournal-n3hn.onrender.com{% if post %}/blog/{{ post.slug }}{% else %}/blog{% endif %}"/>
+  <meta property="og:title" content="{% if post %}{{ post.title }}{% else %}TradeJournal Blog{% endif %}"/>
+  <meta property="og:description" content="{% if post %}{{ post.meta_desc }}{% else %}Free guides for SMC and ICT traders.{% endif %}"/>
+  <meta property="og:type" content="{% if post %}article{% else %}website{% endif %}"/>
+  <meta property="og:url" content="https://tradejournal-n3hn.onrender.com{% if post %}/blog/{{ post.slug }}{% else %}/blog{% endif %}"/>
+  {% if post %}<meta property="article:published_time" content="{{ post.date }}"/>{% endif %}
+  <meta name="twitter:card" content="summary"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#07090d;--bg2:#0c1018;--panel:#111820;--border:#1c2b3a;--text:#d4dde8;--muted:#5a7080;--faint:#1e2d3d;--green:#00e5a0;--green2:#00c88a;--gdim:#003d2b}
+    body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:64px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+    .nav-logo{font-size:17px;font-weight:900}.nav-logo span{color:var(--green)}
+    .nav-links{display:flex;gap:24px;align-items:center}
+    .nav-links a{font-size:13px;color:var(--muted);font-weight:500;transition:color .2s}.nav-links a:hover{color:var(--text)}
+    .nav-cta{background:var(--green);color:#000;font-weight:800;font-size:13px;padding:8px 20px;border-radius:8px;transition:all .2s}
+    .nav-cta:hover{background:var(--green2)}
+
+    /* BLOG INDEX */
+    .blog-hero{padding:80px 6% 60px;border-bottom:1px solid var(--border);background:var(--bg2)}
+    .blog-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:block}
+    .blog-hero h1{font-size:clamp(36px,5vw,64px);font-weight:900;letter-spacing:-.03em;line-height:1;margin-bottom:16px}
+    .blog-hero h1 em{font-style:italic;color:var(--green);font-weight:300}
+    .blog-hero p{font-size:16px;color:var(--muted);max-width:520px;line-height:1.7}
+
+    .posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:24px;max-width:1100px;margin:60px auto;padding:0 6%}
+    .post-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px;transition:all .3s;display:flex;flex-direction:column}
+    .post-card:hover{border-color:var(--green);transform:translateY(-3px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+    .post-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);background:var(--gdim);padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:14px}
+    .post-title{font-size:18px;font-weight:800;line-height:1.3;margin-bottom:10px;letter-spacing:-.01em}
+    .post-excerpt{font-size:13px;color:var(--muted);line-height:1.7;flex:1;margin-bottom:20px}
+    .post-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--faint)}
+    .post-read{font-size:13px;font-weight:600;color:var(--green)}
+    .post-read:hover{color:var(--green2)}
+
+    /* BLOG POST */
+    .post-wrap{max-width:720px;margin:0 auto;padding:60px 6% 100px}
+    .post-back{font-size:13px;color:var(--muted);margin-bottom:40px;display:inline-flex;align-items:center;gap:6px;transition:color .2s}
+    .post-back:hover{color:var(--green)}
+    .post-header{margin-bottom:48px}
+    .post-header .post-tag{margin-bottom:16px}
+    .post-header h1{font-size:clamp(28px,4vw,48px);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin-bottom:16px}
+    .post-header .post-date{font-size:12px;color:var(--muted)}
+    .post-body{font-size:16px;line-height:1.85;color:#b0bec8}
+    .post-body h2{font-size:24px;font-weight:800;color:var(--text);margin:48px 0 16px;letter-spacing:-.02em}
+    .post-body h3{font-size:18px;font-weight:700;color:var(--text);margin:32px 0 12px}
+    .post-body p{margin-bottom:20px}
+    .post-body ul,.post-body ol{padding-left:24px;margin-bottom:20px}
+    .post-body li{margin-bottom:8px}
+    .post-body strong{color:var(--text);font-weight:700}
+    .post-body em{color:var(--green);font-style:normal;font-weight:600}
+    .post-body code{font-family:"JetBrains Mono",monospace;font-size:13px;background:var(--panel);border:1px solid var(--border);padding:2px 8px;border-radius:4px;color:var(--green)}
+    .post-body blockquote{border-left:3px solid var(--green);padding:14px 20px;background:var(--panel);border-radius:0 8px 8px 0;margin:24px 0;font-style:italic;color:var(--muted)}
+    .post-cta{margin-top:60px;padding:32px;background:var(--panel);border:1px solid var(--border);border-radius:14px;text-align:center}
+    .post-cta h3{font-size:22px;font-weight:800;margin-bottom:8px}
+    .post-cta p{font-size:14px;color:var(--muted);margin-bottom:20px}
+    .post-cta a{background:var(--green);color:#000;font-weight:800;font-size:15px;padding:12px 28px;border-radius:10px;display:inline-block;transition:all .2s}
+    .post-cta a:hover{background:var(--green2);transform:translateY(-2px)}
+
+    footer{border-top:1px solid var(--border);padding:32px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .fl{font-size:14px;font-weight:900}.fl span{color:var(--green)}
+    .fc{font-size:11px;color:var(--faint)}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">Trade<span>·</span>Journal</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/blog">Blog</a>
+    <a href="/login">Sign In</a>
+    <a href="/register" class="nav-cta">Start Free →</a>
+  </div>
+</nav>
+
+{% if post %}
+<!-- SINGLE POST -->
+<div class="post-wrap">
+  <a href="/blog" class="post-back">← Back to Blog</a>
+  <div class="post-header">
+    <span class="post-tag">{{ post.tag }}</span>
+    <h1>{{ post.title }}</h1>
+    <div class="post-date">{{ post.date }} · {{ post.read_time }} min read</div>
+  </div>
+  <div class="post-body">{{ post.content | safe }}</div>
+  <div class="post-cta">
+    <h3>Ready to journal smarter?</h3>
+    <p>TradeJournal is free forever. No credit card. Import your MT5 history in minutes.</p>
+    <a href="/register">Create Free Account →</a>
+  </div>
+</div>
+
+{% else %}
+<!-- BLOG INDEX -->
+<div class="blog-hero">
+  <span class="blog-label">SMC · ICT · Prop Firm Guides</span>
+  <h1>Trade smarter.<br><em>Journal better.</em></h1>
+  <p>Free guides for SMC and ICT traders on journaling, psychology, prop firms, and building a consistent edge.</p>
+</div>
+
+<div class="posts-grid">
+  {% for post in posts %}
+  <a href="/blog/{{ post.slug }}" class="post-card">
+    <span class="post-tag">{{ post.tag }}</span>
+    <div class="post-title">{{ post.title }}</div>
+    <div class="post-excerpt">{{ post.excerpt }}</div>
+    <div class="post-meta">
+      <span>{{ post.date }} · {{ post.read_time }} min read</span>
+      <span class="post-read">Read →</span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+<footer>
+  <div class="fl">Trade<span>·</span>Journal</div>
+  <div class="fc">© 2026 TradeJournal · Free AI trading journal for SMC & ICT traders</div>
+</footer>
+
+</body>
+</html>
