@@ -319,17 +319,6 @@ Disallow: /api/
 
 Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
 
-@app.route("/blog")
-def blog_index():
-    return render_template("blog.html", posts=POSTS, post=None)
-
-@app.route("/blog/<slug>")
-def blog_post(slug):
-    post = get_post(slug)
-    if not post:
-        return redirect(url_for("blog_index"))
-    return render_template("blog.html", post=post, posts=None)
-
 @app.route("/google18b855e2f453917d.html")
 def google_verification():
     return "google-site-verification: google18b855e2f453917d.html"
