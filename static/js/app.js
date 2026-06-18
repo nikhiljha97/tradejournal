@@ -1011,6 +1011,7 @@ async function updateTrade(id) {
     target_pips:riskModeEl==='pip'?$('f_target_pips').value:null,
     dollar_risk:riskModeEl==='dollar'?$('f_dollar_risk').value:null,
     setups:[...selectedTags], notes:$('f_notes').value, emotions:[],
+    win_loss: document.querySelector('input[name="win_loss"]:checked')?.value || 'auto',
   };
   $('saveBtn').disabled=true; $('saveBtn').textContent='Updating…';
   try {
