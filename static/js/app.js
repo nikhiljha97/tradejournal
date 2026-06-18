@@ -56,11 +56,13 @@ async function pollEngineStatus() {
 
 /* ── Master refresh ──────────────────────────────────────────── */
 async function refresh() {
-  const [tradesRes, metricsRes] = await Promise.all([
-    fetch('/api/trades'), fetch('/api/metrics')
+  const [tradesRes, metricsRes, settingsRes] = await Promise.all([
+    fetch('/api/trades'), fetch('/api/metrics'), fetch('/api/settings')
   ]);
   allTrades = await tradesRes.json();
   const m = await metricsRes.json();
+  const sett = await settingsRes.json();
+  window._startingBalance = parseFloat(sett.starting_balance || 10000);
   lastMetrics = m;
 
   renderProp(m.prop);
@@ -160,8 +162,10 @@ function renderBalanceChart(trades) {
   if (!trades || trades.length < 2) return;
   // Build running balance from starting point
   const sorted = [...trades].sort((a,b) => new Date(a.trade_date+' '+(a.entry_time||'00:00')) - new Date(b.trade_date+' '+(b.entry_time||'00:00')));
-  let bal = 10000; // base starting point
+  const startBal = parseFloat(window._startingBalance || 10000);
+  let bal = startBal;
   const labels = [], data = [];
+  labels.push('Start'); data.push(startBal);
   sorted.forEach(t => {
     if (t.pnl != null) {
       bal += (t.pnl || 0);
