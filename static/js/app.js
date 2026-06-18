@@ -167,8 +167,19 @@ function renderBalanceChart(trades) {
   const labels = [], data = [];
   labels.push('Start'); data.push(startBal);
   sorted.forEach(t => {
-    if (t.pnl != null) {
-      bal += (t.pnl || 0);
+    // Try pnl first, then realized_pnl, then calculate from prices
+    const pnl = t.pnl ?? t.realized_pnl ?? null;
+    if (pnl != null && pnl !== 0) {
+      bal += pnl;
+      labels.push(t.trade_date);
+      data.push(+bal.toFixed(2));
+    } else if (t.exit_price && t.entry_price && t.lots) {
+      // Calculate P&L from prices
+      const CONTRACT = {XAUUSD:100,XAGUSD:100,EURUSD:100000,GBPUSD:100000,USDJPY:100000,BTCUSD:1,ETHUSD:1,US30:1,NAS100:1,US500:1};
+      const cs = CONTRACT[t.instrument] || 100000;
+      const dir = t.direction === 'Long' ? 1 : -1;
+      const calcPnl = (t.exit_price - t.entry_price) * dir * cs * t.lots;
+      bal += calcPnl;
       labels.push(t.trade_date);
       data.push(+bal.toFixed(2));
     }
