@@ -30,6 +30,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = ""
 login_manager.login_message = ""
+login_manager.login_message = ""
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -248,6 +249,38 @@ def login():
         return jsonify({"ok":True, "username": user.username})
     return render_template("auth.html", mode="login")
 
+@app.route("/api/prices")
+def public_prices():
+    """Public price feed for landing page ticker — uses GoldAPI + exchange rate fallbacks."""
+    import urllib.request, json as _json
+    prices = {}
+    try:
+        # XAUUSD via GoldAPI
+        req = urllib.request.Request(
+            "https://www.goldapi.io/api/XAU/USD",
+            headers={"x-access-token": "goldapi-61098d6b50e88976c2ce53472d03098e-io", "Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            d = _json.loads(resp.read())
+            p = d.get("price", 0)
+            prev = d.get("prev_close_price", p)
+            chg = ((p - prev) / prev * 100) if prev else 0
+            prices["XAUUSD"] = {"price": f"{p:,.2f}", "change_pct": f"{chg:+.2f}%"}
+    except Exception:
+        prices["XAUUSD"] = {"price": "—", "change_pct": ""}
+
+    # Static fallbacks for other pairs (could expand with more APIs later)
+    static = {
+        "EURUSD": "1.0821", "GBPUSD": "1.2734", "USDJPY": "157.83",
+        "BTCUSD": "67,420", "NAS100": "19,847", "US30": "39,215",
+        "XAGUSD": "29.41", "ETHUSD": "3,521", "DXY": "104.21",
+    }
+    for sym, val in static.items():
+        if sym not in prices:
+            prices[sym] = {"price": val, "change_pct": ""}
+
+    return jsonify(prices)
+
 @app.route("/google18b855e2f453917d.html")
 def google_verification():
     return "google-site-verification: google18b855e2f453917d.html"
@@ -256,7 +289,7 @@ def google_verification():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("login"))
+    return redirect(url_for("home"))
 
 @app.route("/api/me")
 @login_required

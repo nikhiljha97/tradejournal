@@ -67,6 +67,9 @@ async function refresh() {
   renderKPIs(m.kpi, m.prop);
   renderEquity(m.kpi);
   renderWL(m.kpi);
+  renderBalanceChart(allTrades);
+  renderRecoveryFactor(m);
+  renderTiltControl(allTrades);
   renderRRRGauge(m.kpi.rrr);
   renderOrderTypes(allTrades);
   renderRadar(m.kpi);
@@ -150,6 +153,121 @@ function renderEquity(k) {
         fill:true, backgroundColor:'rgba(0,229,160,0.06)', pointRadius:0, tension:0.2}] },
     options:baseOpts({tooltip:{callbacks:{label:c=>fmt$(c.parsed.y)}}}),
   });
+}
+
+function renderBalanceChart(trades) {
+  charts.balance?.destroy();
+  if (!trades || trades.length < 2) return;
+  // Build running balance from starting point
+  const sorted = [...trades].sort((a,b) => new Date(a.trade_date+' '+(a.entry_time||'00:00')) - new Date(b.trade_date+' '+(b.entry_time||'00:00')));
+  let bal = 10000; // base starting point
+  const labels = [], data = [];
+  sorted.forEach(t => {
+    if (t.pnl != null) {
+      bal += (t.pnl || 0);
+      labels.push(t.trade_date);
+      data.push(+bal.toFixed(2));
+    }
+  });
+  if (!$('balanceChart')) return;
+  charts.balance = new Chart($('balanceChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: C.green,
+        backgroundColor: (ctx) => {
+          const g = ctx.chart.ctx.createLinearGradient(0,0,0,200);
+          g.addColorStop(0, 'rgba(0,229,160,0.18)');
+          g.addColorStop(1, 'rgba(0,229,160,0.01)');
+          return g;
+        },
+        borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' $' + c.raw.toLocaleString() } } },
+      scales: {
+        x: { display: false },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: C.muted, callback: v => '$' + (v/1000).toFixed(0) + 'K', font: { family: 'JetBrains Mono', size: 10 } } }
+      }
+    }
+  });
+}
+
+function renderRecoveryFactor(m) {
+  const k = m.kpi || {};
+  const maxDD = Math.abs(k.max_drawdown_usd || 0);
+  const pnl = k.net_pnl || 0;
+  const rf = maxDD > 0 ? (pnl / maxDD) : 0;
+  const rfAbs = Math.abs(rf);
+  const state = rfAbs >= 2 ? 'Excellent' : rfAbs >= 1 ? 'Good' : rfAbs >= 0.5 ? 'Fair' : 'Poor';
+  const stateColor = rfAbs >= 2 ? 'var(--green)' : rfAbs >= 1 ? 'var(--green)' : rfAbs >= 0.5 ? 'var(--amber)' : 'var(--red)';
+  const breakeven = pnl < 0 ? Math.abs(pnl) : 0;
+
+  if($('rf_maxdd')) $('rf_maxdd').textContent = '$' + fmt(maxDD);
+  if($('rf_maxdd_pct')) $('rf_maxdd_pct').textContent = k.max_drawdown_pct ? (fmt(k.max_drawdown_pct,2) + '% of peak') : '';
+  if($('rf_breakeven')) $('rf_breakeven').textContent = breakeven > 0 ? '$' + fmt(breakeven) : pnl >= 0 ? '+$' + fmt(pnl) : '—';
+  if($('rf_be_sub')) $('rf_be_sub').textContent = pnl >= 0 ? 'Already profitable' : 'needed to break even';
+  if($('rf_val')) { $('rf_val').textContent = fmt(rfAbs, 2); $('rf_val').style.color = stateColor; }
+  if($('rf_state')) { $('rf_state').textContent = state; $('rf_state').style.color = stateColor; }
+
+  // Layman sentence
+  const rfSentence = document.getElementById('rf_sentence');
+  if (rfSentence) {
+    let msg = '';
+    if (maxDD === 0) {
+      msg = "No drawdown recorded yet — log more trades to see your recovery strength.";
+    } else if (pnl < 0) {
+      msg = `You're currently down $${fmt(Math.abs(pnl))}. You need to make back $${fmt(breakeven)} just to break even from your worst hole.`;
+    } else if (rfAbs >= 2) {
+      msg = `You've earned $${fmt(pnl)} while your worst dip was only $${fmt(maxDD)} — you recovered ${fmt(rfAbs,1)}x your worst loss. That's excellent.`;
+    } else if (rfAbs >= 1) {
+      msg = `You've made back more than your worst drawdown. Every $1 you dropped, you've earned $${fmt(rfAbs,2)} back.`;
+    } else if (rfAbs >= 0.5) {
+      msg = `You've recovered about half of your worst drawdown in profits. Keep going — you're getting there.`;
+    } else {
+      msg = `Your profits are small compared to your worst loss. Focus on protecting capital before scaling up.`;
+    }
+    rfSentence.textContent = msg;
+  }
+}
+
+function renderTiltControl(trades) {
+  if (!$('tilt_multiplier') || !trades || trades.length < 5) return;
+  const sorted = [...trades].filter(t => t.dollar_risk > 0)
+    .sort((a,b) => new Date(a.trade_date) - new Date(b.trade_date));
+  if (sorted.length < 5) { $('tilt_multiplier').textContent = 'N/A'; return; }
+  const baseline = sorted.slice(0, Math.max(1, sorted.length - 10));
+  const recent = sorted.slice(-10);
+  const avgBase = baseline.reduce((s,t) => s + (t.dollar_risk||0), 0) / baseline.length;
+  const avgRecent = recent.reduce((s,t) => s + (t.dollar_risk||0), 0) / recent.length;
+  const mult = avgBase > 0 ? avgRecent / avgBase : 1;
+  const color = mult > 1.3 ? 'var(--red)' : mult > 1.1 ? 'var(--amber)' : 'var(--green)';
+  $('tilt_multiplier').textContent = fmt(mult, 2) + 'x';
+  $('tilt_multiplier').style.color = color;
+  if($('tilt_recent')) $('tilt_recent').textContent = '$' + fmt(avgRecent);
+  if($('tilt_baseline')) $('tilt_baseline').textContent = '$' + fmt(avgBase);
+
+  // Layman sentence
+  const tiltSentence = document.getElementById('tilt_sentence');
+  if (tiltSentence) {
+    let msg = '';
+    if (avgBase === 0) {
+      msg = "Not enough baseline data yet. Log more trades to detect tilt patterns.";
+    } else if (mult > 1.3) {
+      msg = `⚠️ You're risking $${fmt(avgRecent)} per trade lately vs your usual $${fmt(avgBase)}. You're betting ${fmt(mult,1)}x more than normal — classic tilt. Step back.`;
+    } else if (mult > 1.1) {
+      msg = `Your recent risk ($${fmt(avgRecent)}/trade) is slightly above your baseline ($${fmt(avgBase)}). Watch this — it could be early tilt creeping in.`;
+    } else if (mult < 0.7) {
+      msg = `You're risking less than usual ($${fmt(avgRecent)} vs $${fmt(avgBase)} normally). Could be caution after losses — that's okay, just make sure it's deliberate.`;
+    } else {
+      msg = `You're risking $${fmt(avgRecent)} per trade, right in line with your usual $${fmt(avgBase)}. Risk is consistent — no tilt detected.`;
+    }
+    tiltSentence.textContent = msg;
+  }
 }
 
 function renderWL(k) {

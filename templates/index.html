@@ -53,17 +53,51 @@
   <div class="tab-panel active" id="tab-overview">
     <div class="kpi-row" id="kpiRow"></div>
 
+    <!-- Row 1: Equity + Balance -->
     <div class="charts-grid-2">
       <div class="panel">
-        <div class="panel-hdr">Daily Net Cumulative P&L</div>
+        <div class="panel-hdr">Daily Net Cumulative P&amp;L</div>
         <div class="chart-wrap h260"><canvas id="equityChart"></canvas></div>
       </div>
       <div class="panel">
-        <div class="panel-hdr">W&L Statistic <span class="panel-sub" id="wlSub"></span></div>
+        <div class="panel-hdr">Account Balance</div>
+        <div class="chart-wrap h260"><canvas id="balanceChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Row 2: W&L (smaller) + Recovery Factor + Tilt Control -->
+    <div class="charts-grid-3">
+      <div class="panel">
+        <div class="panel-hdr">W&amp;L Statistic <span class="panel-sub" id="wlSub"></span></div>
         <div class="donut-row">
-          <div class="chart-wrap h200 w200"><canvas id="wlChart"></canvas></div>
+          <div class="chart-wrap h160 w160"><canvas id="wlChart"></canvas></div>
           <div class="donut-legend" id="wlLegend"></div>
         </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr" style="display:flex;align-items:center;gap:6px">
+          <span>🔄</span> Recovery Factor
+          <span class="info-btn" data-tooltip="Recovery Factor = Net P&L ÷ Max Drawdown. Shows how efficiently you recover from losses. >1 is good, >2 is excellent.">ⓘ</span>
+        </div>
+        <div class="metric-grid-2" id="recoveryGrid">
+          <div class="metric-tile"><div class="mt-label">Max Drawdown</div><div class="mt-val" id="rf_maxdd">—</div><div class="mt-sub" id="rf_maxdd_pct"></div></div>
+          <div class="metric-tile"><div class="mt-label">Breakeven Target</div><div class="mt-val" id="rf_breakeven">—</div><div class="mt-sub" id="rf_be_sub"></div></div>
+          <div class="metric-tile"><div class="mt-label">Recovery Factor</div><div class="mt-val" id="rf_val" style="color:var(--amber)">—</div></div>
+          <div class="metric-tile"><div class="mt-label">State</div><div class="mt-val" id="rf_state" style="color:var(--amber)">—</div></div>
+        </div>
+        <div id="rf_sentence" style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6;padding:10px 12px;background:var(--panel2);border-radius:6px;border-left:3px solid var(--border2)"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr" style="display:flex;align-items:center;gap:6px">
+          <span>⚠️</span> Tilt Control
+          <span class="info-btn" data-tooltip="Tilt Control tracks if you are increasing risk after losses. A risk multiplier >1.2x on the last 10 trades vs baseline suggests tilt. Stay at 1.0x.">ⓘ</span>
+        </div>
+        <div class="metric-grid-2" id="tiltGrid">
+          <div class="metric-tile" style="grid-column:span 2"><div class="mt-label">Risk Multiplier (Last 10 Trades)</div><div class="mt-val" id="tilt_multiplier" style="font-size:32px">—</div></div>
+          <div class="metric-tile"><div class="mt-label">Avg Risk Recent</div><div class="mt-val" id="tilt_recent">—</div></div>
+          <div class="metric-tile"><div class="mt-label">Avg Risk Baseline</div><div class="mt-val" id="tilt_baseline">—</div></div>
+        </div>
+        <div id="tilt_sentence" style="margin-top:12px;font-size:12px;color:var(--muted);line-height:1.6;padding:10px 12px;background:var(--panel2);border-radius:6px;border-left:3px solid var(--border2)"></div>
       </div>
     </div>
 

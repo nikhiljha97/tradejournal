@@ -74,7 +74,7 @@
     .tick-c.dn{color:var(--red)}
 
     /* SOCIAL PROOF NUMBERS */
-    .proof{padding:70px 6%;border-bottom:1px solid var(--border)}
+    .proof{padding:48px 6%;border-bottom:1px solid var(--border)}
     .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:900px;margin:0 auto;border:1px solid var(--border);border-radius:16px;overflow:hidden}
     .proof-item{background:var(--panel);padding:32px 24px;text-align:center;border-right:1px solid var(--border)}
     .proof-item:last-child{border-right:none}
@@ -82,7 +82,7 @@
     .proof-label{font-size:12px;color:var(--muted);margin-top:6px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
 
     /* SECTION SHARED */
-    .s{padding:120px 6%}
+    .s{padding:80px 6%}
     .s-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:block}
     .s-h{font-size:clamp(36px,5vw,64px);font-weight:900;line-height:1.0;letter-spacing:-.03em;margin-bottom:16px}
     .s-h em{font-style:italic;color:var(--green);font-weight:300}
@@ -91,11 +91,10 @@
     .center .s-p{margin:0 auto 60px}
 
     /* BENTO FEATURES */
-    .bento{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:16px;max-width:1100px;margin:0 auto}
+    .bento{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;max-width:1100px;margin:0 auto}
     .bento-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden;transition:all .3s}
     .bento-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 20px 50px rgba(0,0,0,.5)}
-    .bento-card.wide{grid-column:span 2}
-    .bento-card.tall{grid-row:span 2}
+    @media(min-width:900px){.bento-card.wide{grid-column:span 2}}
     .bento-card::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,rgba(0,229,160,.07),transparent 60%);opacity:0;transition:opacity .3s}
     .bento-card:hover::after{opacity:1}
     .bento-icon{font-size:28px;margin-bottom:14px;display:block}
@@ -195,7 +194,7 @@
     /* BIG CTA */
     .cta-s{padding:140px 6%;text-align:center;border-top:1px solid var(--border);position:relative;overflow:hidden}
     .cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(0,229,160,.07),transparent 70%);pointer-events:none}
-    .cta-h{font-size:clamp(48px,8vw,100px);font-weight:900;letter-spacing:-.04em;line-height:.95;margin-bottom:24px}
+    .cta-h{font-size:clamp(48px,8vw,100px);font-weight:900;letter-spacing:-.04em;line-height:.95;margin-bottom:24px;color:var(--text)}
     .cta-h em{font-style:italic;color:var(--green);font-weight:300}
     .cta-sub{font-size:16px;color:var(--muted);margin-bottom:40px;font-family:"JetBrains Mono",monospace}
 
@@ -214,9 +213,9 @@
     .scroll-arrow{width:20px;height:20px;border-right:2px solid var(--green);border-bottom:2px solid var(--green);transform:rotate(45deg)}
 
     /* FADE IN UTILITY */
-    .fade-up{opacity:0;transform:translateY(30px)}
-    .fade-left{opacity:0;transform:translateX(-40px)}
-    .fade-right{opacity:0;transform:translateX(40px)}
+    .fade-up{opacity:1}
+    .fade-left{opacity:1}
+    .fade-right{opacity:1}
 
     /* PROP FIRM STRIP */
     .prop-strip{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
@@ -453,19 +452,33 @@ gsap.from('.hero-actions', {opacity:0, y:20, duration:.8, ease:'power2.out', del
 gsap.from('.hero-note', {opacity:0, duration:.6, delay:.9});
 gsap.from('.scroll-ind', {opacity:0, duration:.6, delay:1.2});
 
-// TICKER
-const tickers = [
-  {s:'XAUUSD',v:'2,347.50',c:'+0.42%',up:true},{s:'EURUSD',v:'1.0821',c:'-0.12%',up:false},
-  {s:'GBPUSD',v:'1.2734',c:'+0.18%',up:true},{s:'USDJPY',v:'157.83',c:'+0.31%',up:true},
-  {s:'BTCUSD',v:'67,420',c:'+1.24%',up:true},{s:'NAS100',v:'19,847',c:'-0.08%',up:false},
-  {s:'US30',v:'39,215',c:'+0.22%',up:true},{s:'XAGUSD',v:'29.41',c:'+0.55%',up:true},
-  {s:'ETHUSD',v:'3,521',c:'+0.89%',up:true},{s:'DXY',v:'104.21',c:'-0.15%',up:false},
-  {s:'AUDUSD',v:'0.6543',c:'+0.08%',up:true},{s:'USDCAD',v:'1.3621',c:'-0.11%',up:false},
-];
-const tickerEl = document.getElementById('tickerInner');
-tickerEl.innerHTML = [...tickers,...tickers].map(t=>
-  `<div class="tick"><span class="tick-s">${t.s}</span><span class="tick-v">${t.v}</span><span class="tick-c ${t.up?'up':'dn'}">${t.c}</span></div>`
-).join('');
+// TICKER — live prices via /api/ticker (same endpoint as dashboard)
+async function loadTicker() {
+  const tickerEl = document.getElementById('tickerInner');
+  const fallback = [
+    {s:'XAUUSD',v:'—',c:'',up:true},{s:'EURUSD',v:'—',c:'',up:true},
+    {s:'GBPUSD',v:'—',c:'',up:true},{s:'USDJPY',v:'—',c:'',up:true},
+    {s:'BTCUSD',v:'—',c:'',up:true},{s:'NAS100',v:'—',c:'',up:true},
+    {s:'US30',v:'—',c:'',up:true},{s:'XAGUSD',v:'—',c:'',up:true},
+  ];
+  const renderTicker = (items) => {
+    tickerEl.innerHTML = [...items,...items].map(t=>
+      `<div class="tick"><span class="tick-s">${t.s}</span><span class="tick-v">${t.v}</span>${t.c?`<span class="tick-c ${t.up?'up':'dn'}">${t.c}</span>`:''}</div>`
+    ).join('');
+  };
+  renderTicker(fallback);
+  try {
+    const r = await fetch('/api/prices');
+    if (!r.ok) return;
+    const d = await r.json();
+    const items = Object.entries(d).map(([s,info]) => ({
+      s, v: info.price, c: info.change_pct, up: parseFloat(info.change_pct) >= 0
+    }));
+    if (items.length) renderTicker(items);
+  } catch(e) { /* keep fallback */ }
+}
+loadTicker();
+setInterval(loadTicker, 30000);
 
 // SETUP TAGS MARQUEE
 const tags = ['Order Block','Fair Value Gap','BOS','CHoCH','Liquidity Sweep','Breaker Block','Inducement','OTE','Imbalance','Premium/Discount','Equal Highs/Lows','Turtle Soup','Session Open','NY Killzone','London Killzone','Mitigation Block','4H OB','15min FVG','Weekly Sweep','Daily BOS'];
@@ -493,12 +506,27 @@ const proofObs = new IntersectionObserver(entries => {
 }, {threshold: 0.3});
 proofObs.observe(document.querySelector('.proof'));
 
-// FADE-UP SCROLL REVEAL
-document.querySelectorAll('.fade-up,.fade-left,.fade-right').forEach(el => {
-  gsap.to(el, {
-    scrollTrigger: {trigger: el, start:'top 85%'},
-    opacity:1, x:0, y:0, duration:.8, ease:'power2.out'
-  });
+// FADE-UP SCROLL REVEAL — use fromTo so elements are always visible even if GSAP fails
+document.querySelectorAll('.fade-up').forEach(el => {
+  gsap.fromTo(el,
+    {opacity:0, y:40},
+    {opacity:1, y:0, duration:.8, ease:'power2.out',
+     scrollTrigger:{trigger:el, start:'top 88%', once:true}}
+  );
+});
+document.querySelectorAll('.fade-left').forEach(el => {
+  gsap.fromTo(el,
+    {opacity:0, x:-40},
+    {opacity:1, x:0, duration:.8, ease:'power2.out',
+     scrollTrigger:{trigger:el, start:'top 88%', once:true}}
+  );
+});
+document.querySelectorAll('.fade-right').forEach(el => {
+  gsap.fromTo(el,
+    {opacity:0, x:40},
+    {opacity:1, x:0, duration:.8, ease:'power2.out',
+     scrollTrigger:{trigger:el, start:'top 88%', once:true}}
+  );
 });
 
 // TERMINAL TYPEWRITER
@@ -689,10 +717,11 @@ createApp({
 }).mount('#faqWrap');
 
 // CTA section fade
-gsap.from('.cta-h', {
-  scrollTrigger:{trigger:'.cta-s',start:'top 80%'},
-  opacity:0, y:60, duration:1, ease:'power3.out'
-});
+gsap.fromTo('.cta-h',
+  {opacity:0, y:60},
+  {opacity:1, y:0, duration:1, ease:'power3.out',
+   scrollTrigger:{trigger:'.cta-s', start:'top 80%', once:true}}
+);
 </script>
 {% endraw %}
 </body>

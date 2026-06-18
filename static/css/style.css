@@ -664,3 +664,37 @@ tbody tr:hover { background: var(--panel2); }
 .pag-num:hover  { border-color: var(--green-dim); color: var(--text); }
 .pag-num.active { background: var(--green-dim); border-color: var(--green); color: var(--green); font-weight: 700; }
 .pag-info   { text-align: center; font-size: 11px; color: var(--faint); }
+
+/* ── Recovery Factor / Tilt Control tiles ─────────────────── */
+.metric-grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;
+}
+.metric-tile {
+  background: var(--panel2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px;
+}
+.mt-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.mt-val { font-size: 20px; font-weight: 700; font-family: "JetBrains Mono", monospace; color: var(--text); }
+.mt-sub { font-size: 11px; color: var(--faint); margin-top: 2px; }
+
+/* ── Info tooltip button ──────────────────────────────────── */
+.info-btn {
+  font-size: 12px; color: var(--muted); cursor: help;
+  position: relative; display: inline-flex; align-items: center;
+  transition: color .2s;
+}
+.info-btn:hover { color: var(--green); }
+.info-btn::after {
+  content: attr(data-tooltip);
+  position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+  background: var(--panel2); border: 1px solid var(--border2); color: var(--text);
+  font-size: 12px; line-height: 1.6; padding: 10px 14px; border-radius: 8px;
+  width: 260px; white-space: normal; pointer-events: none;
+  opacity: 0; transition: opacity .2s; z-index: 100;
+  font-weight: 400; font-family: "Inter", sans-serif;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+}
+.info-btn:hover::after { opacity: 1; }
+
+/* ── h160 chart size ─────────────────────────────────────── */
+.h160 { height: 160px !important; }
