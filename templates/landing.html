@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>TradeJournal — AI Trading Journal for SMC & ICT Traders</title>
   <meta name="description" content="The AI trading journal built for SMC and ICT traders. Automatic psychology analysis, prop firm tracking, XAUUSD support. Free forever."/>
@@ -473,13 +474,13 @@ window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
 });
 
-// HERO entrance
-gsap.from('#heroH1', {opacity:0, y:60, duration:1, ease:'power3.out', delay:.2});
-gsap.from('.hero-label', {opacity:0, y:20, duration:.8, ease:'power2.out', delay:.1});
-gsap.from('.hero-sub', {opacity:0, y:30, duration:.8, ease:'power2.out', delay:.5});
-gsap.from('.hero-actions', {opacity:0, y:20, duration:.8, ease:'power2.out', delay:.7});
-gsap.from('.hero-note', {opacity:0, duration:.6, delay:.9});
-gsap.from('.scroll-ind', {opacity:0, duration:.6, delay:1.2});
+// HERO entrance — use fromTo so content is never invisible to crawlers
+gsap.fromTo('#heroH1', {opacity:0, y:60}, {opacity:1, y:0, duration:1, ease:'power3.out', delay:.2});
+gsap.fromTo('.hero-label', {opacity:0, y:20}, {opacity:1, y:0, duration:.8, ease:'power2.out', delay:.1});
+gsap.fromTo('.hero-sub', {opacity:0, y:30}, {opacity:1, y:0, duration:.8, ease:'power2.out', delay:.5});
+gsap.fromTo('.hero-actions', {opacity:0, y:20}, {opacity:1, y:0, duration:.8, ease:'power2.out', delay:.7});
+gsap.fromTo('.hero-note', {opacity:0}, {opacity:1, duration:.6, delay:.9});
+gsap.fromTo('.scroll-ind', {opacity:0}, {opacity:1, duration:.6, delay:1.2});
 
 // TICKER — live prices via /api/ticker (same endpoint as dashboard)
 async function loadTicker() {

@@ -319,6 +319,7 @@ Allow: /
 Allow: /register
 Allow: /login
 Allow: /blog
+Allow: /api/prices
 Disallow: /api/
 
 Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
