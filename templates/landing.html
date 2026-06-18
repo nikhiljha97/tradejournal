@@ -3,431 +3,250 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>TradeJournal — AI-Powered Trading Journal for SMC & ICT Traders</title>
-  <meta name="description" content="The only trading journal built for SMC and ICT traders. AI psychology analysis, prop firm tracking, XAUUSD & forex support. Free forever. No spreadsheets."/>
-  <meta name="keywords" content="SMC trading journal, ICT trading journal, AI trading journal, prop firm journal, XAUUSD journal, forex trading journal, free trading journal, trading psychology, order block journal"/>
-  <meta name="author" content="TradeJournal"/>
+  <title>TradeJournal — AI Trading Journal for SMC & ICT Traders</title>
+  <meta name="description" content="The AI trading journal built for SMC and ICT traders. Automatic psychology analysis, prop firm tracking, XAUUSD support. Free forever."/>
+  <meta name="keywords" content="SMC trading journal, ICT trading journal, AI trading journal, prop firm journal, XAUUSD journal, forex trading journal, free trading journal, order block journal, fair value gap tracker"/>
   <meta property="og:title" content="TradeJournal — AI Trading Journal for SMC & ICT Traders"/>
-  <meta property="og:description" content="Track trades, analyse psychology, and beat prop firm rules. Built for serious SMC/ICT traders."/>
+  <meta property="og:description" content="Track trades, read your psychology, beat prop firm rules. Built for serious SMC/ICT traders. Free."/>
   <meta property="og:url" content="https://tradejournal-n3hn.onrender.com/"/>
   <meta property="og:type" content="website"/>
   <meta name="twitter:card" content="summary_large_image"/>
-  <meta name="twitter:title" content="TradeJournal — AI Trading Journal"/>
-  <meta name="twitter:description" content="The smartest free trading journal for SMC & ICT traders. AI reads your psychology."/>
   <link rel="canonical" href="https://tradejournal-n3hn.onrender.com/"/>
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-
-  <!-- GSAP for animations -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-
-  <!-- Vue 3 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js"></script>
-
-  <!-- CountUp -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/CountUp.js/2.6.2/countUp.umd.js"></script>
-
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TradeJournal","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"AI-powered trading journal for SMC and ICT traders.","url":"https://tradejournal-n3hn.onrender.com"}</script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:       #080c10;
-      --bg2:      #0d1117;
-      --panel:    #111820;
-      --panel2:   #161f2a;
-      --border:   #1c2b3a;
-      --border2:  #243447;
-      --text:     #cdd9e5;
-      --muted:    #637589;
-      --faint:    #2d3f52;
-      --green:    #00e5a0;
-      --green2:   #00c88a;
-      --green-dim:#003d2b;
-      --gold:     #f0c040;
-      --red:      #ff4757;
-      --blue:     #4da6ff;
-      --purple:   #a78bfa;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07090d;--bg2:#0c1018;--panel:#111820;--panel2:#161f2a;
+      --border:#1c2b3a;--border2:#243447;
+      --text:#d4dde8;--muted:#5a7080;--faint:#1e2d3d;
+      --green:#00e5a0;--green2:#00c88a;--gdim:#003d2b;
+      --red:#ff4757;--gold:#f0c040;--blue:#4da6ff;
     }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: "Inter", sans-serif;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-    a { color: inherit; text-decoration: none; }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    a{color:inherit;text-decoration:none}
 
-    /* ── NAV ── */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 5%; height: 64px;
-      background: rgba(8,12,16,0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      transition: all 0.3s;
-    }
-    .nav-logo {
-      display: flex; align-items: center; gap: 10px;
-      font-size: 18px; font-weight: 800; letter-spacing: 0.01em;
-    }
-    .nav-logo span { color: var(--green); }
-    .nav-logo-icon { font-size: 22px; }
-    .nav-links { display: flex; align-items: center; gap: 32px; }
-    .nav-links a { font-size: 13px; color: var(--muted); font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--text); }
-    .nav-cta {
-      background: var(--green); color: #000; font-weight: 700;
-      font-size: 13px; padding: 8px 20px; border-radius: 8px;
-      transition: all 0.2s; letter-spacing: 0.02em;
-    }
-    .nav-cta:hover { background: var(--green2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,229,160,0.3); }
+    /* NAV */
+    nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:66px;transition:all .3s}
+    nav.scrolled{background:rgba(7,9,13,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+    .nav-logo{font-size:17px;font-weight:900;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+    .nav-logo .dot{color:var(--green)}
+    .nav-links{display:flex;gap:32px}
+    .nav-links a{font-size:13px;color:var(--muted);font-weight:500;transition:color .2s}
+    .nav-links a:hover{color:var(--text)}
+    .nav-cta{background:var(--green);color:#000;font-weight:800;font-size:13px;padding:9px 22px;border-radius:8px;letter-spacing:.02em;transition:all .2s}
+    .nav-cta:hover{background:var(--green2);box-shadow:0 4px 24px rgba(0,229,160,.3)}
 
-    /* ── HERO ── */
-    .hero {
-      min-height: 100vh; display: flex; align-items: center;
-      justify-content: center; text-align: center;
-      padding: 100px 5% 60px;
-      position: relative; overflow: hidden;
-    }
-    .hero-bg {
-      position: absolute; inset: 0; z-index: 0;
-      background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,229,160,0.06) 0%, transparent 70%);
-    }
-    .hero-grid {
-      position: absolute; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 60px 60px;
-      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
-      opacity: 0.3;
-    }
-    .hero-content { position: relative; z-index: 1; max-width: 860px; }
-    .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: var(--green-dim); border: 1px solid var(--green);
-      color: var(--green); font-size: 12px; font-weight: 600;
-      padding: 5px 14px; border-radius: 100px; margin-bottom: 28px;
-      letter-spacing: 0.06em; text-transform: uppercase;
-    }
-    .hero-badge::before { content: "●"; font-size: 8px; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-    .hero-title {
-      font-size: clamp(40px, 7vw, 80px);
-      font-weight: 900; line-height: 1.05;
-      letter-spacing: -0.03em; margin-bottom: 24px;
-    }
-    .hero-title .accent { color: var(--green); }
-    .hero-title .dim { color: var(--muted); }
-    .hero-sub {
-      font-size: clamp(15px, 2vw, 19px); color: var(--muted);
-      line-height: 1.7; max-width: 580px; margin: 0 auto 40px;
-      font-weight: 400;
-    }
-    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary {
-      background: var(--green); color: #000; font-weight: 700;
-      font-size: 15px; padding: 14px 32px; border-radius: 10px;
-      display: inline-flex; align-items: center; gap: 8px;
-      transition: all 0.2s; letter-spacing: 0.01em;
-    }
-    .btn-primary:hover { background: var(--green2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,229,160,0.35); }
-    .btn-ghost {
-      border: 1px solid var(--border2); color: var(--text); font-weight: 600;
-      font-size: 15px; padding: 14px 32px; border-radius: 10px;
-      display: inline-flex; align-items: center; gap: 8px;
-      transition: all 0.2s; background: var(--panel);
-    }
-    .btn-ghost:hover { border-color: var(--green); color: var(--green); transform: translateY(-2px); }
-    .hero-note { margin-top: 16px; font-size: 12px; color: var(--muted); }
-    .hero-note span { color: var(--green); font-weight: 600; }
+    /* HERO */
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 6% 80px;position:relative;overflow:hidden}
+    .hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,black 20%,transparent 100%);opacity:.5}
+    .hero-glow{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(0,229,160,.12) 0%,transparent 70%);pointer-events:none}
+    .hero-label{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(0,229,160,.3);background:rgba(0,229,160,.06);color:var(--green);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:32px}
+    .hero-label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    .hero-h1{font-size:clamp(52px,8vw,100px);font-weight:900;line-height:.95;letter-spacing:-.04em;margin-bottom:28px}
+    .hero-h1 em{font-style:italic;color:var(--green);font-weight:300}
+    .hero-h1 .dim{color:var(--muted)}
+    .hero-sub{font-size:clamp(15px,1.8vw,19px);color:var(--muted);line-height:1.7;max-width:520px;margin:0 auto 40px}
+    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .btn-p{background:var(--green);color:#000;font-weight:800;font-size:15px;padding:14px 32px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;transition:all .2s}
+    .btn-p:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,229,160,.35)}
+    .btn-g{border:1px solid var(--border2);color:var(--text);font-weight:600;font-size:15px;padding:14px 32px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;transition:all .2s;background:var(--panel)}
+    .btn-g:hover{border-color:var(--green);color:var(--green);transform:translateY(-2px)}
+    .hero-note{margin-top:14px;font-size:12px;color:var(--muted)}
+    .hero-note b{color:var(--green)}
 
-    /* ── TICKER ── */
-    .ticker-wrap {
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-      background: var(--panel); overflow: hidden; padding: 12px 0;
-    }
-    .ticker-track {
-      display: flex; gap: 48px; white-space: nowrap;
-      animation: ticker 30s linear infinite;
-    }
-    .ticker-track:hover { animation-play-state: paused; }
-    @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-    .ticker-item {
-      display: inline-flex; align-items: center; gap: 8px;
-      font-family: "JetBrains Mono", monospace; font-size: 12px;
-    }
-    .ticker-sym { color: var(--text); font-weight: 700; }
-    .ticker-val { color: var(--green); }
-    .ticker-chg { color: var(--red); font-size: 11px; }
-    .ticker-chg.up { color: var(--green); }
+    /* TICKER */
+    .ticker{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);overflow:hidden;padding:11px 0}
+    .ticker-inner{display:flex;gap:56px;white-space:nowrap;animation:scroll-left 35s linear infinite}
+    .ticker-inner:hover{animation-play-state:paused}
+    @keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    .tick{display:inline-flex;align-items:center;gap:10px;font-family:"JetBrains Mono",monospace;font-size:12px}
+    .tick-s{color:var(--text);font-weight:700}
+    .tick-v{color:var(--green)}
+    .tick-c{font-size:11px}
+    .tick-c.up{color:var(--green)}
+    .tick-c.dn{color:var(--red)}
 
-    /* ── STATS ── */
-    .stats-section { padding: 80px 5%; }
-    .stats-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1px; background: var(--border);
-      border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
-      max-width: 900px; margin: 0 auto;
-    }
-    .stat-card {
-      background: var(--panel); padding: 36px 28px; text-align: center;
-    }
-    .stat-num {
-      font-size: 48px; font-weight: 900; color: var(--green);
-      font-family: "JetBrains Mono", monospace; line-height: 1;
-      margin-bottom: 8px; letter-spacing: -0.03em;
-    }
-    .stat-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+    /* SOCIAL PROOF NUMBERS */
+    .proof{padding:70px 6%;border-bottom:1px solid var(--border)}
+    .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:900px;margin:0 auto;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+    .proof-item{background:var(--panel);padding:32px 24px;text-align:center;border-right:1px solid var(--border)}
+    .proof-item:last-child{border-right:none}
+    .proof-num{font-size:40px;font-weight:900;color:var(--green);font-family:"JetBrains Mono",monospace;letter-spacing:-.03em;line-height:1}
+    .proof-label{font-size:12px;color:var(--muted);margin-top:6px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
 
-    /* ── SECTION SHARED ── */
-    section { padding: 100px 5%; }
-    .section-label {
-      font-size: 11px; font-weight: 700; color: var(--green);
-      letter-spacing: 0.1em; text-transform: uppercase;
-      margin-bottom: 16px; display: block;
-    }
-    .section-title {
-      font-size: clamp(28px, 4vw, 48px); font-weight: 800;
-      line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 16px;
-    }
-    .section-sub {
-      font-size: 16px; color: var(--muted); line-height: 1.7;
-      max-width: 560px; margin-bottom: 60px;
-    }
-    .center { text-align: center; }
-    .center .section-sub { margin: 0 auto 60px; }
+    /* SECTION SHARED */
+    .s{padding:120px 6%}
+    .s-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:block}
+    .s-h{font-size:clamp(36px,5vw,64px);font-weight:900;line-height:1.0;letter-spacing:-.03em;margin-bottom:16px}
+    .s-h em{font-style:italic;color:var(--green);font-weight:300}
+    .s-p{font-size:16px;color:var(--muted);line-height:1.75;max-width:520px}
+    .center{text-align:center}
+    .center .s-p{margin:0 auto 60px}
 
-    /* ── FEATURES ── */
-    .features-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px; max-width: 1100px; margin: 0 auto;
-    }
-    .feature-card {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 14px; padding: 28px;
-      transition: all 0.3s; cursor: default; position: relative; overflow: hidden;
-    }
-    .feature-card::before {
-      content: ""; position: absolute; inset: 0;
-      background: radial-gradient(circle at 20% 20%, rgba(0,229,160,0.05), transparent 60%);
-      opacity: 0; transition: opacity 0.3s;
-    }
-    .feature-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-    .feature-card:hover::before { opacity: 1; }
-    .feature-icon {
-      width: 44px; height: 44px; border-radius: 10px;
-      background: var(--green-dim); border: 1px solid rgba(0,229,160,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 20px; margin-bottom: 18px;
-    }
-    .feature-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-    .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
-    .feature-tag {
-      display: inline-block; margin-top: 14px;
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
-      text-transform: uppercase; color: var(--green);
-      background: var(--green-dim); padding: 3px 8px; border-radius: 4px;
-    }
+    /* BENTO FEATURES */
+    .bento{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:16px;max-width:1100px;margin:0 auto}
+    .bento-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden;transition:all .3s}
+    .bento-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+    .bento-card.wide{grid-column:span 2}
+    .bento-card.tall{grid-row:span 2}
+    .bento-card::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,rgba(0,229,160,.07),transparent 60%);opacity:0;transition:opacity .3s}
+    .bento-card:hover::after{opacity:1}
+    .bento-icon{font-size:28px;margin-bottom:14px;display:block}
+    .bento-title{font-size:16px;font-weight:700;margin-bottom:8px;line-height:1.3}
+    .bento-desc{font-size:13px;color:var(--muted);line-height:1.7}
+    .bento-tag{display:inline-block;margin-top:14px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--green);background:var(--gdim);padding:3px 10px;border-radius:4px}
+    .bento-metric{margin-top:20px;display:flex;gap:20px}
+    .bento-m-val{font-size:28px;font-weight:900;color:var(--green);font-family:"JetBrains Mono",monospace;letter-spacing:-.02em}
+    .bento-m-lbl{font-size:11px;color:var(--muted);margin-top:2px}
 
-    /* ── HOW IT WORKS ── */
-    .steps-wrap { max-width: 800px; margin: 0 auto; }
-    .step {
-      display: flex; gap: 28px; margin-bottom: 48px; align-items: flex-start;
-      opacity: 0; transform: translateX(-20px); transition: all 0.5s;
-    }
-    .step.visible { opacity: 1; transform: translateX(0); }
-    .step-num {
-      flex-shrink: 0; width: 44px; height: 44px;
-      border: 2px solid var(--green); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 15px; font-weight: 800; color: var(--green);
-      font-family: "JetBrains Mono", monospace;
-      background: var(--green-dim); position: relative;
-    }
-    .step-num::after {
-      content: ""; position: absolute; top: 44px; left: 50%;
-      transform: translateX(-50%); width: 2px; height: calc(100% + 4px);
-      background: linear-gradient(var(--green), transparent);
-    }
-    .step:last-child .step-num::after { display: none; }
-    .step-body { padding-top: 8px; }
-    .step-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .step-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    /* MARQUEE ROW */
+    .marquee-wrap{overflow:hidden;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);margin:0}
+    .marquee-inner{display:flex;gap:40px;animation:scroll-left 20s linear infinite;white-space:nowrap}
+    .marquee-inner:hover{animation-play-state:paused}
+    .m-tag{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);padding:6px 16px;border:1px solid var(--border);border-radius:100px;background:var(--panel);white-space:nowrap}
+    .m-tag span{color:var(--green)}
 
-    /* ── TERMINAL DEMO ── */
-    .terminal {
-      background: #0a0e13; border: 1px solid var(--border2);
-      border-radius: 12px; overflow: hidden;
-      max-width: 700px; margin: 0 auto;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
-    }
-    .terminal-bar {
-      background: var(--panel2); padding: 12px 16px;
-      display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid var(--border);
-    }
-    .t-dot { width: 12px; height: 12px; border-radius: 50%; }
-    .t-dot.r { background: #ff5f57; }
-    .t-dot.y { background: #ffbd2e; }
-    .t-dot.g { background: #28c941; }
-    .terminal-title { font-size: 12px; color: var(--muted); margin-left: auto; margin-right: auto; font-family: "JetBrains Mono", monospace; }
-    .terminal-body { padding: 24px; font-family: "JetBrains Mono", monospace; font-size: 13px; line-height: 1.9; }
-    .t-line { display: flex; gap: 12px; }
-    .t-prompt { color: var(--green); }
-    .t-cmd { color: var(--text); }
-    .t-out { color: var(--muted); padding-left: 24px; }
-    .t-val { color: var(--green); font-weight: 700; }
-    .t-neg { color: var(--red); }
-    .t-gold { color: var(--gold); }
-    .t-blue { color: var(--blue); }
-    .t-cursor { display: inline-block; width: 8px; height: 14px; background: var(--green); animation: blink 1s infinite; vertical-align: middle; }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    /* EDITORIAL SECTION */
+    .ed-wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center}
+    .ed-num{font-size:120px;font-weight:900;color:var(--faint);line-height:1;letter-spacing:-.06em;font-family:"JetBrains Mono",monospace;margin-bottom:-20px}
+    .ed-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+    .ed-h{font-size:clamp(32px,4vw,52px);font-weight:900;line-height:1.0;letter-spacing:-.03em;margin-bottom:16px}
+    .ed-h em{font-style:italic;color:var(--green);font-weight:300}
+    .ed-p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:24px}
+    .ed-bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
+    .ed-bullets li{font-size:13px;color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.6}
+    .ed-bullets li::before{content:"·";color:var(--green);font-size:18px;line-height:1.2;flex-shrink:0}
 
-    /* ── COMPARISON ── */
-    .compare-wrap { max-width: 900px; margin: 0 auto; overflow-x: auto; }
-    .compare-table { width: 100%; border-collapse: collapse; }
-    .compare-table th {
-      padding: 16px 20px; font-size: 13px; font-weight: 700;
-      border-bottom: 2px solid var(--border);
-      text-align: left;
-    }
-    .compare-table th.highlight {
-      color: var(--green); background: var(--green-dim);
-      border-bottom-color: var(--green);
-    }
-    .compare-table td {
-      padding: 14px 20px; font-size: 13px; color: var(--muted);
-      border-bottom: 1px solid var(--border);
-    }
-    .compare-table td.highlight { background: rgba(0,229,160,0.03); }
-    .compare-table td.feature-name { color: var(--text); font-weight: 500; }
-    .check { color: var(--green); font-size: 16px; }
-    .cross { color: var(--red); font-size: 16px; }
-    .compare-table tr:hover td { background: var(--panel); }
-    .compare-table tr:hover td.highlight { background: rgba(0,229,160,0.05); }
+    /* TERMINAL / MOCK UI */
+    .mock{background:#0a0e14;border:1px solid var(--border2);border-radius:14px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.7)}
+    .mock-bar{background:var(--panel2);padding:12px 16px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border)}
+    .dot{width:11px;height:11px;border-radius:50%}
+    .dot.r{background:#ff5f57}.dot.y{background:#ffbd2e}.dot.g{background:#28c941}
+    .mock-title{font-size:11px;color:var(--muted);margin:0 auto;font-family:"JetBrains Mono",monospace}
+    .mock-body{padding:20px;font-family:"JetBrains Mono",monospace;font-size:12px;line-height:2}
+    .ml{display:flex;gap:10px}
+    .mp{color:var(--green)}
+    .mc{color:var(--text)}
+    .mo{color:var(--muted);padding-left:20px}
+    .mv{color:var(--green);font-weight:700}
+    .mr{color:var(--red)}
+    .mg{color:var(--gold)}
+    .mb{color:var(--blue)}
+    .mcursor{display:inline-block;width:7px;height:13px;background:var(--green);animation:blink 1s infinite;vertical-align:middle}
 
-    /* ── TESTIMONIALS ── */
-    .testimonials-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px; max-width: 1000px; margin: 0 auto;
-    }
-    .testimonial {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: 14px; padding: 24px;
-      transition: all 0.3s;
-    }
-    .testimonial:hover { border-color: var(--border2); transform: translateY(-2px); }
-    .t-stars { color: var(--gold); font-size: 14px; margin-bottom: 12px; }
-    .t-quote { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
-    .t-author { display: flex; align-items: center; gap: 10px; }
-    .t-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--green-dim); border: 1px solid var(--green);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: var(--green);
-    }
-    .t-name { font-size: 13px; font-weight: 700; }
-    .t-handle { font-size: 11px; color: var(--muted); }
+    /* KPI MINI CARDS */
+    .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+    .kpi{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+    .kpi-label{font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+    .kpi-val{font-size:22px;font-weight:700;font-family:"JetBrains Mono",monospace}
+    .kpi-val.g{color:var(--green)}
+    .kpi-val.r{color:var(--red)}
+    .kpi-val.w{color:var(--text)}
 
-    /* ── FAQ ── */
-    .faq-wrap { max-width: 700px; margin: 0 auto; }
-    .faq-item {
-      border-bottom: 1px solid var(--border); overflow: hidden;
-    }
-    .faq-q {
-      width: 100%; text-align: left; background: none; border: none;
-      color: var(--text); font-size: 15px; font-weight: 600;
-      padding: 20px 0; cursor: pointer; display: flex;
-      justify-content: space-between; align-items: center; gap: 16px;
-      font-family: "Inter", sans-serif;
-    }
-    .faq-q:hover { color: var(--green); }
-    .faq-icon { color: var(--green); font-size: 20px; flex-shrink: 0; transition: transform 0.3s; }
-    .faq-a {
-      max-height: 0; overflow: hidden;
-      font-size: 14px; color: var(--muted); line-height: 1.75;
-      transition: max-height 0.4s ease, padding 0.3s;
-    }
-    .faq-a.open { max-height: 200px; padding-bottom: 20px; }
-    .faq-icon.open { transform: rotate(45deg); }
+    /* EMOTION BARS */
+    .emotion-rows{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+    .em-row{display:flex;align-items:center;gap:10px;font-size:12px}
+    .em-label{width:90px;color:var(--muted);font-size:11px}
+    .em-bar-wrap{flex:1;height:6px;background:var(--faint);border-radius:3px;overflow:hidden}
+    .em-bar{height:100%;border-radius:3px;transition:width 1.5s ease}
+    .em-val{font-size:11px;font-family:"JetBrains Mono",monospace;color:var(--muted);width:36px;text-align:right}
 
-    /* ── CTA SECTION ── */
-    .cta-section {
-      padding: 120px 5%; text-align: center;
-      background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(0,229,160,0.05), transparent 70%);
-      border-top: 1px solid var(--border);
-    }
-    .cta-title {
-      font-size: clamp(32px, 5vw, 60px); font-weight: 900;
-      letter-spacing: -0.03em; margin-bottom: 20px; line-height: 1.05;
-    }
-    .cta-title .accent { color: var(--green); }
-    .cta-sub { font-size: 17px; color: var(--muted); margin-bottom: 40px; }
+    /* COMPARE TABLE */
+    .cmp-wrap{max-width:900px;margin:60px auto 0;overflow-x:auto}
+    table{width:100%;border-collapse:collapse}
+    th{padding:14px 18px;font-size:12px;font-weight:700;border-bottom:2px solid var(--border);text-align:left;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+    th.hl{color:var(--green);background:rgba(0,229,160,.04);border-bottom-color:var(--green)}
+    td{padding:13px 18px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--faint)}
+    td.hl{background:rgba(0,229,160,.02)}
+    td.fn{color:var(--text);font-weight:500}
+    tr:hover td{background:var(--panel)}
+    tr:hover td.hl{background:rgba(0,229,160,.04)}
+    .ck{color:var(--green)}
+    .cx{color:var(--red)}
 
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 40px 5%; display: flex;
-      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
-    }
-    .footer-logo { font-size: 15px; font-weight: 800; }
-    .footer-logo span { color: var(--green); }
-    .footer-links { display: flex; gap: 24px; }
-    .footer-links a { font-size: 13px; color: var(--muted); transition: color 0.2s; }
-    .footer-links a:hover { color: var(--text); }
-    .footer-copy { font-size: 12px; color: var(--faint); }
+    /* TESTIMONIALS */
+    .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1000px;margin:60px auto 0}
+    .testi{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;transition:all .3s}
+    .testi:hover{border-color:var(--border2);transform:translateY(-3px)}
+    .stars{color:var(--gold);font-size:13px;margin-bottom:12px}
+    .tq{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:16px;font-style:italic}
+    .ta{display:flex;align-items:center;gap:10px}
+    .av{width:34px;height:34px;border-radius:50%;background:var(--gdim);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--green)}
+    .an{font-size:13px;font-weight:700}
+    .ah{font-size:11px;color:var(--muted)}
 
-    /* ── FLOATING BADGE ── */
-    .float-badge {
-      position: fixed; bottom: 28px; right: 28px; z-index: 99;
-      background: var(--panel); border: 1px solid var(--green);
-      border-radius: 100px; padding: 10px 18px;
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; font-weight: 700; color: var(--green);
-      box-shadow: 0 8px 30px rgba(0,229,160,0.2);
-      animation: floatup 3s ease-in-out infinite;
-      cursor: pointer; transition: all 0.2s;
-    }
-    .float-badge:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,229,160,0.35); }
-    @keyframes floatup { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    /* FAQ */
+    .faq-wrap{max-width:720px;margin:60px auto 0}
+    .faq-item{border-bottom:1px solid var(--border)}
+    .faq-q{width:100%;text-align:left;background:none;border:none;color:var(--text);font-size:15px;font-weight:600;padding:20px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;font-family:"Inter",sans-serif;transition:color .2s}
+    .faq-q:hover{color:var(--green)}
+    .faq-icon{color:var(--green);font-size:22px;flex-shrink:0;transition:transform .3s;line-height:1}
+    .faq-a{max-height:0;overflow:hidden;font-size:14px;color:var(--muted);line-height:1.8;transition:max-height .4s ease,padding .3s}
+    .faq-a.open{max-height:200px;padding-bottom:20px}
+    .faq-icon.open{transform:rotate(45deg)}
 
-    /* ── RESPONSIVE ── */
-    @media(max-width:768px) {
-      .nav-links { display: none; }
-      .stats-grid { grid-template-columns: repeat(2,1fr); }
-      footer { flex-direction: column; text-align: center; }
+    /* BIG CTA */
+    .cta-s{padding:140px 6%;text-align:center;border-top:1px solid var(--border);position:relative;overflow:hidden}
+    .cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(0,229,160,.07),transparent 70%);pointer-events:none}
+    .cta-h{font-size:clamp(48px,8vw,100px);font-weight:900;letter-spacing:-.04em;line-height:.95;margin-bottom:24px}
+    .cta-h em{font-style:italic;color:var(--green);font-weight:300}
+    .cta-sub{font-size:16px;color:var(--muted);margin-bottom:40px;font-family:"JetBrains Mono",monospace}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:36px 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+    .fl{font-size:15px;font-weight:900}
+    .fl span{color:var(--green)}
+    .flinks{display:flex;gap:24px}
+    .flinks a{font-size:12px;color:var(--muted);transition:color .2s}
+    .flinks a:hover{color:var(--text)}
+    .fc{font-size:11px;color:var(--faint)}
+
+    /* SCROLL INDICATOR */
+    .scroll-ind{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;animation:float 2s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+    .scroll-arrow{width:20px;height:20px;border-right:2px solid var(--green);border-bottom:2px solid var(--green);transform:rotate(45deg)}
+
+    /* FADE IN UTILITY */
+    .fade-up{opacity:0;transform:translateY(30px)}
+    .fade-left{opacity:0;transform:translateX(-40px)}
+    .fade-right{opacity:0;transform:translateX(40px)}
+
+    /* PROP FIRM STRIP */
+    .prop-strip{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:16px 20px;display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+    .prop-chip{display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px}
+    .prop-chip-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .prop-chip-val{font-size:15px;font-weight:700;font-family:"JetBrains Mono",monospace}
+    .prop-chip-val.ok{color:var(--green)}
+    .prop-chip-val.warn{color:var(--gold)}
+    .prop-chip-bar{height:3px;background:var(--faint);border-radius:2px;margin-top:4px}
+    .prop-chip-fill{height:100%;border-radius:2px;background:var(--green)}
+
+    @media(max-width:900px){
+      .nav-links{display:none}
+      .proof-grid{grid-template-columns:repeat(2,1fr)}
+      .bento{grid-template-columns:1fr}
+      .bento-card.wide,.bento-card.tall{grid-column:auto;grid-row:auto}
+      .ed-wrap{grid-template-columns:1fr;gap:48px}
+      .testi-grid{grid-template-columns:1fr}
+      footer{flex-direction:column;text-align:center}
     }
   </style>
-
-  <!-- Structured data for SEO -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "TradeJournal",
-    "applicationCategory": "FinanceApplication",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "AI-powered trading journal for SMC and ICT traders. Track trades, analyse psychology, monitor prop firm rules.",
-    "url": "https://tradejournal-n3hn.onrender.com",
-    "operatingSystem": "Web"
-  }
-  </script>
 </head>
 <body>
 
 <!-- NAV -->
-<nav id="navbar">
-  <div class="nav-logo">
-    <span class="nav-logo-icon">📈</span>
-    Trade<span>Journal</span>
-  </div>
+<nav id="nav">
+  <div class="nav-logo">Trade<span class="dot">·</span>Journal</div>
   <div class="nav-links">
     <a href="#features">Features</a>
-    <a href="#how-it-works">How it works</a>
+    <a href="#how">How it works</a>
     <a href="#compare">Compare</a>
     <a href="#faq">FAQ</a>
   </div>
@@ -436,374 +255,443 @@
 
 <!-- HERO -->
 <section class="hero" id="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-  <div class="hero-content" id="heroContent">
-    <div class="hero-badge">Built for SMC & ICT Traders</div>
-    <h1 class="hero-title">
-      Your trades have<br>
-      <span class="accent">patterns.</span>
-      <span class="dim"> AI finds them.</span>
-    </h1>
-    <p class="hero-sub">
-      The only trading journal that reads your psychology, tracks your prop firm rules, and auto-tags your SMC setups — so you stop repeating the same mistakes.
-    </p>
-    <div class="hero-actions">
-      <a href="/register" class="btn-primary">Start Journaling Free →</a>
-      <a href="#features" class="btn-ghost">See Features</a>
-    </div>
-    <p class="hero-note"><span>100% Free</span> · No credit card · Works with MT5, CSV & XLSX</p>
+  <div class="hero-bg-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-label">Built for SMC · ICT · Prop Traders</div>
+  <h1 class="hero-h1" id="heroH1">
+    Your trades<br>have <em>patterns.</em><br><span class="dim">AI finds them.</span>
+  </h1>
+  <p class="hero-sub">The trading journal that reads your psychology, tracks your prop firm rules, and auto-tags your SMC setups — free, forever.</p>
+  <div class="hero-actions">
+    <a href="/register" class="btn-p">Start Journaling Free →</a>
+    <a href="#features" class="btn-g">See Features ↓</a>
   </div>
+  <p class="hero-note">No credit card · No trial · <b>100% Free</b> · Works with MT5, CSV &amp; XLSX</p>
+  <div class="scroll-ind"><div class="scroll-arrow"></div>scroll</div>
 </section>
 
-<!-- LIVE TICKER -->
-<div class="ticker-wrap">
-  <div class="ticker-track" id="tickerTrack"></div>
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="tickerInner"></div>
 </div>
 
-<!-- STATS -->
-<div class="stats-section" id="statsSection">
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-num" id="stat1">0</div>
-      <div class="stat-label">Trades Logged</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="stat2">0</div>
-      <div class="stat-label">SMC Setups Tracked</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="stat3">0</div>
-      <div class="stat-label">Psychology Insights</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="stat4">0</div>
-      <div class="stat-label">Prop Firm Metrics</div>
-    </div>
+<!-- PROOF NUMBERS -->
+<div class="proof">
+  <div class="proof-grid">
+    <div class="proof-item"><div class="proof-num" id="pn1">0</div><div class="proof-label">Setup Tags</div></div>
+    <div class="proof-item"><div class="proof-num" id="pn2">0</div><div class="proof-label">KPI Metrics</div></div>
+    <div class="proof-item"><div class="proof-num" id="pn3">0</div><div class="proof-label">AI Patterns Max</div></div>
+    <div class="proof-item"><div class="proof-num" id="pn4">$0</div><div class="proof-label">Cost. Forever.</div></div>
   </div>
 </div>
 
-<!-- FEATURES -->
-<section id="features">
-  <div class="center">
-    <span class="section-label">Everything you need</span>
-    <h2 class="section-title">Built different from every<br>other trading journal</h2>
-    <p class="section-sub">No generic spreadsheets. No bloated dashboards. Every feature exists because a real SMC trader needed it.</p>
+<!-- SETUP TAGS MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner" id="marqueeInner"></div>
+</div>
+
+<!-- BENTO FEATURES -->
+<section class="s" id="features">
+  <div class="center fade-up">
+    <span class="s-label">Everything you need</span>
+    <h2 class="s-h">Features that <em>compound</em><br>your edge.</h2>
+    <p class="s-p">No spreadsheets. No bloated dashboards. Every feature exists because a real SMC trader needed it.</p>
   </div>
-  <div class="features-grid" id="featuresGrid"></div>
+  <div class="bento" id="bentoGrid"></div>
 </section>
 
-<!-- HOW IT WORKS -->
-<section id="how-it-works" style="background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
-  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center">
-    <div>
-      <span class="section-label">Simple workflow</span>
-      <h2 class="section-title">From trade to insight<br>in seconds</h2>
-      <p class="section-sub" style="margin-bottom:40px">Log a trade, attach your chart screenshot, write your notes. AI does the rest.</p>
-      <div class="steps-wrap" id="stepsWrap">
-        <div class="step" data-step="1">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <div class="step-title">Log your trade</div>
-            <div class="step-desc">Entry, exit, SL, TP, session, setup tags. Risk is calculated automatically using correct contract sizes.</div>
-          </div>
-        </div>
-        <div class="step" data-step="2">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <div class="step-title">Write your notes</div>
-            <div class="step-desc">Describe your reasoning. AI reads your words and detects emotions, discipline score, and setup context in real time.</div>
-          </div>
-        </div>
-        <div class="step" data-step="3">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <div class="step-title">Get patterns</div>
-            <div class="step-desc">The Psychology tab surfaces your most costly behavioural patterns, sorted by dollar damage, updated with every trade.</div>
-          </div>
-        </div>
-        <div class="step" data-step="4">
-          <div class="step-num">4</div>
-          <div class="step-body">
-            <div class="step-title">Fix them</div>
-            <div class="step-desc">AI gives you one concrete rule per pattern. As you improve, old patterns drop off. New ones surface. Adaptive forever.</div>
-          </div>
-        </div>
+<!-- HOW IT WORKS 01 - Psychology -->
+<section class="s" id="how" style="background:var(--bg2);border-top:1px solid var(--border)">
+  <div class="ed-wrap">
+    <div class="fade-left">
+      <div class="ed-num">01</div>
+      <div class="ed-label">AI Psychology</div>
+      <h2 class="ed-h">Write notes.<br>AI reads your <em>mindset.</em></h2>
+      <p class="ed-p">When you describe your trade, Groq's LLM reads your words for emotions, discipline, and psychological patterns — not market predictions, just your behaviour.</p>
+      <ul class="ed-bullets">
+        <li>Detects frustration, FOMO, revenge, overconfidence, patience</li>
+        <li>Scores discipline from -1.0 (tilt) to +1.0 (calm &amp; focused)</li>
+        <li>Auto-tags SMC setups mentioned in your notes</li>
+        <li>Surfaces up to 5 patterns sorted by dollar damage</li>
+      </ul>
+    </div>
+    <div class="fade-right">
+      <div class="mock">
+        <div class="mock-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="mock-title">tradejournal · ai analysis</div></div>
+        <div class="mock-body" id="termBody"><div class="ml"><span class="mp">▶</span><span class="mc"> Initializing…</span></div></div>
       </div>
     </div>
-    <div class="terminal" id="terminalDemo">
-      <div class="terminal-bar">
-        <div class="t-dot r"></div>
-        <div class="t-dot y"></div>
-        <div class="t-dot g"></div>
-        <div class="terminal-title">tradejournal — AI analysis</div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS 02 - Prop Firm -->
+<section class="s" style="border-top:1px solid var(--border)">
+  <div class="ed-wrap">
+    <div class="fade-left">
+      <div class="mock" style="padding:20px">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">Prop Firm · Upcomers Thunderbolt $10K</div>
+        <div class="prop-strip" id="propStrip"></div>
+        <div class="kpi-grid" id="kpiGrid"></div>
       </div>
-      <div class="terminal-body" id="terminalBody">
-        <div class="t-line"><span class="t-prompt">▶</span><span class="t-cmd"> Analyzing trade notes…</span></div>
+    </div>
+    <div class="fade-right">
+      <div class="ed-num">02</div>
+      <div class="ed-label">Prop Firm Tracker</div>
+      <h2 class="ed-h">Know your status<br>before your <em>broker</em> does.</h2>
+      <p class="ed-p">Track profit target, max drawdown, daily loss limits, and consistency score in real-time. Know exactly where you stand before you place the next trade.</p>
+      <ul class="ed-bullets">
+        <li>Live compliance strip — 5 metrics always visible</li>
+        <li>Works with FTMO, Funded Next, Upcomers, MyFundedFX</li>
+        <li>Consistency % calculated from actual trade data</li>
+        <li>Daily drawdown resets automatically at midnight</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS 03 - History / Pattern -->
+<section class="s" style="background:var(--bg2);border-top:1px solid var(--border)">
+  <div class="ed-wrap">
+    <div class="fade-left">
+      <div class="ed-num">03</div>
+      <div class="ed-label">Adaptive Patterns</div>
+      <h2 class="ed-h">Patterns you fix<br><em>drop off</em> automatically.</h2>
+      <p class="ed-p">The Psychology tab shows up to 5 AI patterns, sorted by dollar damage. As you improve, old patterns disappear and new ones take their place. No stale advice.</p>
+      <ul class="ed-bullets">
+        <li>Sorted by total dollar cost — highest impact first</li>
+        <li>Confidence score based on evidence in your actual trades</li>
+        <li>One concrete rule per pattern, not generic coaching</li>
+        <li>Carousel format — swipe through, focus on one at a time</li>
+      </ul>
+    </div>
+    <div class="fade-right">
+      <div class="mock" style="padding:20px">
+        <div style="font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">AI Pattern Analysis · Psychology Tab</div>
+        <div id="patternMock"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+          <button style="background:var(--panel2);border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px">← Prev</button>
+          <div style="display:flex;gap:5px" id="patternDots"></div>
+          <button style="background:var(--panel2);border:1px solid var(--border2);color:var(--green);border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px">Next →</button>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- COMPARE -->
-<section id="compare">
-  <div class="center">
-    <span class="section-label">Honest comparison</span>
-    <h2 class="section-title">How we compare</h2>
-    <p class="section-sub">We built this because every other journal was missing what SMC traders actually need.</p>
+<section class="s" id="compare" style="border-top:1px solid var(--border)">
+  <div class="center fade-up">
+    <span class="s-label">Honest comparison</span>
+    <h2 class="s-h">We don't charge.<br>They <em>do.</em></h2>
+    <p class="s-p">We built this because every other journal was missing what SMC traders actually need — and charging for it.</p>
   </div>
-  <div class="compare-wrap">
-    <table class="compare-table">
-      <thead>
-        <tr>
-          <th>Feature</th>
-          <th class="highlight">TradeJournal ✦</th>
-          <th>Tradervue</th>
-          <th>Edgewonk</th>
-          <th>Spreadsheet</th>
-        </tr>
-      </thead>
-      <tbody id="compareBody"></tbody>
-    </table>
+  <div class="cmp-wrap">
+    <table><thead><tr>
+      <th>Feature</th>
+      <th class="hl">TradeJournal ✦</th>
+      <th>Tradervue</th>
+      <th>Edgewonk</th>
+      <th>TradeZella</th>
+    </tr></thead>
+    <tbody id="cmpBody"></tbody></table>
   </div>
 </section>
 
 <!-- TESTIMONIALS -->
-<section style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-  <div class="center">
-    <span class="section-label">From traders</span>
-    <h2 class="section-title">What the community says</h2>
-    <p class="section-sub">Real feedback from SMC & ICT traders using TradeJournal daily.</p>
+<section class="s" style="background:var(--bg2);border-top:1px solid var(--border)">
+  <div class="center fade-up">
+    <span class="s-label">Community</span>
+    <h2 class="s-h">What traders <em>actually</em> say.</h2>
+    <p class="s-p">Real feedback from SMC & ICT traders who use TradeJournal every day.</p>
   </div>
-  <div class="testimonials-grid">
-    <div class="testimonial">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">"Finally a journal that actually understands SMC concepts. The auto-tagging from my notes is insane — it caught my 4H OB confluence automatically."</p>
-      <div class="t-author"><div class="t-avatar">R</div><div><div class="t-name">r/Forex user</div><div class="t-handle">XAUUSD trader · 2 prop accounts</div></div></div>
-    </div>
-    <div class="testimonial">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">"The AI psychology coach told me I was overtrading after losses. I didn't believe it until I saw the data. Literally saved my prop account."</p>
-      <div class="t-author"><div class="t-avatar">K</div><div><div class="t-name">r/Daytrading user</div><div class="t-handle">Futures trader · ICT methodology</div></div></div>
-    </div>
-    <div class="testimonial">
-      <div class="t-stars">★★★★★</div>
-      <p class="t-quote">"Edgewonk costs $169/year and doesn't have half of this. The prop firm consistency tracker alone is worth it. And it's free."</p>
-      <div class="t-author"><div class="t-avatar">M</div><div><div class="t-name">r/algotrading user</div><div class="t-handle">Forex trader · FTMO & Funding Pips</div></div></div>
-    </div>
-  </div>
+  <div class="testi-grid" id="testiGrid"></div>
 </section>
 
 <!-- FAQ -->
-<section id="faq">
-  <div class="center">
-    <span class="section-label">Questions</span>
-    <h2 class="section-title">Frequently asked</h2>
-    <p class="section-sub">Everything you need to know before you start.</p>
+<section class="s" id="faq" style="border-top:1px solid var(--border)">
+  <div class="center fade-up">
+    <span class="s-label">FAQ</span>
+    <h2 class="s-h">Ask.<br><em>We answer.</em></h2>
   </div>
   <div class="faq-wrap" id="faqWrap"></div>
 </section>
 
 <!-- CTA -->
-<section class="cta-section">
-  <h2 class="cta-title">Stop guessing.<br>Start <span class="accent">understanding.</span></h2>
-  <p class="cta-sub">Join traders who use data — not feelings — to improve.</p>
-  <a href="/register" class="btn-primary" style="font-size:17px;padding:16px 40px">Create Free Account →</a>
-  <p class="hero-note" style="margin-top:20px">No credit card. No trial. <span>Free forever.</span></p>
+<section class="cta-s">
+  <div class="cta-glow"></div>
+  <h2 class="cta-h fade-up">Your next trade<br>is <em>easier</em><br>with your last<br>500 behind it.</h2>
+  <p class="cta-sub">Free plan. No credit card. Import your history in a minute.</p>
+  <a href="/register" class="btn-p" style="font-size:17px;padding:16px 40px">Create Free Account →</a>
 </section>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">Trade<span>Journal</span></div>
-  <div class="footer-links">
+  <div class="fl">Trade<span>·</span>Journal</div>
+  <div class="flinks">
     <a href="/login">Sign In</a>
     <a href="/register">Register</a>
     <a href="#features">Features</a>
     <a href="#faq">FAQ</a>
   </div>
-  <div class="footer-copy">© 2026 TradeJournal · Built for SMC & ICT traders</div>
+  <div class="fc">© 2026 TradeJournal · Built for SMC & ICT traders · Free forever</div>
 </footer>
-
-<!-- FLOAT CTA -->
-<a href="/register" class="float-badge">🚀 Start Free</a>
 
 {% raw %}
 <script>
-// ── Vue 3 Features Grid ──────────────────────────────────────
-const { createApp, ref, onMounted } = Vue;
+gsap.registerPlugin(ScrollTrigger);
 
+// NAV scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// HERO entrance
+gsap.from('#heroH1', {opacity:0, y:60, duration:1, ease:'power3.out', delay:.2});
+gsap.from('.hero-label', {opacity:0, y:20, duration:.8, ease:'power2.out', delay:.1});
+gsap.from('.hero-sub', {opacity:0, y:30, duration:.8, ease:'power2.out', delay:.5});
+gsap.from('.hero-actions', {opacity:0, y:20, duration:.8, ease:'power2.out', delay:.7});
+gsap.from('.hero-note', {opacity:0, duration:.6, delay:.9});
+gsap.from('.scroll-ind', {opacity:0, duration:.6, delay:1.2});
+
+// TICKER
+const tickers = [
+  {s:'XAUUSD',v:'2,347.50',c:'+0.42%',up:true},{s:'EURUSD',v:'1.0821',c:'-0.12%',up:false},
+  {s:'GBPUSD',v:'1.2734',c:'+0.18%',up:true},{s:'USDJPY',v:'157.83',c:'+0.31%',up:true},
+  {s:'BTCUSD',v:'67,420',c:'+1.24%',up:true},{s:'NAS100',v:'19,847',c:'-0.08%',up:false},
+  {s:'US30',v:'39,215',c:'+0.22%',up:true},{s:'XAGUSD',v:'29.41',c:'+0.55%',up:true},
+  {s:'ETHUSD',v:'3,521',c:'+0.89%',up:true},{s:'DXY',v:'104.21',c:'-0.15%',up:false},
+  {s:'AUDUSD',v:'0.6543',c:'+0.08%',up:true},{s:'USDCAD',v:'1.3621',c:'-0.11%',up:false},
+];
+const tickerEl = document.getElementById('tickerInner');
+tickerEl.innerHTML = [...tickers,...tickers].map(t=>
+  `<div class="tick"><span class="tick-s">${t.s}</span><span class="tick-v">${t.v}</span><span class="tick-c ${t.up?'up':'dn'}">${t.c}</span></div>`
+).join('');
+
+// SETUP TAGS MARQUEE
+const tags = ['Order Block','Fair Value Gap','BOS','CHoCH','Liquidity Sweep','Breaker Block','Inducement','OTE','Imbalance','Premium/Discount','Equal Highs/Lows','Turtle Soup','Session Open','NY Killzone','London Killzone','Mitigation Block','4H OB','15min FVG','Weekly Sweep','Daily BOS'];
+const mq = document.getElementById('marqueeInner');
+mq.innerHTML = [...tags,...tags].map(t=>`<span class="m-tag"><span>✦</span>${t}</span>`).join('');
+
+// PROOF COUNTERS
+const proofObs = new IntersectionObserver(entries => {
+  if (!entries[0].isIntersecting) return;
+  proofObs.disconnect();
+  const animate = (id, target, prefix='', suffix='') => {
+    let start = 0; const dur = 2000; const step = 16;
+    const timer = setInterval(() => {
+      start += step;
+      const p = Math.min(start/dur, 1);
+      const val = Math.round(p * target);
+      document.getElementById(id).textContent = prefix + val + suffix;
+      if (p >= 1) clearInterval(timer);
+    }, step);
+  };
+  animate('pn1', 13);
+  animate('pn2', 20, '', '+');
+  animate('pn3', 5);
+  document.getElementById('pn4').textContent = '$0';
+}, {threshold: 0.3});
+proofObs.observe(document.querySelector('.proof'));
+
+// FADE-UP SCROLL REVEAL
+document.querySelectorAll('.fade-up,.fade-left,.fade-right').forEach(el => {
+  gsap.to(el, {
+    scrollTrigger: {trigger: el, start:'top 85%'},
+    opacity:1, x:0, y:0, duration:.8, ease:'power2.out'
+  });
+});
+
+// TERMINAL TYPEWRITER
+const termLines = [
+  {t:'p', txt:' Analyzing trade notes…'},
+  {t:'o', txt:'Emotions detected: ', v:'frustration · greed', cls:'mr'},
+  {t:'o', txt:'Discipline score: ', v:'-0.6', cls:'mr'},
+  {t:'o', txt:'Label: ', v:'"Chasing after loss"'},
+  {t:'o', txt:''},
+  {t:'p', txt:' Extracting setup tags from notes…'},
+  {t:'o', txt:'Found: ', v:'Fair Value Gap · Order Block · BOS', cls:'mg'},
+  {t:'o', txt:'Timeframe: ', v:'4H FVG tap · 15min OB entry', cls:'mb'},
+  {t:'o', txt:''},
+  {t:'p', txt:' Pattern detected (HIGH · 90% confidence):'},
+  {t:'o', txt:'⚠  ', v:'Revenge trading after Asia loss'},
+  {t:'o', txt:'Cost: ', v:'-$47.20 avg per occurrence', cls:'mr'},
+  {t:'o', txt:'→ Rule: ', v:'60min cooldown after any loss'},
+];
+const termObs = new IntersectionObserver(async entries => {
+  if (!entries[0].isIntersecting) return;
+  termObs.disconnect();
+  const tb = document.getElementById('termBody');
+  tb.innerHTML = '';
+  for (const l of termLines) {
+    await new Promise(r => setTimeout(r, 160));
+    const d = document.createElement('div'); d.className='ml';
+    if (l.t === 'p') {
+      d.innerHTML = `<span class="mp">▶</span><span class="mc">${l.txt}</span>`;
+    } else {
+      const cls = l.cls || 'mv';
+      d.innerHTML = `<span class="mo">${l.txt}${l.v?`<span class="${cls}">${l.v}</span>`:''}</span>`;
+    }
+    tb.appendChild(d); tb.scrollTop = tb.scrollHeight;
+  }
+  const cur = document.createElement('div'); cur.className='ml';
+  cur.innerHTML = '<span class="mp">▶</span><span class="mcursor"></span>';
+  tb.appendChild(cur);
+}, {threshold: 0.4});
+const termEl = document.getElementById('termBody');
+if (termEl) termObs.observe(termEl.closest('.mock'));
+
+// PROP FIRM STRIP
+const propData = [
+  {label:'Profit Target',val:'67.3%',cls:'ok',fill:67.3},
+  {label:'Max DD',val:'2.1%',cls:'ok',fill:21},
+  {label:'Daily DD',val:'0.4%',cls:'ok',fill:4},
+  {label:'Consistency',val:'38%',cls:'warn',fill:38},
+  {label:'ROI',val:'+6.73%',cls:'ok',fill:67.3},
+];
+document.getElementById('propStrip').innerHTML = propData.map(p=>`
+  <div class="prop-chip">
+    <div class="prop-chip-label">${p.label}</div>
+    <div class="prop-chip-val ${p.cls}">${p.val}</div>
+    <div class="prop-chip-bar"><div class="prop-chip-fill" style="width:${p.fill}%"></div></div>
+  </div>`).join('');
+
+// KPI GRID
+document.getElementById('kpiGrid').innerHTML = `
+  <div class="kpi"><div class="kpi-label">Win Rate</div><div class="kpi-val g">66.7%</div></div>
+  <div class="kpi"><div class="kpi-label">Profit Factor</div><div class="kpi-val g">2.41</div></div>
+  <div class="kpi"><div class="kpi-label">Max Drawdown</div><div class="kpi-val r">-2.1%</div></div>
+  <div class="kpi"><div class="kpi-label">Net P&L</div><div class="kpi-val g">+$673</div></div>`;
+
+// PATTERN MOCK
+const patterns = [
+  {title:'Revenge Trading After Loss',sev:'HIGH',conf:90,cost:'-$47.20',rule:'60min cooldown after any loss'},
+  {title:'Overtrading Asia Session',sev:'MEDIUM',conf:75,cost:'-$23.50',rule:'Max 2 trades before NY open'},
+  {title:'Emotion-to-Loss Correlation',sev:'MEDIUM',conf:80,cost:'-$18.90',rule:'No trades when frustrated'},
+];
+let patIdx = 0;
+const renderPattern = () => {
+  const p = patterns[patIdx];
+  const colors = {HIGH:'var(--red)',MEDIUM:'var(--gold)',LOW:'var(--blue)'};
+  document.getElementById('patternMock').innerHTML = `
+    <div style="border-left:3px solid ${colors[p.sev]||'var(--green)'};padding-left:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:700;color:var(--text)">${p.title}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--red);font-family:'JetBrains Mono',monospace">${p.cost}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <span style="font-size:10px;color:${colors[p.sev]};background:rgba(0,0,0,.3);border:1px solid ${colors[p.sev]};padding:2px 8px;border-radius:4px;letter-spacing:.06em">${p.sev} IMPACT</span>
+        <span style="font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--border);padding:2px 8px;border-radius:4px">AI: ${p.conf}%</span>
+      </div>
+      <div style="font-size:12px;color:var(--green);font-weight:600">→ ${p.rule}</div>
+    </div>`;
+  document.getElementById('patternDots').innerHTML = patterns.map((_,i)=>
+    `<div style="width:${i===patIdx?'16px':'6px'};height:6px;border-radius:3px;background:${i===patIdx?'var(--green)':'var(--border2)'};transition:all .3s;cursor:pointer" onclick="patIdx=${i};renderPattern()"></div>`
+  ).join('');
+};
+renderPattern();
+setInterval(() => { patIdx=(patIdx+1)%patterns.length; renderPattern(); }, 3000);
+
+// BENTO CARDS — Vue
+const { createApp } = Vue;
 createApp({
   setup() {
-    const features = [
-      { icon: '🧠', title: 'AI Psychology Coach', desc: 'Groq LLM reads your trade notes and detects emotions, discipline score, and behavioural patterns. Like having a trading psychologist in your journal.', tag: 'Powered by Groq LLM' },
-      { icon: '🏷️', title: 'Smart Setup Auto-Tagging', desc: 'Write "entered on 4H FVG tap with MSS confirmation" — AI extracts and tags Fair Value Gap, BOS automatically. No manual tagging needed.', tag: 'SMC / ICT aware' },
-      { icon: '📊', title: 'Prop Firm Dashboard', desc: 'Real-time tracking of profit target %, max drawdown, daily drawdown, consistency score, and ROI. Know your status before your broker does.', tag: 'FTMO · Funded Next · Upcomers' },
-      { icon: '📅', title: 'P&L Calendar Heatmap', desc: 'See exactly which days you make and lose money. Spot session bias, news day patterns, and revenge trading cycles at a glance.', tag: 'Visual' },
-      { icon: '⚡', title: 'Pattern Carousel', desc: 'Up to 5 adaptive insights, sorted by dollar damage, that update as you improve. Patterns you fix drop off automatically. No stale advice.', tag: 'Adaptive AI' },
-      { icon: '📥', title: 'MT5 Import', desc: 'Import your full trade history from MT5 HTML exports, CSV, XLSX, or PDF. Correct pip math for every instrument including XAUUSD.', tag: 'MT5 · CSV · XLSX · PDF' },
-      { icon: '📈', title: 'Live Market Ticker', desc: 'Real-time prices for XAUUSD, EURUSD, GBPUSD, BTC, ETH, NAS100, US30 and more — right inside your journal.', tag: 'TradingView data' },
-      { icon: '🔐', title: 'Private & Secure', desc: 'Every trade is scoped to your account only. Multi-user architecture with bcrypt password hashing. Your data is yours.', tag: 'Per-user isolation' },
-      { icon: '🖼️', title: 'Chart Screenshots', desc: 'Attach your TradingView chart to every trade. Build a visual library of your setups over time. Click to expand in lightbox.', tag: 'Cloudinary storage' },
+    const cards = [
+      {icon:'🧠',title:'AI Psychology Coach',desc:'Groq LLM reads your trade notes and detects emotions, discipline score, and behavioural patterns — no generic advice.',tag:'Groq llama-3.3-70b',wide:true},
+      {icon:'🏷️',title:'SMC Auto-Tagging',desc:'Write "4H FVG tap with MSS" — AI extracts Fair Value Gap and BOS automatically from your notes.',tag:'SMC / ICT aware'},
+      {icon:'🏦',title:'Prop Firm Compliance',desc:'Real-time profit target, max DD, daily DD, consistency %, and ROI tracking.',tag:'FTMO · Upcomers · MyFundedFX'},
+      {icon:'📥',title:'MT5 Import',desc:'Import full history from MT5 HTML exports, CSV, XLSX, or PDF. Correct pip math including XAUUSD.',tag:'MT5 · CSV · XLSX · PDF'},
+      {icon:'📅',title:'P&L Calendar',desc:'Monthly heatmap showing which days you win and lose. Spot session bias and revenge cycles instantly.',tag:'Visual'},
+      {icon:'🔄',title:'Adaptive Patterns',desc:'Up to 5 AI insights sorted by dollar damage. Patterns you fix disappear automatically.',tag:'Always current'},
+      {icon:'📈',title:'Live Ticker',desc:'Real-time XAUUSD, EURUSD, BTC, NAS100 and more — right inside your journal.',tag:'TradingView data'},
+      {icon:'🔐',title:'Private & Secure',desc:'Every trade scoped to your account. Multi-user architecture with bcrypt hashing.',tag:'Per-user isolation'},
     ];
-    return { features };
+    return { cards };
   },
   template: `
-    <div class="features-grid">
-      <div v-for="(f,i) in features" :key="i" class="feature-card feature-card-vue"
-           :style="{animationDelay: i*0.08+'s'}">
-        <div class="feature-icon">{{f.icon}}</div>
-        <div class="feature-title">{{f.title}}</div>
-        <div class="feature-desc">{{f.desc}}</div>
-        <span class="feature-tag">{{f.tag}}</span>
+    <div class="bento">
+      <div v-for="(c,i) in cards" :key="i" class="bento-card" :class="{wide:c.wide}" style="opacity:0;transform:translateY(30px)">
+        <span class="bento-icon">{{ c.icon }}</span>
+        <div class="bento-title">{{ c.title }}</div>
+        <div class="bento-desc">{{ c.desc }}</div>
+        <span class="bento-tag">{{ c.tag }}</span>
       </div>
     </div>`
-}).mount('#featuresGrid');
+}).mount('#bentoGrid');
 
-// ── FAQ Vue App ──────────────────────────────────────────────
+// Animate bento cards on scroll
+setTimeout(() => {
+  document.querySelectorAll('.bento-card').forEach((card, i) => {
+    gsap.to(card, {
+      scrollTrigger: {trigger: card, start:'top 90%'},
+      opacity:1, y:0, duration:.6, ease:'power2.out', delay: i * 0.06
+    });
+  });
+}, 200);
+
+// COMPARE TABLE
+const rows = [
+  ['SMC/ICT setup tags','✅','❌','❌','❌'],
+  ['AI psychology analysis','✅','❌','❌','✅'],
+  ['Auto-tag from notes','✅','❌','❌','❌'],
+  ['Prop firm compliance tracker','✅','❌','✅','✅'],
+  ['MT5 import','✅','✅','✅','✅'],
+  ['Chart screenshot upload','✅','✅','❌','✅'],
+  ['Adaptive pattern carousel','✅','❌','✅','❌'],
+  ['Correct XAUUSD pip math','✅','⚠️','⚠️','⚠️'],
+  ['Price','🟢 Free','$29/mo','$169/yr','$49/mo'],
+];
+document.getElementById('cmpBody').innerHTML = rows.map(r=>
+  `<tr><td class="fn">${r[0]}</td>${r.slice(1).map((v,i)=>
+    `<td class="${i===0?'hl':''}">${v.includes('✅')?`<span class="ck">✅</span>`:v.includes('❌')?`<span class="cx">❌</span>`:v}</td>`
+  ).join('')}</tr>`
+).join('');
+
+// TESTIMONIALS
+const testis = [
+  {q:'Finally a journal that speaks SMC. The auto-tagging caught my 4H OB confluence automatically from my notes — I didn\'t even click anything.',name:'r/Forex user',handle:'XAUUSD trader · 2 prop accounts'},
+  {q:'The AI psychology coach flagged my revenge trading pattern before I even noticed it myself. Saved my prop account consistency score.',name:'r/Daytrading user',handle:'Futures trader · ICT methodology'},
+  {q:'Edgewonk costs $169/year and doesn\'t have half of this. The prop firm tracker alone is worth it. And it\'s actually free.',name:'r/algotrading user',handle:'Forex trader · FTMO & Funded Next'},
+];
+document.getElementById('testiGrid').innerHTML = testis.map((t,i)=>`
+  <div class="testi" style="opacity:0;transform:translateY(20px)">
+    <div class="stars">★★★★★</div>
+    <p class="tq">"${t.q}"</p>
+    <div class="ta"><div class="av">${t.name[0]}</div><div><div class="an">${t.name}</div><div class="ah">${t.handle}</div></div></div>
+  </div>`).join('');
+document.querySelectorAll('.testi').forEach((el,i) => {
+  gsap.to(el, {scrollTrigger:{trigger:el,start:'top 90%'}, opacity:1, y:0, duration:.6, ease:'power2.out', delay:i*.12});
+});
+
+// FAQ — Vue
 createApp({
   setup() {
+    const { ref } = Vue;
     const open = ref(null);
     const faqs = [
-      { q: 'Is TradeJournal really free?', a: 'Yes, completely free. No trial period, no credit card, no hidden limits. We built this for traders, not to sell subscriptions.' },
-      { q: 'Does it work with my MT5 broker?', a: 'Yes. Import trades directly from MT5 HTML history exports, or paste CSV/XLSX. Pip math is correct for every instrument including XAUUSD (contract size 100 oz/lot).' },
-      { q: 'What is SMC and does it support ICT concepts?', a: 'Smart Money Concepts (SMC) and Inner Circle Trader (ICT) methodology use concepts like Order Blocks, Fair Value Gaps, BOS, CHoCH, and Liquidity Sweeps. TradeJournal has all of these as setup tags, and the AI understands them in your notes.' },
-      { q: 'How does the AI psychology analysis work?', a: 'When you write trade notes, the AI (powered by Groq\'s llama-3.3-70b model) reads your words and identifies emotions like FOMO, revenge, patience, or confidence. It scores your discipline from -1 (tilt) to +1 (calm), and over time surfaces patterns that cost you money.' },
-      { q: 'Can I track my prop firm rules?', a: 'Yes. Add your prop firm\'s profit target, max drawdown, daily drawdown limit, and consistency requirements in Settings. The dashboard shows a live compliance strip so you always know where you stand.' },
-      { q: 'Is my data private?', a: 'Completely. Every piece of data is scoped to your user account. No other user can see your trades, and we do not sell or share your data.' },
+      {q:'Is TradeJournal really free?', a:'Yes — completely. No trial, no credit card, no trade caps, no hidden tiers. All features are available to every user from day one.'},
+      {q:'Does it work with MT5 brokers?', a:'Yes. Import trades directly from MT5 HTML history exports, CSV, or XLSX. Pip math is correct for every instrument — including XAUUSD at 100 oz/lot contract size.'},
+      {q:'What SMC and ICT concepts are supported?', a:'All major ones: Order Blocks, Fair Value Gaps, BOS, CHoCH, Liquidity Sweeps, Breaker Blocks, Mitigation Blocks, Inducement, OTE, Premium/Discount, Imbalance, Equal Highs/Lows, Turtle Soup, Killzones, and Session Opens. Plus the AI reads your notes and extracts timeframe-aware tags automatically.'},
+      {q:'How does the AI psychology analysis work?', a:'When you write trade notes, Groq\'s llama-3.3-70b model reads your words and identifies emotions (FOMO, revenge, patience, overconfidence), scores discipline from -1 to +1, and over time surfaces patterns costing you real money.'},
+      {q:'Can I track multiple prop firm challenges?', a:'You can configure one prop firm target at a time in Settings. Multi-account support is on the roadmap.'},
+      {q:'Is my data private?', a:'Yes. Every trade, note, and chart is scoped to your user account only. No other user can see your data, and we do not sell or share it with anyone.'},
     ];
-    const toggle = (i) => { open.value = open.value === i ? null : i; };
-    return { faqs, open, toggle };
+    return { faqs, open, toggle: i => { open.value = open.value === i ? null : i; }};
   },
-  template: `
+  template:`
     <div>
       <div v-for="(f,i) in faqs" :key="i" class="faq-item">
         <button class="faq-q" @click="toggle(i)">
-          {{f.q}}
-          <span class="faq-icon" :class="{open: open===i}">+</span>
+          {{ f.q }}<span class="faq-icon" :class="{open:open===i}">+</span>
         </button>
-        <div class="faq-a" :class="{open: open===i}">{{f.a}}</div>
+        <div class="faq-a" :class="{open:open===i}">{{ f.a }}</div>
       </div>
     </div>`
 }).mount('#faqWrap');
 
-// ── Compare Table ────────────────────────────────────────────
-const rows = [
-  ['SMC/ICT setup tags', '✅', '❌', '❌', '❌'],
-  ['AI psychology analysis', '✅', '❌', '❌', '❌'],
-  ['Auto-tag from notes', '✅', '❌', '❌', '❌'],
-  ['Prop firm tracker', '✅', '❌', '✅', '❌'],
-  ['MT5 import', '✅', '✅', '✅', '❌'],
-  ['Chart screenshot upload', '✅', '✅', '❌', '❌'],
-  ['Pattern carousel (max 5)', '✅', '❌', '✅', '❌'],
-  ['Correct XAUUSD pip math', '✅', '⚠️', '⚠️', '⚠️'],
-  ['Price', '🟢 Free', '💰 $29/mo', '💰 $169/yr', '🟡 Free'],
-];
-const tbody = document.getElementById('compareBody');
-rows.forEach(r => {
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td class="feature-name">${r[0]}</td>${r.slice(1).map((v,i)=>`<td class="${i===0?'highlight':''}">${v.includes('✅')?`<span class="check">✅</span>`:v.includes('❌')?`<span class="cross">❌</span>`:v}</td>`).join('')}`;
-  tbody.appendChild(tr);
-});
-
-// ── Ticker ───────────────────────────────────────────────────
-const tickers = [
-  {sym:'XAUUSD',val:'2,347.50',chg:'+0.42%',up:true},
-  {sym:'EURUSD',val:'1.0821',chg:'-0.12%',up:false},
-  {sym:'GBPUSD',val:'1.2734',chg:'+0.18%',up:true},
-  {sym:'USDJPY',val:'157.83',chg:'+0.31%',up:true},
-  {sym:'BTCUSD',val:'67,420',chg:'+1.24%',up:true},
-  {sym:'NAS100',val:'19,847',chg:'-0.08%',up:false},
-  {sym:'US30',val:'39,215',chg:'+0.22%',up:true},
-  {sym:'XAGUSD',val:'29.41',chg:'+0.55%',up:true},
-  {sym:'ETHUSD',val:'3,521',chg:'+0.89%',up:true},
-  {sym:'DXY',val:'104.21',chg:'-0.15%',up:false},
-];
-const track = document.getElementById('tickerTrack');
-const html = [...tickers,...tickers].map(t=>`
-  <div class="ticker-item">
-    <span class="ticker-sym">${t.sym}</span>
-    <span class="ticker-val">${t.val}</span>
-    <span class="ticker-chg ${t.up?'up':''}">${t.chg}</span>
-  </div>`).join('');
-track.innerHTML = html;
-
-// ── GSAP Animations ──────────────────────────────────────────
-gsap.registerPlugin(ScrollTrigger);
-
-gsap.from('#heroContent > *', {
-  opacity: 0, y: 30, stagger: 0.15, duration: 0.8, ease: 'power3.out', delay: 0.2
-});
-
-// CountUp stats
-const statsObserver = new IntersectionObserver((entries) => {
-  if (entries[0].isIntersecting) {
-    new countUp.CountUp('stat1', 2847, {duration:2.5, useEasing:true}).start();
-    new countUp.CountUp('stat2', 13, {duration:2, suffix:' tags'}).start();
-    new countUp.CountUp('stat3', 5, {duration:1.5, suffix:'/trader'}).start();
-    new countUp.CountUp('stat4', 8, {duration:1.5, suffix:' live'}).start();
-    statsObserver.disconnect();
-  }
-}, {threshold:0.3});
-statsObserver.observe(document.getElementById('statsSection'));
-
-// Steps scroll reveal
-const steps = document.querySelectorAll('.step');
-const stepObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-}, {threshold:0.2});
-steps.forEach(s => stepObserver.observe(s));
-
-// Terminal typewriter
-const lines = [
-  {type:'prompt', text:' Analyzing trade notes…'},
-  {type:'out', text:'Detected emotions: ', val:'frustration, overconfidence'},
-  {type:'out', text:'Discipline score: ', val:'-0.4', neg:true},
-  {type:'out', text:'Label: ', val:'"Chasing after loss"'},
-  {type:'out', text:''},
-  {type:'prompt', text:' Extracting setup tags…'},
-  {type:'out', text:'Found: ', val:'Fair Value Gap · Order Block · BOS', gold:true},
-  {type:'out', text:'Timeframe context: ', val:'4H FVG tap, 15min OB entry', blue:true},
-  {type:'out', text:''},
-  {type:'prompt', text:' Pattern detected:'},
-  {type:'out', text:'⚠  ', val:'Revenge trading after Asia session loss (-$47.20 avg cost)'},
-  {type:'out', text:'→  Rule: ', val:'No trades for 60min after a loss'},
-];
-let lineIdx = 0;
-const tb = document.getElementById('terminalBody');
-const termObserver = new IntersectionObserver(async (entries) => {
-  if (!entries[0].isIntersecting) return;
-  termObserver.disconnect();
-  tb.innerHTML = '';
-  for (const l of lines) {
-    await new Promise(r => setTimeout(r, 180));
-    const div = document.createElement('div');
-    div.className = 't-line';
-    if (l.type === 'prompt') {
-      div.innerHTML = `<span class="t-prompt">▶</span><span class="t-cmd">${l.text}</span>`;
-    } else {
-      const valClass = l.neg ? 't-neg' : l.gold ? 't-gold' : l.blue ? 't-blue' : 't-val';
-      div.innerHTML = `<span class="t-out">${l.text}${l.val ? `<span class="${valClass}">${l.val}</span>` : ''}</span>`;
-    }
-    tb.appendChild(div);
-    tb.scrollTop = tb.scrollHeight;
-  }
-  const cursor = document.createElement('div');
-  cursor.className = 't-line';
-  cursor.innerHTML = '<span class="t-prompt">▶</span><span class="t-cursor"></span>';
-  tb.appendChild(cursor);
-}, {threshold:0.4});
-termObserver.observe(document.getElementById('terminalDemo'));
-
-// Nav scroll effect
-window.addEventListener('scroll', () => {
-  document.getElementById('navbar').style.background =
-    window.scrollY > 60 ? 'rgba(8,12,16,0.98)' : 'rgba(8,12,16,0.85)';
-});
-
-// Feature cards GSAP
-gsap.from('.feature-card-vue', {
-  scrollTrigger: { trigger: '#featuresGrid', start: 'top 80%' },
-  opacity: 0, y: 40, stagger: 0.07, duration: 0.6, ease: 'power2.out'
+// CTA section fade
+gsap.from('.cta-h', {
+  scrollTrigger:{trigger:'.cta-s',start:'top 80%'},
+  opacity:0, y:60, duration:1, ease:'power3.out'
 });
 </script>
 {% endraw %}
