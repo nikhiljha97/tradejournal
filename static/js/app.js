@@ -174,6 +174,7 @@ function renderBalanceChart(trades) {
     }
   });
   if (!$('balanceChart')) return;
+  console.log('Balance chart data:', data.length, 'points, start:', startBal, 'trades with pnl:', sorted.filter(t=>t.pnl!=null).length);
   charts.balance = new Chart($('balanceChart'), {
     type: 'line',
     data: {
@@ -198,8 +199,8 @@ function renderBalanceChart(trades) {
         y: {
           grid: { color: 'rgba(255,255,255,0.04)' },
           ticks: { color: C.muted, callback: v => '$' + v.toFixed(0), font: { family: 'JetBrains Mono', size: 10 } },
-          min: Math.min(...data) - Math.abs(Math.min(...data) * 0.02),
-          max: Math.max(...data) + Math.abs(Math.max(...data) * 0.02),
+          min: data.length ? Math.min(...data) * 0.999 : undefined,
+          max: data.length ? Math.max(...data) * 1.001 : undefined,
         }
       }
     }
