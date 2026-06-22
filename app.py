@@ -19,7 +19,7 @@ except ImportError:
     pass
 
 from config import Config, INSTRUMENT_PIP, SESSIONS, SETUP_TAGS
-from models import db, Trade, Settings, ImportLog, User
+from models import db, Trade, Settings, ImportLog, User, BlogPost, TradeIdea, PostComment, PostLike, IdeaComment, IdeaLike
 import metrics as kpi
 import sentiment as sent
 import importer as imp
@@ -398,6 +398,138 @@ def reset_password(token):
     user.reset_token_expiry = None
     db.session.commit()
     return jsonify({"ok": True})
+
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL","nikhiljha97@yahoo.com")
+def is_admin():
+    return current_user.is_authenticated and current_user.email == ADMIN_EMAIL
+
+@app.route("/blog-posts")
+def blog_posts_page():
+    return render_template("community.html", section="blog")
+
+@app.route("/ideas")
+def ideas_page():
+    return render_template("community.html", section="ideas")
+
+@app.route("/api/blog-posts", methods=["GET"])
+def get_blog_posts():
+    posts = BlogPost.query.filter_by(published=True).order_by(BlogPost.created_at.desc()).all()
+    uid = current_user.id if current_user.is_authenticated else None
+    return jsonify([p.to_dict(uid) for p in posts])
+
+@app.route("/api/blog-posts", methods=["POST"])
+@login_required
+def create_blog_post():
+    if not is_admin(): return jsonify({"error":"Unauthorized"}),403
+    d = request.json
+    import re
+    slug = re.sub(r"[^a-z0-9]+","-",d.get("title","").lower()).strip("-")
+    slug = f"{slug}-{int(datetime.now(timezone.utc).timestamp())}"
+    post = BlogPost(author_id=current_user.id,title=d.get("title",""),slug=slug,excerpt=d.get("excerpt",""),content=d.get("content",""),tag=d.get("tag","Chart Update"))
+    db.session.add(post); db.session.commit()
+    return jsonify(post.to_dict(current_user.id))
+
+@app.route("/api/blog-posts/<int:pid>", methods=["DELETE"])
+@login_required
+def delete_blog_post(pid):
+    if not is_admin(): return jsonify({"error":"Unauthorized"}),403
+    post = BlogPost.query.get_or_404(pid)
+    db.session.delete(post); db.session.commit()
+    return jsonify({"ok":True})
+
+@app.route("/api/blog-posts/<int:pid>/like", methods=["POST"])
+@login_required
+def like_blog_post(pid):
+    is_like = request.json.get("is_like",True)
+    existing = PostLike.query.filter_by(post_id=pid,user_id=current_user.id).first()
+    if existing:
+        if existing.is_like==is_like: db.session.delete(existing)
+        else: existing.is_like=is_like
+    else: db.session.add(PostLike(post_id=pid,user_id=current_user.id,is_like=is_like))
+    db.session.commit()
+    post = BlogPost.query.get(pid)
+    return jsonify(post.to_dict(current_user.id))
+
+@app.route("/api/blog-posts/<int:pid>/comments", methods=["GET"])
+def get_blog_comments(pid):
+    return jsonify([c.to_dict() for c in PostComment.query.filter_by(post_id=pid).order_by(PostComment.created_at.asc()).all()])
+
+@app.route("/api/blog-posts/<int:pid>/comments", methods=["POST"])
+@login_required
+def add_blog_comment(pid):
+    txt = request.json.get("content","").strip()
+    if not txt: return jsonify({"error":"Empty"}),400
+    c = PostComment(post_id=pid,user_id=current_user.id,content=txt)
+    db.session.add(c); db.session.commit()
+    return jsonify(c.to_dict())
+
+@app.route("/api/blog-posts/<int:pid>/comments/<int:cid>", methods=["DELETE"])
+@login_required
+def delete_blog_comment(pid,cid):
+    c = PostComment.query.get_or_404(cid)
+    if c.user_id!=current_user.id and not is_admin(): return jsonify({"error":"Unauthorized"}),403
+    db.session.delete(c); db.session.commit()
+    return jsonify({"ok":True})
+
+@app.route("/api/ideas", methods=["GET"])
+def get_ideas():
+    ideas = TradeIdea.query.order_by(TradeIdea.created_at.desc()).all()
+    uid = current_user.id if current_user.is_authenticated else None
+    return jsonify([i.to_dict(uid) for i in ideas])
+
+@app.route("/api/ideas", methods=["POST"])
+@login_required
+def create_idea():
+    d = request.json
+    idea = TradeIdea(author_id=current_user.id,title=d.get("title",""),instrument=d.get("instrument","").upper(),direction=d.get("direction","Neutral"),content=d.get("content",""),image_url=d.get("image_url"))
+    db.session.add(idea); db.session.commit()
+    return jsonify(idea.to_dict(current_user.id))
+
+@app.route("/api/ideas/<int:iid>", methods=["DELETE"])
+@login_required
+def delete_idea(iid):
+    idea = TradeIdea.query.get_or_404(iid)
+    if idea.author_id!=current_user.id and not is_admin(): return jsonify({"error":"Unauthorized"}),403
+    db.session.delete(idea); db.session.commit()
+    return jsonify({"ok":True})
+
+@app.route("/api/ideas/<int:iid>/like", methods=["POST"])
+@login_required
+def like_idea(iid):
+    is_like = request.json.get("is_like",True)
+    existing = IdeaLike.query.filter_by(idea_id=iid,user_id=current_user.id).first()
+    if existing:
+        if existing.is_like==is_like: db.session.delete(existing)
+        else: existing.is_like=is_like
+    else: db.session.add(IdeaLike(idea_id=iid,user_id=current_user.id,is_like=is_like))
+    db.session.commit()
+    idea = TradeIdea.query.get(iid)
+    return jsonify(idea.to_dict(current_user.id))
+
+@app.route("/api/ideas/<int:iid>/comments", methods=["GET"])
+def get_idea_comments(iid):
+    return jsonify([c.to_dict() for c in IdeaComment.query.filter_by(idea_id=iid).order_by(IdeaComment.created_at.asc()).all()])
+
+@app.route("/api/ideas/<int:iid>/comments", methods=["POST"])
+@login_required
+def add_idea_comment(iid):
+    txt = request.json.get("content","").strip()
+    if not txt: return jsonify({"error":"Empty"}),400
+    c = IdeaComment(idea_id=iid,user_id=current_user.id,content=txt)
+    db.session.add(c); db.session.commit()
+    return jsonify(c.to_dict())
+
+@app.route("/api/ideas/<int:iid>/comments/<int:cid>", methods=["DELETE"])
+@login_required
+def delete_idea_comment(iid,cid):
+    c = IdeaComment.query.get_or_404(cid)
+    if c.user_id!=current_user.id and not is_admin(): return jsonify({"error":"Unauthorized"}),403
+    db.session.delete(c); db.session.commit()
+    return jsonify({"ok":True})
+
+@app.route("/api/me/is_admin")
+def check_admin():
+    return jsonify({"is_admin":is_admin()})
 
 @app.route("/google18b855e2f453917d.html")
 def google_verification():

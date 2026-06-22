@@ -153,3 +153,77 @@ class User(db.Model):
 
     def to_dict(self):
         return {"id": self.id, "email": self.email, "username": self.username}
+
+
+class BlogPost(db.Model):
+    __tablename__ = "blog_posts"
+    id          = db.Column(db.Integer, primary_key=True)
+    author_id   = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    title       = db.Column(db.String(200), nullable=False)
+    slug        = db.Column(db.String(220), unique=True, nullable=False)
+    excerpt     = db.Column(db.Text)
+    content     = db.Column(db.Text, nullable=False)
+    tag         = db.Column(db.String(50), default="Chart Update")
+    published   = db.Column(db.Boolean, default=True)
+    created_at  = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    comments    = db.relationship("PostComment", backref="post", lazy=True, cascade="all,delete")
+    likes       = db.relationship("PostLike",    backref="post", lazy=True, cascade="all,delete")
+    def to_dict(self, user_id=None):
+        return {"id":self.id,"title":self.title,"slug":self.slug,"excerpt":self.excerpt,"content":self.content,"tag":self.tag,"created_at":self.created_at.strftime("%Y-%m-%d"),"likes":sum(1 for l in self.likes if l.is_like),"dislikes":sum(1 for l in self.likes if not l.is_like),"liked":any(l.user_id==user_id and l.is_like for l in self.likes) if user_id else False,"disliked":any(l.user_id==user_id and not l.is_like for l in self.likes) if user_id else False,"comment_count":len(self.comments),"author":"TradeJournal"}
+
+class TradeIdea(db.Model):
+    __tablename__ = "trade_ideas"
+    id          = db.Column(db.Integer, primary_key=True)
+    author_id   = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    title       = db.Column(db.String(200), nullable=False)
+    instrument  = db.Column(db.String(20), nullable=False)
+    direction   = db.Column(db.String(10), nullable=False)
+    content     = db.Column(db.Text, nullable=False)
+    image_url   = db.Column(db.String(500))
+    created_at  = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    comments    = db.relationship("IdeaComment", backref="idea", lazy=True, cascade="all,delete")
+    likes       = db.relationship("IdeaLike",    backref="idea", lazy=True, cascade="all,delete")
+    def to_dict(self, user_id=None):
+        from models import User
+        author = User.query.get(self.author_id)
+        return {"id":self.id,"title":self.title,"instrument":self.instrument,"direction":self.direction,"content":self.content,"image_url":self.image_url,"created_at":self.created_at.strftime("%Y-%m-%d %H:%M"),"author":author.username if author else "Unknown","likes":sum(1 for l in self.likes if l.is_like),"dislikes":sum(1 for l in self.likes if not l.is_like),"liked":any(l.user_id==user_id and l.is_like for l in self.likes) if user_id else False,"disliked":any(l.user_id==user_id and not l.is_like for l in self.likes) if user_id else False,"comment_count":len(self.comments)}
+
+class PostComment(db.Model):
+    __tablename__ = "post_comments"
+    id         = db.Column(db.Integer, primary_key=True)
+    post_id    = db.Column(db.Integer, db.ForeignKey("blog_posts.id"), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content    = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    def to_dict(self):
+        from models import User
+        u = User.query.get(self.user_id)
+        return {"id":self.id,"content":self.content,"author":u.username if u else "?","created_at":self.created_at.strftime("%Y-%m-%d %H:%M")}
+
+class PostLike(db.Model):
+    __tablename__ = "post_likes"
+    id      = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey("blog_posts.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    is_like = db.Column(db.Boolean, default=True)
+    __table_args__ = (db.UniqueConstraint("post_id","user_id"),)
+
+class IdeaComment(db.Model):
+    __tablename__ = "idea_comments"
+    id       = db.Column(db.Integer, primary_key=True)
+    idea_id  = db.Column(db.Integer, db.ForeignKey("trade_ideas.id"), nullable=False)
+    user_id  = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    content  = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    def to_dict(self):
+        from models import User
+        u = User.query.get(self.user_id)
+        return {"id":self.id,"content":self.content,"author":u.username if u else "?","created_at":self.created_at.strftime("%Y-%m-%d %H:%M")}
+
+class IdeaLike(db.Model):
+    __tablename__ = "idea_likes"
+    id      = db.Column(db.Integer, primary_key=True)
+    idea_id = db.Column(db.Integer, db.ForeignKey("trade_ideas.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    is_like = db.Column(db.Boolean, default=True)
+    __table_args__ = (db.UniqueConstraint("idea_id","user_id"),)

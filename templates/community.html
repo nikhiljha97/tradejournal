@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{% if section=='blog' %}Chart Updates — TradeJournal{% else %}Trade Ideas — TradeJournal Community{% endif %}</title>
+  <meta name="description" content="{% if section=='blog' %}Daily chart analysis and trade setups.{% else %}Community trade ideas from SMC and ICT traders.{% endif %}"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#07090d;--bg2:#0c1018;--panel:#111820;--panel2:#161f2a;--border:#1c2b3a;--border2:#243447;--text:#d4dde8;--muted:#5a7080;--faint:#1e2d3d;--green:#00e5a0;--green2:#00c88a;--gdim:#003d2b;--red:#ff4757;--gold:#f0c040;--blue:#4da6ff}
+    body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:64px;background:rgba(7,9,13,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .nav-logo{font-size:17px;font-weight:900}.nav-logo span{color:var(--green)}
+    .nav-links{display:flex;gap:24px;align-items:center}
+    .nav-links a{font-size:13px;color:var(--muted);font-weight:500;transition:color .2s}.nav-links a:hover{color:var(--text)}
+    .nav-links a.active{color:var(--green)}
+    .nav-cta{background:var(--green);color:#000;font-weight:800;font-size:13px;padding:8px 20px;border-radius:8px}
+    .hero{padding:60px 5% 40px;border-bottom:1px solid var(--border);background:var(--bg2)}
+    .hero-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;display:block}
+    .hero-title{font-size:clamp(32px,5vw,56px);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin-bottom:12px}
+    .hero-title em{font-style:italic;color:var(--green);font-weight:300}
+    .hero-sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:520px}
+    .hero-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;align-items:center}
+    .btn-p{background:var(--green);color:#000;font-weight:700;font-size:14px;padding:10px 22px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;font-family:"Inter",sans-serif;text-decoration:none}
+    .btn-p:hover{background:var(--green2)}
+    .btn-g{border:1px solid var(--border2);color:var(--text);font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;background:var(--panel);cursor:pointer;transition:all .2s;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block}
+    .btn-g:hover{border-color:var(--green);color:var(--green)}
+    .login-note{font-size:13px;color:var(--muted)}.login-note a{color:var(--green);font-weight:600}
+    .section-tabs{display:flex;gap:2px;padding:0 5%;border-bottom:1px solid var(--border);background:var(--bg2)}
+    .s-tab{padding:14px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;text-decoration:none;display:inline-block}
+    .s-tab:hover{color:var(--text)}.s-tab.active{color:var(--green);border-bottom-color:var(--green)}
+    .feed{max-width:800px;margin:0 auto;padding:40px 5%}
+    .post-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px;transition:all .3s}
+    .post-card:hover{border-color:var(--border2)}
+    .post-tag{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:10px}
+    .tag-green{background:var(--gdim);color:var(--green)}.tag-blue{background:rgba(77,166,255,.1);color:var(--blue)}.tag-red{background:rgba(255,71,87,.1);color:var(--red)}.tag-gold{background:rgba(240,192,64,.1);color:var(--gold)}
+    .post-title{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:8px;line-height:1.3;cursor:pointer}
+    .post-title:hover{color:var(--green)}
+    .post-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+    .post-author{font-weight:600;color:var(--text)}
+    .post-excerpt{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+    .post-image{width:100%;border-radius:8px;margin-bottom:16px;max-height:400px;object-fit:cover;cursor:pointer}
+    .post-content{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:16px;display:none;white-space:pre-wrap}
+    .post-content.expanded{display:block}
+    .post-actions{display:flex;align-items:center;gap:8px;padding-top:14px;border-top:1px solid var(--faint);flex-wrap:wrap}
+    .action-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .2s;font-family:"Inter",sans-serif}
+    .action-btn:hover{border-color:var(--border2);color:var(--text)}
+    .action-btn.liked{border-color:var(--green);color:var(--green);background:var(--gdim)}
+    .action-btn.disliked{border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08)}
+    .action-btn.comment-btn{margin-left:auto}
+    .expand-btn{font-size:12px;color:var(--green);font-weight:600;background:none;border:none;cursor:pointer;font-family:"Inter",sans-serif;padding:0;margin-bottom:8px}
+    .delete-btn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;float:right}
+    .delete-btn:hover{color:var(--red)}
+    .comments-section{margin-top:16px;display:none}
+    .comments-section.open{display:block}
+    .comment{display:flex;gap:10px;margin-bottom:12px}
+    .comment-avatar{width:28px;height:28px;border-radius:50%;background:var(--gdim);border:1px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--green);flex-shrink:0}
+    .comment-body{flex:1;background:var(--panel2);border:1px solid var(--faint);border-radius:8px;padding:10px 14px}
+    .comment-author{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .comment-text{font-size:13px;color:var(--muted);line-height:1.6}
+    .comment-time{font-size:10px;color:var(--faint);margin-top:4px}
+    .comment-input-row{display:flex;gap:8px;margin-top:12px}
+    .comment-input{flex:1;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 14px;font-size:13px;font-family:"Inter",sans-serif;outline:none;transition:border-color .2s}
+    .comment-input:focus{border-color:var(--green)}
+    .comment-submit{background:var(--green);color:#000;font-weight:700;font-size:13px;padding:9px 16px;border:none;border-radius:8px;cursor:pointer;font-family:"Inter",sans-serif}
+    .dir-long{color:var(--green);font-weight:700}.dir-short{color:var(--red);font-weight:700}.dir-neutral{color:var(--muted);font-weight:700}
+    .empty{text-align:center;padding:60px 20px;color:var(--muted)}.empty-icon{font-size:48px;margin-bottom:16px}.empty h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-bg.open{display:flex}
+    .modal{background:var(--panel);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto}
+    .modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);z-index:1}
+    .modal-title{font-size:16px;font-weight:700}
+    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+    .modal-body{padding:24px}
+    .field{margin-bottom:18px}
+    .field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px}
+    .field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 14px;font-size:14px;font-family:"Inter",sans-serif;outline:none;transition:border-color .2s;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green)}
+    .field select option{background:var(--panel2)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+    footer{border-top:1px solid var(--border);padding:32px 5%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:40px}
+    .fl{font-size:14px;font-weight:900}.fl span{color:var(--green)}
+    .fc{font-size:11px;color:var(--faint)}
+    @media(max-width:768px){nav .nav-links{display:none}.hero{padding:40px 4% 28px}.feed{padding:24px 4%}.field-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">Trade<span>·</span>Journal</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/blog">Blog</a>
+    <a href="/blog-posts" class="{% if section=='blog' %}active{% endif %}">Chart Updates</a>
+    <a href="/ideas" class="{% if section=='ideas' %}active{% endif %}">Trade Ideas</a>
+  </div>
+  <a href="/register" class="nav-cta" id="navCta">Start Free</a>
+</nav>
+
+{% if section == 'blog' %}
+<div class="hero">
+  <span class="hero-label">Daily Analysis</span>
+  <h1 class="hero-title">Chart Updates &amp;<br><em>Trade Setups</em></h1>
+  <p class="hero-sub">Daily market analysis, XAUUSD trade setups, and SMC breakdowns by TradeJournal.</p>
+  <div class="hero-actions" id="heroActions"><span class="login-note">Sign in to like and comment</span></div>
+</div>
+{% else %}
+<div class="hero">
+  <span class="hero-label">Community</span>
+  <h1 class="hero-title">Trade Ideas from<br><em>Real Traders</em></h1>
+  <p class="hero-sub">Share your trade setups, get feedback from the community, and learn from other SMC and ICT traders.</p>
+  <div class="hero-actions" id="heroActions"><span class="login-note">Sign in to post and engage</span></div>
+</div>
+{% endif %}
+
+<div class="section-tabs">
+  <a href="/blog-posts" class="s-tab {% if section=='blog' %}active{% endif %}">📊 Chart Updates</a>
+  <a href="/ideas" class="s-tab {% if section=='ideas' %}active{% endif %}">💡 Trade Ideas</a>
+</div>
+
+<div class="feed" id="feed">
+  <div class="empty"><div class="empty-icon">⏳</div><h3>Loading…</h3></div>
+</div>
+
+<div class="modal-bg" id="postModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modalTitle">Post</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Title</label><input id="f_title" placeholder="e.g. XAUUSD Short — 4H OB Rejection" maxlength="200"/></div>
+      <div class="field-row" id="ideaFields">
+        <div class="field"><label>Instrument</label><input id="f_instrument" placeholder="XAUUSD" maxlength="20"/></div>
+        <div class="field"><label>Direction</label><select id="f_direction"><option value="Long">Long 📈</option><option value="Short">Short 📉</option><option value="Neutral">Neutral ↔</option></select></div>
+      </div>
+      <div class="field" id="blogTagField" style="display:none"><label>Category</label><select id="f_tag"><option value="Chart Update">Chart Update</option><option value="XAUUSD">XAUUSD</option><option value="Forex">Forex</option><option value="SMC Analysis">SMC Analysis</option><option value="Education">Education</option><option value="Weekly Outlook">Weekly Outlook</option></select></div>
+      <div class="field"><label>Summary</label><input id="f_excerpt" placeholder="One line summary"/></div>
+      <div class="field"><label>Full Analysis</label><textarea id="f_content" rows="8" placeholder="Describe your analysis, entry reasons, key levels, targets…"></textarea></div>
+      <div class="field"><label>Chart Image URL (optional)</label><input id="f_image" placeholder="https://…"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-g" onclick="closeModal()">Cancel</button>
+      <button class="btn-p" onclick="submitPost()" id="submitBtn">Post</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="fl">Trade<span>·</span>Journal</div>
+  <div style="display:flex;gap:20px"><a href="/" style="font-size:12px;color:var(--muted)">Home</a><a href="/blog" style="font-size:12px;color:var(--muted)">Blog</a><a href="/ideas" style="font-size:12px;color:var(--muted)">Trade Ideas</a><a href="/register" style="font-size:12px;color:var(--muted)">Register</a></div>
+  <div class="fc">© 2026 TradeJournal</div>
+</footer>
+
+<script>
+const SECTION="{{section}}";
+let isLoggedIn=false,isAdmin=false,currentUser=null;
+
+async function checkAuth(){
+  try{const r=await fetch('/api/me');if(r.ok){const d=await r.json();isLoggedIn=true;currentUser=d;const ar=await fetch('/api/me/is_admin');const ad=await ar.json();isAdmin=ad.is_admin;}}catch(e){}
+  updateUI();loadFeed();
+}
+
+function updateUI(){
+  const cta=document.getElementById('navCta');
+  if(isLoggedIn){cta.textContent='Dashboard →';cta.href='/';}
+  const ha=document.getElementById('heroActions');
+  if(SECTION==='blog'){
+    if(isAdmin) ha.innerHTML='<button class="btn-p" onclick="openModal()">✏️ Write Chart Update</button>';
+    else if(isLoggedIn) ha.innerHTML='<span class="login-note">Like and comment below</span>';
+    else ha.innerHTML='<a href="/login" class="btn-g">Sign In</a><a href="/register" class="btn-p">Join Free</a>';
+  }else{
+    if(isLoggedIn) ha.innerHTML='<button class="btn-p" onclick="openModal()">💡 Share Trade Idea</button>';
+    else ha.innerHTML='<a href="/login" class="btn-g">Sign In to Post</a><a href="/register" class="btn-p">Join Free →</a>';
+  }
+}
+
+async function loadFeed(){
+  const feed=document.getElementById('feed');
+  const ep=SECTION==='blog'?'/api/blog-posts':'/api/ideas';
+  try{
+    const r=await fetch(ep);const posts=await r.json();
+    if(!posts.length){feed.innerHTML=`<div class="empty"><div class="empty-icon">${SECTION==='blog'?'📊':'💡'}</div><h3>${SECTION==='blog'?'No chart updates yet':'No trade ideas yet'}</h3><p style="color:var(--muted);font-size:14px;margin-top:8px">${SECTION==='blog'?'Check back soon':'Be the first to share!'}</p></div>`;return;}
+    feed.innerHTML=posts.map(p=>renderPost(p)).join('');
+  }catch(e){feed.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><h3>Failed to load</h3></div>';}
+}
+
+function renderPost(p){
+  const isIdea=SECTION==='ideas';
+  const dirClass=p.direction==='Long'?'dir-long':p.direction==='Short'?'dir-short':'dir-neutral';
+  const tagClass=p.direction==='Long'?'tag-green':p.direction==='Short'?'tag-red':'tag-blue';
+  const canDelete=isAdmin||(isLoggedIn&&isIdea&&currentUser&&p.author===currentUser.username);
+  return `<div class="post-card" id="post-${p.id}">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span class="post-tag ${isIdea?tagClass:'tag-gold'}">${isIdea?(p.direction||'Idea'):(p.tag||'Update')}</span>
+      ${canDelete?`<button class="delete-btn" onclick="deletePost(${p.id})">🗑 Delete</button>`:''}
+    </div>
+    <div class="post-title" onclick="toggleContent(${p.id})">${p.title}</div>
+    <div class="post-meta">
+      <span class="post-author">${p.author||'TradeJournal'}</span>
+      ${isIdea?`<span class="${dirClass}">${p.direction}</span><span style="font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:700">${p.instrument}</span>`:''}
+      <span>${p.created_at}</span>
+    </div>
+    ${p.excerpt?`<div class="post-excerpt">${p.excerpt}</div>`:''}
+    ${p.image_url?`<img class="post-image" src="${p.image_url}" alt="${p.title}" onclick="window.open('${p.image_url}','_blank')"/>`:''}
+    <div class="post-content" id="content-${p.id}">${p.content||''}</div>
+    ${p.content?`<button class="expand-btn" id="expand-${p.id}" onclick="toggleContent(${p.id})">Read more ↓</button>`:''}
+    <div class="post-actions">
+      <button class="action-btn ${p.liked?'liked':''}" onclick="react(${p.id},true)">👍 <span id="likes-${p.id}">${p.likes}</span></button>
+      <button class="action-btn ${p.disliked?'disliked':''}" onclick="react(${p.id},false)">👎 <span id="dislikes-${p.id}">${p.dislikes}</span></button>
+      <button class="action-btn comment-btn" onclick="toggleComments(${p.id})">💬 <span id="ccount-${p.id}">${p.comment_count}</span></button>
+    </div>
+    <div class="comments-section" id="comments-${p.id}">
+      <div id="comment-list-${p.id}"></div>
+      ${isLoggedIn?`<div class="comment-input-row"><input class="comment-input" id="cinput-${p.id}" placeholder="Add a comment…" onkeydown="if(event.key==='Enter')submitComment(${p.id})"/><button class="comment-submit" onclick="submitComment(${p.id})">Post</button></div>`:`<p style="font-size:13px;color:var(--muted);margin-top:12px"><a href="/login" style="color:var(--green);font-weight:600">Sign in</a> to comment</p>`}
+    </div>
+  </div>`;
+}
+
+function toggleContent(id){
+  const c=document.getElementById(`content-${id}`);const btn=document.getElementById(`expand-${id}`);
+  if(!c)return;c.classList.toggle('expanded');
+  if(btn)btn.textContent=c.classList.contains('expanded')?'Show less ↑':'Read more ↓';
+}
+
+async function react(id,isLike){
+  if(!isLoggedIn){window.location.href='/login';return;}
+  const ep=SECTION==='blog'?`/api/blog-posts/${id}/like`:`/api/ideas/${id}/like`;
+  const r=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({is_like:isLike})});
+  const p=await r.json();
+  document.getElementById(`likes-${id}`).textContent=p.likes;
+  document.getElementById(`dislikes-${id}`).textContent=p.dislikes;
+  const card=document.getElementById(`post-${id}`);
+  card.querySelectorAll('.action-btn')[0].className='action-btn'+(p.liked?' liked':'');
+  card.querySelectorAll('.action-btn')[1].className='action-btn'+(p.disliked?' disliked':'');
+}
+
+async function toggleComments(id){
+  const section=document.getElementById(`comments-${id}`);
+  const isOpen=section.classList.contains('open');
+  section.classList.toggle('open');
+  if(!isOpen){
+    const ep=SECTION==='blog'?`/api/blog-posts/${id}/comments`:`/api/ideas/${id}/comments`;
+    const r=await fetch(ep);const comments=await r.json();
+    const list=document.getElementById(`comment-list-${id}`);
+    list.innerHTML=comments.length?comments.map(c=>`<div class="comment"><div class="comment-avatar">${c.author[0].toUpperCase()}</div><div class="comment-body"><div class="comment-author">${c.author}</div><div class="comment-text">${c.content}</div><div class="comment-time">${c.created_at}</div></div></div>`).join(''):'<p style="font-size:13px;color:var(--muted);padding:8px 0">No comments yet. Be the first!</p>';
+  }
+}
+
+async function submitComment(id){
+  if(!isLoggedIn){window.location.href='/login';return;}
+  const input=document.getElementById(`cinput-${id}`);const content=input.value.trim();if(!content)return;
+  const ep=SECTION==='blog'?`/api/blog-posts/${id}/comments`:`/api/ideas/${id}/comments`;
+  const r=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content})});
+  const c=await r.json();
+  document.getElementById(`comment-list-${id}`).innerHTML+=`<div class="comment"><div class="comment-avatar">${c.author[0].toUpperCase()}</div><div class="comment-body"><div class="comment-author">${c.author}</div><div class="comment-text">${c.content}</div><div class="comment-time">${c.created_at}</div></div></div>`;
+  input.value='';
+  const cnt=document.getElementById(`ccount-${id}`);cnt.textContent=parseInt(cnt.textContent)+1;
+}
+
+async function deletePost(id){
+  if(!confirm('Delete this post?'))return;
+  const ep=SECTION==='blog'?`/api/blog-posts/${id}`:`/api/ideas/${id}`;
+  await fetch(ep,{method:'DELETE'});document.getElementById(`post-${id}`).remove();
+}
+
+function openModal(){
+  if(!isLoggedIn){window.location.href='/login';return;}
+  const isIdea=SECTION==='ideas';
+  document.getElementById('modalTitle').textContent=isIdea?'Share Trade Idea':'Write Chart Update';
+  document.getElementById('ideaFields').style.display=isIdea?'grid':'none';
+  document.getElementById('blogTagField').style.display=isIdea?'none':'block';
+  document.getElementById('postModal').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('postModal').classList.remove('open');
+  ['f_title','f_excerpt','f_content','f_image','f_instrument'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+async function submitPost(){
+  const title=document.getElementById('f_title').value.trim();
+  const content=document.getElementById('f_content').value.trim();
+  if(!title||!content){alert('Title and analysis are required');return;}
+  const btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Posting…';
+  try{
+    const isIdea=SECTION==='ideas';
+    const payload=isIdea?{title,content,excerpt:document.getElementById('f_excerpt').value.trim(),instrument:document.getElementById('f_instrument').value.trim()||'XAUUSD',direction:document.getElementById('f_direction').value,image_url:document.getElementById('f_image').value.trim()||null}:{title,content,excerpt:document.getElementById('f_excerpt').value.trim(),tag:document.getElementById('f_tag').value,image_url:document.getElementById('f_image').value.trim()||null};
+    const ep=isIdea?'/api/ideas':'/api/blog-posts';
+    const r=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const p=await r.json();if(p.error){alert(p.error);return;}
+    closeModal();loadFeed();
+  }finally{btn.disabled=false;btn.textContent='Post';}
+}
+
+document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closeModal();});
+checkAuth();
+</script>
+</body>
+</html>
