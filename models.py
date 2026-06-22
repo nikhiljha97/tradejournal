@@ -142,6 +142,8 @@ class User(db.Model):
     username      = db.Column(db.String(80),  unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     is_active     = db.Column(db.Boolean, default=True)
+    reset_token        = db.Column(db.String(100), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
     created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Flask-Login required

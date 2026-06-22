@@ -4,6 +4,9 @@ TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 import os, json, uuid
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from blog_posts import POSTS, get_post
+import resend
+import secrets
+from datetime import datetime, timedelta, timezone
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
@@ -325,6 +328,67 @@ Allow: /api/prices
 Disallow: /api/
 
 Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
+
+@app.route("/forgot-password", methods=["GET","POST"])
+def forgot_password():
+    if request.method == "GET":
+        return render_template("forgot_password.html")
+    email = request.json.get("email","").strip().lower()
+    user = User.query.filter_by(email=email).first()
+    if user:
+        token = secrets.token_urlsafe(32)
+        user.reset_token = token
+        user.reset_token_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
+        db.session.commit()
+        reset_url = f"https://tradejournal-n3hn.onrender.com/reset-password/{token}"
+        try:
+            resend.api_key = os.environ.get("RESEND_API_KEY","")
+            resend.Emails.send({
+                "from": "TradeJournal <onboarding@resend.dev>",
+                "to": [email],
+                "subject": "Reset your TradeJournal password",
+                "html": f"""
+                <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+                  <h2 style="color:#00e5a0;margin-bottom:16px">Reset your password</h2>
+                  <p style="color:#5a7080;margin-bottom:24px">Click the button below to reset your TradeJournal password. This link expires in 1 hour.</p>
+                  <a href="{reset_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Reset Password</a>
+                  <p style="color:#5a7080;margin-top:24px;font-size:12px">If you didnt request this, ignore this email.</p>
+                </div>"""
+            })
+        except Exception as e:
+            print(f"Email error: {e}")
+    return jsonify({"ok": True})
+
+@app.route("/reset-password/<token>", methods=["GET","POST"])
+def reset_password(token):
+    if request.method == "GET":
+        user = User.query.filter_by(reset_token=token).first()
+        if not user or not user.reset_token_expiry:
+            return redirect(url_for("login"))
+        expiry = user.reset_token_expiry
+        if expiry.tzinfo is None:
+            expiry = expiry.replace(tzinfo=timezone.utc)
+        if expiry < datetime.now(timezone.utc):
+            return redirect(url_for("login"))
+        return render_template("reset_password.html", token=token)
+    data = request.json
+    token_val = data.get("token","")
+    password = data.get("password","")
+    if len(password) < 6:
+        return jsonify({"ok": False, "error": "Password must be at least 6 characters"})
+    user = User.query.filter_by(reset_token=token_val).first()
+    if not user or not user.reset_token_expiry:
+        return jsonify({"ok": False, "error": "Invalid or expired link"})
+    expiry = user.reset_token_expiry
+    if expiry.tzinfo is None:
+        expiry = expiry.replace(tzinfo=timezone.utc)
+    if expiry < datetime.now(timezone.utc):
+        return jsonify({"ok": False, "error": "Link has expired. Request a new one."})
+    user.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
+    user.reset_token = None
+    user.reset_token_expiry = None
+    db.session.commit()
+    return jsonify({"ok": True})
 
 @app.route("/google18b855e2f453917d.html")
 def google_verification():
