@@ -249,7 +249,21 @@ async function toggleComments(id){
     const ep=SECTION==='blog'?`/api/blog-posts/${id}/comments`:`/api/ideas/${id}/comments`;
     const r=await fetch(ep);const comments=await r.json();
     const list=document.getElementById(`comment-list-${id}`);
-    list.innerHTML=comments.length?comments.map(c=>`<div class="comment"><div class="comment-avatar">${c.author[0].toUpperCase()}</div><div class="comment-body"><div class="comment-author">${c.author}</div><div class="comment-text">${c.content}</div><div class="comment-time">${c.created_at}</div></div></div>`).join(''):'<p style="font-size:13px;color:var(--muted);padding:8px 0">No comments yet. Be the first!</p>';
+    list.innerHTML=comments.length?comments.map(c=>`<div class="comment" id="comment-${c.id}">
+      <div class="comment-avatar">${c.author[0].toUpperCase()}</div>
+      <div class="comment-body">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="comment-author">${c.author}</div>
+          ${isLoggedIn && (c.author===currentUser?.username||isAdmin) ? `
+          <div style="display:flex;gap:6px">
+            <button onclick="editComment(${id},${c.id},'${c.content.replace(/'/g,"\'")}')" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--muted)'">✏️ Edit</button>
+            <button onclick="deleteComment(${id},${c.id})" style="background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--muted)'">🗑</button>
+          </div>` : ''}
+        </div>
+        <div class="comment-text" id="ctext-${c.id}">${c.content}</div>
+        <div class="comment-time">${c.created_at}</div>
+      </div>
+    </div>`).join(''):'<p style="font-size:13px;color:var(--muted);padding:8px 0">No comments yet. Be the first!</p>';
   }
 }
 
@@ -262,6 +276,24 @@ async function submitComment(id){
   document.getElementById(`comment-list-${id}`).innerHTML+=`<div class="comment"><div class="comment-avatar">${c.author[0].toUpperCase()}</div><div class="comment-body"><div class="comment-author">${c.author}</div><div class="comment-text">${c.content}</div><div class="comment-time">${c.created_at}</div></div></div>`;
   input.value='';
   const cnt=document.getElementById(`ccount-${id}`);cnt.textContent=parseInt(cnt.textContent)+1;
+}
+
+async function editComment(postId, commentId, currentText) {
+  const newText = prompt('Edit your comment:', currentText);
+  if (!newText || newText.trim() === currentText) return;
+  const ep = SECTION==='blog' ? `/api/blog-posts/${postId}/comments/${commentId}` : `/api/ideas/${postId}/comments/${commentId}`;
+  const r = await fetch(ep, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({content:newText.trim()})});
+  if (r.ok) {
+    const el = document.getElementById(`ctext-${commentId}`);
+    if (el) el.textContent = newText.trim();
+  }
+}
+
+async function deleteComment(postId, commentId) {
+  if (!confirm('Delete this comment?')) return;
+  const ep = SECTION==='blog' ? `/api/blog-posts/${postId}/comments/${commentId}` : `/api/ideas/${postId}/comments/${commentId}`;
+  const r = await fetch(ep, {method:'DELETE'});
+  if (r.ok) document.getElementById(`comment-${commentId}`)?.remove();
 }
 
 async function deletePost(id){

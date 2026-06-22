@@ -470,6 +470,15 @@ def add_blog_comment(pid):
     db.session.add(c); db.session.commit()
     return jsonify(c.to_dict())
 
+@app.route("/api/blog-posts/<int:pid>/comments/<int:cid>", methods=["PUT"])
+@login_required
+def edit_blog_comment(pid,cid):
+    c = PostComment.query.get_or_404(cid)
+    if c.user_id!=current_user.id and not is_admin(): return jsonify({"error":"Unauthorized"}),403
+    c.content = request.json.get("content","").strip() or c.content
+    db.session.commit()
+    return jsonify(c.to_dict())
+
 @app.route("/api/blog-posts/<int:pid>/comments/<int:cid>", methods=["DELETE"])
 @login_required
 def delete_blog_comment(pid,cid):
@@ -572,6 +581,15 @@ def add_idea_comment(iid):
     if not txt: return jsonify({"error":"Empty"}),400
     c = IdeaComment(idea_id=iid,user_id=current_user.id,content=txt)
     db.session.add(c); db.session.commit()
+    return jsonify(c.to_dict())
+
+@app.route("/api/ideas/<int:iid>/comments/<int:cid>", methods=["PUT"])
+@login_required
+def edit_idea_comment(iid,cid):
+    c = IdeaComment.query.get_or_404(cid)
+    if c.user_id!=current_user.id and not is_admin(): return jsonify({"error":"Unauthorized"}),403
+    c.content = request.json.get("content","").strip() or c.content
+    db.session.commit()
     return jsonify(c.to_dict())
 
 @app.route("/api/ideas/<int:iid>/comments/<int:cid>", methods=["DELETE"])
