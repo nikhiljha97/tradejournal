@@ -269,6 +269,13 @@
   <p>TradeJournal uses correct XAUUSD contract size of 100 oz per lot for accurate P&L and R multiple calculations. Import your gold trades from MetaTrader 5 and get instant analysis.</p>
 </div>
 
+<noscript>
+<style>
+  .fade-up,.fade-left,.fade-right{opacity:1!important;transform:none!important}
+  .hero-h1,.hero-sub,.hero-label,.hero-actions,.hero-note{opacity:1!important}
+  .bento-card,.testi{opacity:1!important}
+</style>
+</noscript>
 <!-- NAV -->
 <nav id="nav">
   <div class="nav-logo">Trade<span class="dot">·</span>Journal</div>
@@ -497,13 +504,15 @@ window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
 });
 
-// HERO entrance — use fromTo so content is never invisible to crawlers
-gsap.fromTo('#heroH1', {opacity:0, y:60}, {opacity:1, y:0, duration:1, ease:'power3.out', delay:.2});
-gsap.fromTo('.hero-label', {opacity:0, y:20}, {opacity:1, y:0, duration:.8, ease:'power2.out', delay:.1});
-gsap.fromTo('.hero-sub', {opacity:0, y:30}, {opacity:1, y:0, duration:.8, ease:'power2.out', delay:.5});
-gsap.fromTo('.hero-actions', {opacity:0, y:20}, {opacity:1, y:0, duration:.8, ease:'power2.out', delay:.7});
-gsap.fromTo('.hero-note', {opacity:0}, {opacity:1, duration:.6, delay:.9});
-gsap.fromTo('.scroll-ind', {opacity:0}, {opacity:1, duration:.6, delay:1.2});
+// HERO entrance — skip animation if no JS support, content always visible
+if (window.gsap) {
+  gsap.fromTo('#heroH1', {opacity:0, y:40}, {opacity:1, y:0, duration:.8, ease:'power3.out', delay:.1});
+  gsap.fromTo('.hero-label', {opacity:0}, {opacity:1, duration:.6, delay:.05});
+  gsap.fromTo('.hero-sub', {opacity:0, y:20}, {opacity:1, y:0, duration:.7, ease:'power2.out', delay:.3});
+  gsap.fromTo('.hero-actions', {opacity:0, y:10}, {opacity:1, y:0, duration:.6, ease:'power2.out', delay:.5});
+  gsap.fromTo('.hero-note', {opacity:0}, {opacity:1, duration:.5, delay:.7});
+  gsap.fromTo('.scroll-ind', {opacity:0}, {opacity:1, duration:.5, delay:.9});
+}
 
 // Ticker handled by TradingView widget above
 
@@ -664,7 +673,7 @@ createApp({
   },
   template: `
     <div class="bento">
-      <div v-for="(c,i) in cards" :key="i" class="bento-card" :class="{wide:c.wide}" style="opacity:0;transform:translateY(30px)">
+      <div v-for="(c,i) in cards" :key="i" class="bento-card" :class="{wide:c.wide}" style="opacity:1">
         <span class="bento-icon">{{ c.icon }}</span>
         <div class="bento-title">{{ c.title }}</div>
         <div class="bento-desc">{{ c.desc }}</div>
