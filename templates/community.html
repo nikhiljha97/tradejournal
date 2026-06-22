@@ -173,7 +173,10 @@ function updateUI(){
     else if(isLoggedIn) ha.innerHTML='<span class="login-note">Like and comment below</span>';
     else ha.innerHTML='<a href="/login" class="btn-g">Sign In</a><a href="/register" class="btn-p">Join Free</a>';
   }else{
-    if(isLoggedIn) ha.innerHTML='<button class="btn-p" onclick="openModal()">💡 Share Trade Idea</button>';
+    if(isLoggedIn) {
+      ha.innerHTML='<button class="btn-p" onclick="openModal()">💡 Share Trade Idea</button> <button class="btn-g" id="notifBtn" style="font-size:12px;padding:8px 14px">🔔 Loading…</button>';
+      setTimeout(loadNotifStatus, 500);
+    }
     else ha.innerHTML='<a href="/login" class="btn-g">Sign In to Post</a><a href="/register" class="btn-p">Join Free →</a>';
   }
 }
@@ -297,6 +300,35 @@ async function submitPost(){
 
 document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closeModal();});
 checkAuth();
+
+async function loadNotifStatus() {
+  if (!isLoggedIn) return;
+  try {
+    const r = await fetch('/api/me/notifications');
+    const d = await r.json();
+    const btn = document.getElementById('notifBtn');
+    if (!btn) return;
+    if (d.idea_notifications) {
+      btn.textContent = '🔔 Subscribed';
+      btn.style.color = 'var(--green)';
+      btn.style.borderColor = 'var(--green)';
+      btn.onclick = () => toggleNotif(false);
+    } else {
+      btn.textContent = '🔕 Re-subscribe to notifications';
+      btn.style.color = 'var(--muted)';
+      btn.style.borderColor = 'var(--border2)';
+      btn.onclick = () => toggleNotif(true);
+    }
+  } catch(e) {}
+}
+
+async function toggleNotif(subscribe) {
+  await fetch('/api/me/notifications', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({idea_notifications: subscribe})
+  });
+  loadNotifStatus();
+}
 </script>
 </body>
 </html>
