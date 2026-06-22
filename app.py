@@ -42,7 +42,14 @@ def load_user(user_id):
 
 with app.app_context():
     db.create_all()
-    # Add reset token columns if they don't exist
+    # Add notification columns if they don't exist
+    with db.engine.connect() as conn:
+        for col, typ in [("idea_notifications","BOOLEAN DEFAULT TRUE"),("notif_token","VARCHAR(100)")]:
+            try:
+                conn.execute(text(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {typ}"))
+                conn.commit()
+            except: pass
+        # Add reset token columns if they don't exist
     try:
         from sqlalchemy import text
         with db.engine.connect() as conn:
@@ -483,7 +490,55 @@ def create_idea():
     d = request.json
     idea = TradeIdea(author_id=current_user.id,title=d.get("title",""),instrument=d.get("instrument","").upper(),direction=d.get("direction","Neutral"),content=d.get("content",""),image_url=d.get("image_url"))
     db.session.add(idea); db.session.commit()
+    try:
+        _send_idea_notifications(idea, current_user)
+    except Exception as e:
+        print(f"Notification error: {e}")
     return jsonify(idea.to_dict(current_user.id))
+
+def _send_idea_notifications(idea, author):
+    import threading
+    def send():
+        try:
+            resend.api_key = os.environ.get("RESEND_API_KEY","")
+            dir_emoji = "Bullish" if idea.direction=="Long" else "Bearish" if idea.direction=="Short" else "Neutral"
+            dir_icon = "📈" if idea.direction=="Long" else "📉" if idea.direction=="Short" else "↔"
+            bg_color = "rgba(0,229,160,.1)" if idea.direction=="Long" else "rgba(255,71,87,.1)" if idea.direction=="Short" else "rgba(90,112,128,.15)"
+            txt_color = "#00e5a0" if idea.direction=="Long" else "#ff4757" if idea.direction=="Short" else "#5a7080"
+            subscribers = User.query.filter_by(idea_notifications=True).all()
+            for user in subscribers:
+                if user.id == author.id:
+                    continue
+                if not user.notif_token:
+                    user.notif_token = secrets.token_urlsafe(32)
+                    db.session.commit()
+                unsub_url = f"https://tradejournal-n3hn.onrender.com/unsubscribe-ideas/{user.notif_token}"
+                preview = (idea.content or "")[:200] + ("..." if len(idea.content or "") > 200 else "")
+                html_body = (
+                    "<div style=\"font-family:Inter,sans-serif;max-width:520px;margin:0 auto;background:#07090d;border-radius:12px;overflow:hidden\">"
+                    "<div style=\"background:#111820;padding:24px;border-bottom:1px solid #1c2b3a\">"
+                    "<div style=\"font-size:18px;font-weight:900;color:#d4dde8\">Trade<span style=\"color:#00e5a0\">·</span>Journal</div></div>"
+                    "<div style=\"padding:32px\">"
+                    "<div style=\"font-size:11px;font-weight:700;color:#00e5a0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px\">New Trade Idea</div>"
+                    f"<h2 style=\"font-size:22px;font-weight:800;color:#d4dde8;margin:0 0 16px\">{idea.title}</h2>"
+                    f"<div style=\"margin-bottom:20px\">"
+                    f"<span style=\"background:#003d2b;color:#00e5a0;font-size:12px;font-weight:700;padding:4px 12px;border-radius:4px;margin-right:8px\">{idea.instrument}</span>"
+                    f"<span style=\"background:{bg_color};color:{txt_color};font-size:12px;font-weight:700;padding:4px 12px;border-radius:4px\">{dir_icon} {dir_emoji}</span></div>"
+                    f"<p style=\"color:#5a7080;font-size:14px;line-height:1.7;margin:0 0 24px\">{preview}</p>"
+                    "<a href=\"https://tradejournal-n3hn.onrender.com/ideas\" style=\"display:inline-block;background:#00e5a0;color:#000;font-weight:800;font-size:15px;padding:12px 28px;border-radius:8px;text-decoration:none\">View Idea →</a>"
+                    "</div>"
+                    f"<div style=\"padding:20px 32px;border-top:1px solid #1c2b3a;text-align:center\">"
+                    f"<p style=\"color:#5a7080;font-size:11px;margin:0\">Posted by <strong style=\"color:#d4dde8\">{author.username}</strong> on TradeJournal</p>"
+                    f"<p style=\"margin:8px 0 0\"><a href=\"{unsub_url}\" style=\"color:#5a7080;font-size:11px\">Unsubscribe from trade idea notifications</a></p>"
+                    "</div></div>"
+                )
+                try:
+                    resend.Emails.send({"from":"TradeJournal <onboarding@resend.dev>","to":[user.email],"subject":f"New Trade Idea: {idea.instrument} — {dir_icon} {dir_emoji}","html":html_body})
+                except Exception as e:
+                    print(f"Email to {user.email} failed: {e}")
+        except Exception as e:
+            print(f"Notification thread error: {e}")
+    threading.Thread(target=send, daemon=True).start()
 
 @app.route("/api/ideas/<int:iid>", methods=["DELETE"])
 @login_required
@@ -526,6 +581,27 @@ def delete_idea_comment(iid,cid):
     if c.user_id!=current_user.id and not is_admin(): return jsonify({"error":"Unauthorized"}),403
     db.session.delete(c); db.session.commit()
     return jsonify({"ok":True})
+
+@app.route("/unsubscribe-ideas/<token>")
+def unsubscribe_ideas(token):
+    user = User.query.filter_by(notif_token=token).first()
+    if user:
+        user.idea_notifications = False
+        db.session.commit()
+    html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><style>body{background:#07090d;color:#d4dde8;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.box{background:#111820;border:1px solid #1c2b3a;border-radius:14px;padding:40px;max-width:400px;text-align:center}.icon{font-size:48px;margin-bottom:16px}.title{font-size:20px;font-weight:700;margin-bottom:8px}.sub{color:#5a7080;font-size:14px;line-height:1.6}.btn{display:inline-block;margin-top:20px;background:#00e5a0;color:#000;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px}</style></head><body><div class=\"box\"><div class=\"icon\">✅</div><div class=\"title\">Unsubscribed</div><div class=\"sub\">You won't receive trade idea notifications anymore.<br>You can re-subscribe anytime from the Trade Ideas page.</div><a href=\"/ideas\" class=\"btn\">Go to Trade Ideas</a></div></body></html>"
+    return html
+
+@app.route("/api/me/notifications", methods=["GET","POST"])
+@login_required
+def manage_notifications():
+    if request.method == "GET":
+        return jsonify({"idea_notifications": current_user.idea_notifications})
+    data = request.json
+    current_user.idea_notifications = data.get("idea_notifications", True)
+    if not current_user.notif_token:
+        current_user.notif_token = secrets.token_urlsafe(32)
+    db.session.commit()
+    return jsonify({"ok": True, "idea_notifications": current_user.idea_notifications})
 
 @app.route("/api/me/is_admin")
 def check_admin():
