@@ -3,6 +3,7 @@ TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 """
 import os, json, uuid
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
+from sqlalchemy import text
 from blog_posts import POSTS, get_post
 import resend
 import secrets
@@ -33,12 +34,22 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = ""
-login_manager.login_message = ""
-login_manager.login_message = ""
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+# ── Security headers ──────────────────────────────────────────────────────────
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    # HSTS — only enforce over HTTPS (Render always serves HTTPS in production)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 with app.app_context():
     db.create_all()
@@ -51,7 +62,6 @@ with app.app_context():
             except: pass
         # Add reset token columns if they don't exist
     try:
-        from sqlalchemy import text
         with db.engine.connect() as conn:
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(100)"))
             conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expiry TIMESTAMP"))
