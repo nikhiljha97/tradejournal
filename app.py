@@ -157,6 +157,8 @@ def _compute_derived(data):
 
 def _save_trade(data):
     from datetime import datetime, timezone
+    # Convert empty strings to None for all fields
+    data = {k: (None if v == "" else v) for k, v in data.items()}
     t = Trade(
         user_id=uid(),
         trade_date=data.get("trade_date"), entry_time=data.get("entry_time"),
