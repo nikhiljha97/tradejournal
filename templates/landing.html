@@ -504,14 +504,12 @@ window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
 });
 
-// HERO entrance — skip animation if no JS support, content always visible
+// HERO — no opacity animations, content visible immediately for crawlers
+// Only subtle transform animation, no hiding
 if (window.gsap) {
-  gsap.fromTo('#heroH1', {opacity:0, y:40}, {opacity:1, y:0, duration:.8, ease:'power3.out', delay:.1});
-  gsap.fromTo('.hero-label', {opacity:0}, {opacity:1, duration:.6, delay:.05});
-  gsap.fromTo('.hero-sub', {opacity:0, y:20}, {opacity:1, y:0, duration:.7, ease:'power2.out', delay:.3});
-  gsap.fromTo('.hero-actions', {opacity:0, y:10}, {opacity:1, y:0, duration:.6, ease:'power2.out', delay:.5});
-  gsap.fromTo('.hero-note', {opacity:0}, {opacity:1, duration:.5, delay:.7});
-  gsap.fromTo('.scroll-ind', {opacity:0}, {opacity:1, duration:.5, delay:.9});
+  gsap.from('#heroH1', {y:20, duration:.8, ease:'power3.out', delay:.1});
+  gsap.from('.hero-sub', {y:10, duration:.7, ease:'power2.out', delay:.3});
+  gsap.from('.hero-actions', {y:10, duration:.6, ease:'power2.out', delay:.5});
 }
 
 // Ticker handled by TradingView widget above
@@ -543,26 +541,18 @@ const proofObs = new IntersectionObserver(entries => {
 proofObs.observe(document.querySelector('.proof'));
 
 // FADE-UP SCROLL REVEAL — use fromTo so elements are always visible even if GSAP fails
+// Scroll reveal — only transform, no opacity hiding
 document.querySelectorAll('.fade-up').forEach(el => {
-  gsap.fromTo(el,
-    {opacity:0, y:40},
-    {opacity:1, y:0, duration:.8, ease:'power2.out',
-     scrollTrigger:{trigger:el, start:'top 88%', once:true}}
-  );
+  gsap.from(el, {y:30, duration:.8, ease:'power2.out',
+    scrollTrigger:{trigger:el, start:'top 88%', once:true}});
 });
 document.querySelectorAll('.fade-left').forEach(el => {
-  gsap.fromTo(el,
-    {opacity:0, x:-40},
-    {opacity:1, x:0, duration:.8, ease:'power2.out',
-     scrollTrigger:{trigger:el, start:'top 88%', once:true}}
-  );
+  gsap.from(el, {x:-30, duration:.8, ease:'power2.out',
+    scrollTrigger:{trigger:el, start:'top 88%', once:true}});
 });
 document.querySelectorAll('.fade-right').forEach(el => {
-  gsap.fromTo(el,
-    {opacity:0, x:40},
-    {opacity:1, x:0, duration:.8, ease:'power2.out',
-     scrollTrigger:{trigger:el, start:'top 88%', once:true}}
-  );
+  gsap.from(el, {x:30, duration:.8, ease:'power2.out',
+    scrollTrigger:{trigger:el, start:'top 88%', once:true}});
 });
 
 // TERMINAL TYPEWRITER
@@ -717,13 +707,14 @@ const testis = [
   {q:'Edgewonk costs $169/year and doesn\'t have half of this. The prop firm tracker alone is worth it. And it\'s actually free.',name:'r/algotrading user',handle:'Forex trader · FTMO & Funded Next'},
 ];
 document.getElementById('testiGrid').innerHTML = testis.map((t,i)=>`
-  <div class="testi" style="opacity:0;transform:translateY(20px)">
+  <div class="testi">
     <div class="stars">★★★★★</div>
     <p class="tq">"${t.q}"</p>
     <div class="ta"><div class="av">${t.name[0]}</div><div><div class="an">${t.name}</div><div class="ah">${t.handle}</div></div></div>
   </div>`).join('');
 document.querySelectorAll('.testi').forEach((el,i) => {
-  gsap.to(el, {scrollTrigger:{trigger:el,start:'top 90%'}, opacity:1, y:0, duration:.6, ease:'power2.out', delay:i*.12});
+  gsap.from(el, {y:20, duration:.6, ease:'power2.out',
+    scrollTrigger:{trigger:el,start:'top 90%'}, delay:i*.12});
 });
 
 // FAQ — Vue
@@ -753,11 +744,7 @@ createApp({
 }).mount('#faqWrap');
 
 // CTA section fade
-gsap.fromTo('.cta-h',
-  {opacity:0, y:60},
-  {opacity:1, y:0, duration:1, ease:'power3.out',
-   scrollTrigger:{trigger:'.cta-s', start:'top 80%', once:true}}
-);
+gsap.from('.cta-h', {y:40, duration:1, ease:'power3.out', scrollTrigger:{trigger:'.cta-s', start:'top 80%', once:true}});
 </script>
 {% endraw %}
 </body>
