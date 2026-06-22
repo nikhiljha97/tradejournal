@@ -299,9 +299,32 @@
   <div class="scroll-ind"><div class="scroll-arrow"></div>scroll</div>
 </section>
 
-<!-- TICKER -->
-<div class="ticker">
-  <div class="ticker-inner" id="tickerInner"></div>
+<!-- TICKER — TradingView real-time -->
+<div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);overflow:hidden">
+  <div class="tradingview-widget-container">
+    <div class="tradingview-widget-container__widget"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+    {
+      "symbols": [
+        {"proName":"OANDA:XAUUSD","title":"Gold"},
+        {"proName":"OANDA:EURUSD","title":"EUR/USD"},
+        {"proName":"OANDA:GBPUSD","title":"GBP/USD"},
+        {"proName":"OANDA:USDJPY","title":"USD/JPY"},
+        {"proName":"OANDA:XAGUSD","title":"Silver"},
+        {"proName":"BINANCE:BTCUSDT","title":"Bitcoin"},
+        {"proName":"BINANCE:ETHUSDT","title":"Ethereum"},
+        {"proName":"OANDA:US30USD","title":"Dow Jones"},
+        {"proName":"OANDA:NAS100USD","title":"Nasdaq"},
+        {"proName":"TVC:DXY","title":"DXY"}
+      ],
+      "showSymbolLogo": false,
+      "isTransparent": true,
+      "displayMode": "adaptive",
+      "colorTheme": "dark",
+      "locale": "en"
+    }
+    </script>
+  </div>
 </div>
 
 <!-- PROOF NUMBERS -->
@@ -482,33 +505,7 @@ gsap.fromTo('.hero-actions', {opacity:0, y:20}, {opacity:1, y:0, duration:.8, ea
 gsap.fromTo('.hero-note', {opacity:0}, {opacity:1, duration:.6, delay:.9});
 gsap.fromTo('.scroll-ind', {opacity:0}, {opacity:1, duration:.6, delay:1.2});
 
-// TICKER — live prices via /api/ticker (same endpoint as dashboard)
-async function loadTicker() {
-  const tickerEl = document.getElementById('tickerInner');
-  const fallback = [
-    {s:'XAUUSD',v:'—',c:'',up:true},{s:'EURUSD',v:'—',c:'',up:true},
-    {s:'GBPUSD',v:'—',c:'',up:true},{s:'USDJPY',v:'—',c:'',up:true},
-    {s:'BTCUSD',v:'—',c:'',up:true},{s:'NAS100',v:'—',c:'',up:true},
-    {s:'US30',v:'—',c:'',up:true},{s:'XAGUSD',v:'—',c:'',up:true},
-  ];
-  const renderTicker = (items) => {
-    tickerEl.innerHTML = [...items,...items].map(t=>
-      `<div class="tick"><span class="tick-s">${t.s}</span><span class="tick-v">${t.v}</span>${t.c?`<span class="tick-c ${t.up?'up':'dn'}">${t.c}</span>`:''}</div>`
-    ).join('');
-  };
-  renderTicker(fallback);
-  try {
-    const r = await fetch('/api/prices');
-    if (!r.ok) return;
-    const d = await r.json();
-    const items = Object.entries(d).map(([s,info]) => ({
-      s, v: info.price, c: info.change_pct, up: parseFloat(info.change_pct) >= 0
-    }));
-    if (items.length) renderTicker(items);
-  } catch(e) { /* keep fallback */ }
-}
-loadTicker();
-setInterval(loadTicker, 30000);
+// Ticker handled by TradingView widget above
 
 // SETUP TAGS MARQUEE
 const tags = ['Order Block','Fair Value Gap','BOS','CHoCH','Liquidity Sweep','Breaker Block','Inducement','OTE','Imbalance','Premium/Discount','Equal Highs/Lows','Turtle Soup','Session Open','NY Killzone','London Killzone','Mitigation Block','4H OB','15min FVG','Weekly Sweep','Daily BOS'];
