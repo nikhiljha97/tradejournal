@@ -6,7 +6,7 @@
   <title>Chart Replay — TradeJournal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/klinecharts@9.8.4/dist/umd/klinecharts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/klinecharts@9.8.12/dist/umd/klinecharts.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -185,6 +185,7 @@ let overlayIds    = [];    // track created overlay IDs for clearing
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+  registerCustomOverlays();
   initChart();
   loadData(currentSymbol, currentTF);
 });
@@ -277,8 +278,7 @@ function initChart() {
       },
     },
     timezone: "UTC",
-    thousandsSeparator: ",",
-    decimalFoldThreshold: 0,
+    thousandsSeparator: { sign: "," },
     customApi: {
       formatDate: (dateTimeFormat, timestamp, format, type) => {
         const d = new Date(timestamp);
@@ -290,29 +290,33 @@ function initChart() {
     },
   });
 
-  // Volume indicator in sub-pane
-  chart.createIndicator("VOL", false, { id: "candle_pane" });
+  // Volume indicator in its own sub-pane
+  try { chart.createIndicator("VOL", false, { id: "vol_pane", height: 80 }); } catch(e) { console.warn("VOL indicator:", e); }
 
   // Crosshair events → update status bar
-  chart.subscribeAction("onCrosshairChange", (data) => {
-    if (!data || !data.kLineData) return;
-    const d = data.kLineData;
-    const prev = allCandles[allCandles.indexOf(d) - 1];
-    const chgPct = prev ? ((d.close - prev.close) / prev.close * 100).toFixed(2) : null;
-    document.getElementById("sbO").textContent = fmt(d.open);
-    document.getElementById("sbH").textContent = fmt(d.high);
-    document.getElementById("sbL").textContent = fmt(d.low);
-    const cel = document.getElementById("sbC");
-    cel.textContent = fmt(d.close);
-    cel.className = "status-price " + (d.close >= d.open ? "status-up" : "status-dn");
-    const chgEl = document.getElementById("sbChg");
-    if (chgPct !== null) {
-      chgEl.textContent = (chgPct >= 0 ? "+" : "") + chgPct + "%";
-      chgEl.className = chgPct >= 0 ? "status-up" : "status-dn";
-    } else {
-      chgEl.textContent = "";
-    }
-  });
+  try {
+    chart.subscribeAction("onCrosshairChange", (data) => {
+      if (!data || !data.kLineData) return;
+      const d = data.kLineData;
+      // find index by timestamp match (object refs differ after chart internal copy)
+      const idx = allCandles.findIndex(c => c.timestamp === d.timestamp);
+      const prev = idx > 0 ? allCandles[idx - 1] : null;
+      const chgPct = prev ? ((d.close - prev.close) / prev.close * 100).toFixed(2) : null;
+      document.getElementById("sbO").textContent = fmt(d.open);
+      document.getElementById("sbH").textContent = fmt(d.high);
+      document.getElementById("sbL").textContent = fmt(d.low);
+      const cel = document.getElementById("sbC");
+      cel.textContent = fmt(d.close);
+      cel.className = "status-price " + (d.close >= d.open ? "status-up" : "status-dn");
+      const chgEl = document.getElementById("sbChg");
+      if (chgPct !== null) {
+        chgEl.textContent = (chgPct >= 0 ? "+" : "") + chgPct + "%";
+        chgEl.className = chgPct >= 0 ? "status-up" : "status-dn";
+      } else {
+        chgEl.textContent = "";
+      }
+    });
+  } catch(e) { console.warn("subscribeAction:", e); }
 }
 
 // ── Data loading ─────────────────────────────────────────────────────────────
@@ -562,8 +566,7 @@ function showToast(msg, dur=2500) {
   setTimeout(() => t.classList.remove("show"), dur);
 }
 
-// Register custom overlays on load
-registerCustomOverlays();
+
 </script>
 </body>
 </html>
