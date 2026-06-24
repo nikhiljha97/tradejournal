@@ -18,38 +18,31 @@
     html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
     a{color:inherit;text-decoration:none}
 
-    /* NAV */
     nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:48px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
     .nav-logo{font-size:16px;font-weight:900}.nav-logo span{color:var(--green)}
     .nav-links{display:flex;gap:20px;align-items:center}
     .nav-links a{font-size:12px;color:var(--muted);font-weight:500;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--text)}
     .nav-right{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
 
-    /* TOOLBAR */
-    .toolbar{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-    .sym-btn,.tf-btn,.tool-btn{font-size:11px;font-weight:600;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif;white-space:nowrap}
+    .toolbar{display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .sym-btn,.tf-btn,.tool-btn{font-size:11px;font-weight:600;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif;white-space:nowrap}
     .sym-btn:hover,.tf-btn:hover,.tool-btn:hover{border-color:var(--border2);color:var(--text)}
     .sym-btn.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
     .tf-btn.active{background:var(--panel2);border-color:var(--border2);color:var(--text)}
     .tool-btn.active{background:rgba(0,229,160,.12);border-color:var(--green);color:var(--green)}
-    .toolbar-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 3px}
+    .toolbar-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 2px}
     .toolbar-label{font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap}
-
-    /* Color picker */
     .color-wrap{position:relative;display:inline-flex;align-items:center;cursor:pointer}
     .color-wrap input[type=color]{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer}
     .color-swatch{width:22px;height:22px;border-radius:4px;border:2px solid var(--border);background:var(--blue);flex-shrink:0;pointer-events:none}
-
-    /* Session badge */
+    .theme-btn{font-size:11px;padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s}
+    .theme-btn:hover{border-color:var(--border2);color:var(--text)}
     .session-badge{font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
     .session-badge:hover{border-color:var(--border2);color:var(--text)}
 
-    /* LAYOUT */
     body{display:flex;flex-direction:column}
     .main{display:flex;flex:1;overflow:hidden;flex-direction:column}
     .chart-container{display:flex;flex:1;overflow:hidden}
-
-    /* CHART */
     .chart-wrap{flex:1;position:relative;overflow:hidden;min-width:0}
     #kline-chart{width:100%;height:100%}
     .loading-overlay{position:absolute;inset:0;background:rgba(7,9,13,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:14px}
@@ -63,30 +56,22 @@
     .trade-panel.collapsed{width:28px}
     .panel-toggle{width:28px;height:100%;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--border);transition:color .2s}
     .panel-toggle:hover{color:var(--text)}
-    .panel-inner{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:212px}
+    .panel-inner{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:7px;min-width:212px}
     .panel-section-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:4px 0 2px}
-
-    /* Order form */
     .dir-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
     .dir-btn{padding:7px 0;border-radius:6px;border:1px solid var(--border);background:var(--panel);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif}
     .dir-btn.buy{color:#00e5a0}.dir-btn.buy.active{background:var(--gdim);border-color:var(--green)}
     .dir-btn.sell{color:#ff4757}.dir-btn.sell.active{background:#2d0a0e;border-color:var(--red)}
-    .form-label{font-size:10px;color:var(--muted);font-weight:600;margin-top:4px}
+    .form-label{font-size:10px;color:var(--muted);font-weight:600}
     .form-input{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:12px;font-family:"JetBrains Mono",monospace;outline:none}
     .form-input:focus{border-color:var(--green)}
     .form-select{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer}
-    .place-btn{width:100%;padding:8px;border-radius:6px;border:none;background:var(--green);color:#000;font-weight:700;font-size:12px;cursor:pointer;margin-top:4px;transition:background .15s;font-family:"Inter",sans-serif}
+    .place-btn{width:100%;padding:8px;border-radius:6px;border:none;background:var(--green);color:#000;font-weight:700;font-size:12px;cursor:pointer;transition:background .15s;font-family:"Inter",sans-serif}
     .place-btn:hover{background:var(--green2)}
-    .place-btn:disabled{background:var(--faint);color:var(--muted);cursor:not-allowed}
-
-    /* Positions list */
     .pos-card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:11px}
-    .pos-card.buy{border-left:2px solid var(--green)}
-    .pos-card.sell{border-left:2px solid var(--red)}
-    .pos-card.pending{opacity:.7;border-left:2px solid var(--gold)}
+    .pos-card.buy{border-left:2px solid var(--green)}.pos-card.sell{border-left:2px solid var(--red)}.pos-card.pending{opacity:.7;border-left:2px solid var(--gold)}
     .pos-header{display:flex;align-items:center;gap:5px;margin-bottom:4px}
-    .pos-dir{font-weight:700;font-size:11px}
-    .pos-dir.buy{color:var(--green)}.pos-dir.sell{color:var(--red)}.pos-dir.pending{color:var(--gold)}
+    .pos-dir{font-weight:700;font-size:11px}.pos-dir.buy{color:var(--green)}.pos-dir.sell{color:var(--red)}.pos-dir.pending{color:var(--gold)}
     .pos-type-badge{font-size:9px;background:var(--faint);color:var(--muted);padding:1px 5px;border-radius:3px}
     .pos-close-btn{margin-left:auto;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;line-height:1}
     .pos-close-btn:hover{color:var(--red)}
@@ -94,15 +79,13 @@
     .pos-pnl{font-size:11px;font-weight:700;margin-top:3px;font-family:"JetBrains Mono",monospace}
     .pos-pnl.up{color:var(--green)}.pos-pnl.dn{color:var(--red)}.pos-pnl.zero{color:var(--muted)}
     .empty-msg{font-size:11px;color:var(--muted);text-align:center;padding:12px 0;font-style:italic}
-
-    /* Session P&L bar */
     .pnl-bar{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 9px;display:flex;justify-content:space-between;align-items:center;font-size:11px}
     .pnl-bar span:first-child{color:var(--muted)}
     .summary-btn{width:100%;padding:7px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif}
     .summary-btn:hover{border-color:var(--green);color:var(--green)}
 
     /* REPLAY BAR */
-    .replay-bar{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .replay-bar{display:flex;align-items:center;gap:7px;padding:5px 12px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
     .replay-label{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
     .replay-date{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 9px;font-size:12px;font-family:"JetBrains Mono",monospace;outline:none}
     .replay-date:focus{border-color:var(--green)}
@@ -113,11 +96,11 @@
     .speed-btn.active{border-color:var(--green);color:var(--green);background:var(--gdim)}
     .replay-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
     .replay-progress{font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace;white-space:nowrap;margin-left:auto}
+    .countdown{font-size:11px;color:var(--gold);font-family:"JetBrains Mono",monospace;white-space:nowrap;min-width:100px}
 
     /* STATUS BAR */
     .status-bar{display:flex;align-items:center;gap:14px;padding:3px 12px;background:var(--bg);border-top:1px solid var(--border);flex-shrink:0;font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace}
-    .status-price{color:var(--text);font-weight:600}
-    .status-up{color:var(--green)}.status-dn{color:var(--red)}
+    .status-price{color:var(--text);font-weight:600}.status-up{color:var(--green)}.status-dn{color:var(--red)}
 
     /* MODALS */
     .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center}
@@ -132,12 +115,10 @@
     .session-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
     .session-item-actions{display:flex;gap:6px;flex-shrink:0}
     .btn-continue{font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;border:1px solid var(--green);background:var(--gdim);color:var(--green);cursor:pointer;font-family:"Inter",sans-serif}
-    .btn-delete{font-size:11px;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif}
-    .btn-delete:hover{border-color:var(--red);color:var(--red)}
+    .btn-delete-sess{font-size:11px;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s}
+    .btn-delete-sess:hover{border-color:var(--red);color:var(--red)}
     .btn-new{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;font-family:"Inter",sans-serif;transition:all .15s}
     .btn-new:hover{border-color:var(--green);color:var(--green)}
-
-    /* Summary modal */
     .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
     .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px}
     .stat-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
@@ -151,10 +132,22 @@
     .modal-close-btn{padding:8px 18px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;font-size:12px;font-family:"Inter",sans-serif}
     .modal-primary-btn{padding:8px 18px;border-radius:6px;border:none;background:var(--green);color:#000;font-weight:700;font-size:12px;cursor:pointer;font-family:"Inter",sans-serif;text-decoration:none;display:inline-flex;align-items:center}
 
+    /* CONTEXT MENU */
+    .ctx-menu{position:fixed;z-index:500;background:var(--panel2);border:1px solid var(--border2);border-radius:8px;padding:4px;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+    .ctx-menu.visible{display:block}
+    .ctx-item{padding:7px 12px;border-radius:5px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .1s;user-select:none}
+    .ctx-item:hover{background:var(--faint)}
+    .ctx-item.buy{color:var(--green)}.ctx-item.sell{color:var(--red)}.ctx-item.neutral{color:var(--text)}
+    .ctx-sep{height:1px;background:var(--border);margin:3px 4px}
+    .ctx-price{font-size:10px;color:var(--muted);font-family:"JetBrains Mono",monospace;margin-left:auto}
+
     /* TOAST */
     .toast{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--green);color:var(--green);font-size:12px;font-weight:600;padding:7px 16px;border-radius:7px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
-    .toast.show{opacity:1}
-    .toast.error{border-color:var(--red);color:var(--red)}
+    .toast.show{opacity:1}.toast.error{border-color:var(--red);color:var(--red)}
+
+    /* Step hint banner */
+    .step-hint{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(7,9,13,.85);border:1px solid var(--border2);border-radius:6px;padding:5px 14px;font-size:11px;color:var(--gold);pointer-events:none;z-index:30;display:none}
+    .step-hint.visible{display:block}
   </style>
 </head>
 <body>
@@ -195,6 +188,21 @@
   </div>
 </div>
 
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu">
+  <div class="ctx-item buy" onclick="ctxOrder('BUY','limit')">▲ Buy Limit  <span class="ctx-price" id="ctxPriceLbl">—</span></div>
+  <div class="ctx-item sell" onclick="ctxOrder('SELL','limit')">▼ Sell Limit <span class="ctx-price" id="ctxPriceLbl2">—</span></div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item buy" onclick="ctxOrder('BUY','stop')">▲ Buy Stop   <span class="ctx-price" id="ctxPriceLbl3">—</span></div>
+  <div class="ctx-item sell" onclick="ctxOrder('SELL','stop')">▼ Sell Stop  <span class="ctx-price" id="ctxPriceLbl4">—</span></div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item buy" onclick="ctxOrder('BUY','market')">▲ Buy Market</div>
+  <div class="ctx-item sell" onclick="ctxOrder('SELL','market')">▼ Sell Market</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item neutral" onclick="ctxSetTP()">Set TP here</div>
+  <div class="ctx-item neutral" onclick="ctxSetSL()">Set SL here</div>
+</div>
+
 <!-- TOOLBAR -->
 <div class="toolbar">
   <span class="toolbar-label">Symbol:</span>
@@ -212,36 +220,44 @@
 
   <div class="toolbar-sep"></div>
   <span class="toolbar-label">Draw:</span>
-  <button class="tool-btn" data-tool="cursor"                 onclick="setTool('cursor',this)"                title="Cursor / Select">🖱</button>
-  <button class="tool-btn" data-tool="horizontalStraightLine" onclick="setTool('horizontalStraightLine',this)" title="Horizontal Line">━</button>
-  <button class="tool-btn" data-tool="segmentLine"            onclick="setTool('segmentLine',this)"            title="Trend Line">╱</button>
-  <button class="tool-btn" data-tool="rayLine"                onclick="setTool('rayLine',this)"                title="Ray">⇒</button>
-  <button class="tool-btn" data-tool="rect"                   onclick="setTool('rect',this)"                   title="Rectangle">▭</button>
-  <button class="tool-btn" data-tool="parallelStraightLine"   onclick="setTool('parallelStraightLine',this)"   title="Parallel Channel">⫼</button>
-  <button class="tool-btn" data-tool="fibRetracement"         onclick="setTool('fibRetracement',this)"         title="Fibonacci (ranged)">Φ</button>
-  <button class="tool-btn" data-tool="textOverlay"            onclick="setTool('textOverlay',this)"            title="Text Label">T</button>
-  <button class="tool-btn" data-tool="longPosition"           onclick="setTool('longPosition',this)"           title="Long R:R">🟢L</button>
-  <button class="tool-btn" data-tool="shortPosition"          onclick="setTool('shortPosition',this)"          title="Short R:R">🔴S</button>
+  <button class="tool-btn active" data-tool="cursor"                onclick="setTool('cursor',this)"                title="Cursor">🖱</button>
+  <button class="tool-btn" data-tool="horizontalStraightLine"       onclick="setTool('horizontalStraightLine',this)" title="H-Line">━</button>
+  <button class="tool-btn" data-tool="segment"                      onclick="setTool('segment',this)"                title="Trendline">╱</button>
+  <button class="tool-btn" data-tool="rayLine"                      onclick="setTool('rayLine',this)"                title="Ray">⇒</button>
+  <button class="tool-btn" data-tool="rect"                         onclick="setTool('rect',this)"                   title="Rectangle">▭</button>
+  <button class="tool-btn" data-tool="parallelStraightLine"         onclick="setTool('parallelStraightLine',this)"   title="Parallel Channel">⫼</button>
+  <button class="tool-btn" data-tool="fibRetracement"               onclick="setTool('fibRetracement',this)"         title="Fibonacci">Φ</button>
+  <button class="tool-btn" data-tool="textOverlay"                  onclick="setTool('textOverlay',this)"            title="Text Label">T</button>
+  <button class="tool-btn" data-tool="longPosition"                 onclick="setTool('longPosition',this)"           title="Long R:R (3 clicks: Entry→SL→TP)">🟢L</button>
+  <button class="tool-btn" data-tool="shortPosition"                onclick="setTool('shortPosition',this)"          title="Short R:R (3 clicks: Entry→SL→TP)">🔴S</button>
 
   <div class="toolbar-sep"></div>
-  <!-- Color picker -->
   <label class="color-wrap" title="Drawing color">
     <input type="color" id="colorPicker" value="#4da6ff" onchange="setDrawColor(this.value)">
     <div class="color-swatch" id="colorSwatch"></div>
   </label>
 
   <div class="toolbar-sep"></div>
-  <!-- Volume toggle -->
   <button class="tool-btn" id="volToggleBtn" onclick="toggleVolume()" title="Toggle volume pane">VOL</button>
-  <!-- Clear -->
-  <button class="tool-btn" onclick="clearDrawings()" title="Clear all drawings" style="margin-left:2px">🗑</button>
+  <button class="tool-btn" onclick="clearDrawings()" title="Clear drawings">🗑</button>
+
+  <div class="toolbar-sep"></div>
+  <span class="toolbar-label">Theme:</span>
+  <button class="theme-btn" onclick="applyTheme('dark')"  title="Dark">🌑</button>
+  <button class="theme-btn" onclick="applyTheme('navy')"  title="Navy">🌊</button>
+  <button class="theme-btn" onclick="applyTheme('slate')" title="Slate">🌫</button>
+  <button class="theme-btn" onclick="applyTheme('light')" title="Light">☀️</button>
+
+  <div class="toolbar-sep"></div>
+  <button class="tool-btn" onclick="fitChart()" title="Auto-fit chart (Auto scale)">⊞ Fit</button>
 </div>
+
+<!-- STEP HINT -->
+<div class="step-hint" id="stepHint"></div>
 
 <!-- MAIN -->
 <div class="main">
   <div class="chart-container">
-
-    <!-- Chart -->
     <div class="chart-wrap" id="chartWrap">
       <div id="kline-chart"></div>
       <div class="loading-overlay hidden" id="loadingOverlay">
@@ -256,63 +272,46 @@
         <button class="panel-toggle" id="panelToggleBtn" onclick="toggleTradePanel()" title="Toggle panel">⟩</button>
         <div class="panel-inner" id="panelInner">
           <div class="panel-section-title">Order</div>
-
-          <!-- Direction -->
           <div class="dir-row">
-            <button class="dir-btn buy active" id="btnBuy" onclick="setDir('BUY',this)">▲ BUY</button>
-            <button class="dir-btn sell" id="btnSell" onclick="setDir('SELL',this)">▼ SELL</button>
+            <button class="dir-btn buy active" id="btnBuy"  onclick="setDir('BUY',this)">▲ BUY</button>
+            <button class="dir-btn sell"        id="btnSell" onclick="setDir('SELL',this)">▼ SELL</button>
           </div>
-
-          <!-- Order type -->
           <div class="form-label">Type</div>
           <select class="form-select" id="orderType" onchange="onOrderTypeChange()">
             <option value="market">Market</option>
             <option value="limit">Limit</option>
             <option value="stop">Stop</option>
           </select>
-
-          <!-- Lots -->
           <div class="form-label">Lots</div>
           <input class="form-input" type="number" id="lotsInput" value="0.01" step="0.01" min="0.001">
-
-          <!-- Trigger price (limit/stop only) -->
           <div class="form-label" id="triggerLabel" style="display:none">Trigger Price</div>
           <input class="form-input" type="number" id="triggerInput" step="0.00001" style="display:none" placeholder="e.g. 1.0850">
-
-          <!-- TP / SL -->
           <div class="form-label">Take Profit</div>
           <input class="form-input" type="number" id="tpInput" step="0.00001" placeholder="optional">
           <div class="form-label">Stop Loss</div>
           <input class="form-input" type="number" id="slInput" step="0.00001" placeholder="optional">
-
           <button class="place-btn" id="placeBtn" onclick="placeOrder()">Place Order</button>
-
-          <!-- Positions -->
           <div class="panel-section-title" style="margin-top:4px">Positions &amp; Orders</div>
           <div id="positionsList"><div class="empty-msg">No open positions</div></div>
-
-          <!-- Session stats -->
           <div class="pnl-bar">
             <span>P&amp;L</span>
             <span id="sessionPnlEl" class="status-up">$0.00</span>
             <span id="sessionStatsEl" style="color:var(--muted)">0W / 0L</span>
           </div>
-
           <button class="summary-btn" onclick="showSummary()">📊 Session Summary</button>
         </div>
       </div>
     </div>
-
-  </div><!-- chart-container -->
+  </div>
 
   <!-- Replay bar -->
   <div class="replay-bar">
     <span class="replay-label">Replay from:</span>
     <input type="date" class="replay-date" id="replayDate" onchange="replayReset()"/>
-    <button class="rep-btn" onclick="replayReset()"   title="Reset to start date">⏮</button>
-    <button class="rep-btn" onclick="replayStep(-1)"  title="Step back 1 bar">◀</button>
-    <button class="rep-btn" id="btnPlay" onclick="togglePlay()" title="Play / Pause">▶</button>
-    <button class="rep-btn" onclick="replayStep(1)"   title="Step forward 1 bar">▶|</button>
+    <button class="rep-btn" onclick="replayReset()"   title="Reset to start">⏮</button>
+    <button class="rep-btn" onclick="replayStep(-1)"  title="Step back">◀</button>
+    <button class="rep-btn" id="btnPlay" onclick="togglePlay()" title="Play/Pause">▶</button>
+    <button class="rep-btn" onclick="replayStep(1)"   title="Step forward">▶|</button>
     <button class="rep-btn" onclick="replayEnd()"     title="Jump to latest">⏭</button>
     <div class="replay-sep"></div>
     <span class="replay-label">Speed:</span>
@@ -321,6 +320,7 @@
     <button class="speed-btn" data-spd="80"   onclick="setSpeed(80,this)">Fast</button>
     <button class="speed-btn" data-spd="20"   onclick="setSpeed(20,this)">Turbo</button>
     <div class="replay-sep"></div>
+    <span class="countdown" id="cdTimer"></span>
     <span class="replay-progress" id="replayProgress">— / —</span>
   </div>
 
@@ -328,15 +328,15 @@
   <div class="status-bar">
     <span id="sbSymbol">—</span>
     <span id="sbTF">—</span>
-    <span>O: <span id="sbO">—</span></span>
-    <span>H: <span id="sbH">—</span></span>
-    <span>L: <span id="sbL">—</span></span>
-    <span>C: <span id="sbC" class="status-price">—</span></span>
+    <span>O:<span id="sbO">—</span></span>
+    <span>H:<span id="sbH">—</span></span>
+    <span>L:<span id="sbL">—</span></span>
+    <span>C:<span id="sbC" class="status-price">—</span></span>
     <span id="sbChg">—</span>
     <span style="margin-left:auto;color:var(--faint)" id="sbCount">0 bars</span>
-    <span style="color:var(--faint);font-size:10px">Space=play · ←/→=step · R=reset · Esc=cursor</span>
+    <span style="color:var(--faint);font-size:10px">Space=play · ←/→=step · R=reset · Esc=cursor · RightClick=order</span>
   </div>
-</div><!-- main -->
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -350,19 +350,50 @@ let activeTool = "cursor", drawColor = "#4da6ff";
 let overlayIds = [];
 let volVisible = true, volIndicatorId = null;
 let currentSessionId = null;
-let openOrders = [];   // in-memory order book (includes closed for stats)
+let openOrders = [];
 let tradeDir = "BUY";
 let panelOpen = true;
+let lastCrosshairPrice = null;
+let _orderSeq = 0;
+const positionLines = new Map(); // _localId → {entryId, tpId, slId}
 
-// Contract multiplier: pnl = dirMult × (exit−entry) × lots × CONTRACT[sym]
+// Countdown
+let cdHandle = null, cdMs = 0;
+const TF_MS = { "15m": 900000, "30m": 1800000, "1h": 3600000, "4h": 14400000, "1d": 86400000 };
+
+// Contract multipliers
 const CONTRACT = { XAUUSD: 100, USOIL: 1000, BTCUSD: 1, ETHUSD: 1, EURUSD: 100000 };
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
+  document.getElementById("colorSwatch").style.background = drawColor;
   registerCustomOverlays();
   initChart();
   loadData(currentSymbol, currentTF);
   await loadSessions();
+
+  // Hide context menu on outside click
+  document.addEventListener("click", hideCtxMenu);
+  // Right-click on chart
+  document.getElementById("chartWrap").addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    const price = lastCrosshairPrice;
+    if (price == null) return;
+    const priceStr = fmt(price);
+    ["ctxPriceLbl","ctxPriceLbl2","ctxPriceLbl3","ctxPriceLbl4"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = priceStr;
+    });
+    document.getElementById("ctxMenu")._price = price;
+    const menu = document.getElementById("ctxMenu");
+    menu.style.left = e.clientX + "px";
+    menu.style.top  = e.clientY + "px";
+    menu.classList.add("visible");
+  });
+
+  // Restore theme
+  const saved = localStorage.getItem("chartTheme");
+  if (saved) applyTheme(saved);
 });
 
 // ── Keyboard shortcuts ────────────────────────────────────────────────────────
@@ -373,8 +404,39 @@ document.addEventListener("keydown", (e) => {
   if (e.code === "ArrowRight") { e.preventDefault(); replayStep(1); }
   if (e.code === "ArrowLeft")  { e.preventDefault(); replayStep(-1); }
   if (e.code === "KeyR")       replayReset();
-  if (e.code === "Escape")     setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+  if (e.code === "Escape") {
+    setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+    hideCtxMenu();
+  }
 });
+
+// ── Context menu helpers ──────────────────────────────────────────────────────
+function hideCtxMenu() { document.getElementById("ctxMenu").classList.remove("visible"); }
+
+function ctxOrder(dir, type) {
+  hideCtxMenu();
+  const price = document.getElementById("ctxMenu")._price;
+  if (price == null) return;
+  // Pre-fill the order form
+  setDir(dir, document.getElementById(dir === "BUY" ? "btnBuy" : "btnSell"));
+  document.getElementById("orderType").value = type;
+  onOrderTypeChange();
+  if (type !== "market") document.getElementById("triggerInput").value = price.toFixed(5);
+  // Open trade panel if collapsed
+  if (!panelOpen) toggleTradePanel();
+  showToast(`${dir} ${type} pre-filled @ ${fmt(price)} — set TP/SL then click Place Order`);
+}
+
+function ctxSetTP() {
+  hideCtxMenu();
+  const price = document.getElementById("ctxMenu")._price;
+  if (price != null) document.getElementById("tpInput").value = price.toFixed(5);
+}
+function ctxSetSL() {
+  hideCtxMenu();
+  const price = document.getElementById("ctxMenu")._price;
+  if (price != null) document.getElementById("slInput").value = price.toFixed(5);
+}
 
 // ── Chart init ────────────────────────────────────────────────────────────────
 function initChart() {
@@ -395,12 +457,12 @@ function initChart() {
         },
         priceMark: {
           show: true,
-          high: { show: true, color: "#00e5a0", textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
-          low:  { show: true, color: "#ff4757", textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
+          high: { show: true, color: "#00e5a0", textSize: 10, textFamily: "Inter,sans-serif", textWeight: "600" },
+          low:  { show: true, color: "#ff4757", textSize: 10, textFamily: "Inter,sans-serif", textWeight: "600" },
           last: { show: true, upColor: "#00e5a0", downColor: "#ff4757", noChangeColor: "#5a7080",
             line: { show: true, style: "dashed", dashedValue: [4,4], size: 1 },
             text: { show: true, size: 12, paddingTop: 2, paddingBottom: 2, paddingLeft: 4, paddingRight: 4,
-              borderRadius: 2, borderSize: 1, color: "#000", weight: "700", family: "Inter, sans-serif" } }
+              borderRadius: 2, borderSize: 1, color: "#000", weight: "700", family: "Inter,sans-serif" } }
         },
       },
       indicator: {
@@ -411,28 +473,21 @@ function initChart() {
       xAxis: {
         axisLine: { color: "#1c2b3a" },
         tickLine: { color: "#1c2b3a" },
-        tickText: { color: "#5a7080", family: "JetBrains Mono, monospace", size: 10 },
+        tickText: { color: "#5a7080", family: "JetBrains Mono,monospace", size: 10 },
       },
       yAxis: {
         position: "right",
         axisLine: { color: "#1c2b3a" },
         tickLine: { color: "#1c2b3a" },
-        tickText: { color: "#5a7080", family: "JetBrains Mono, monospace", size: 11 },
+        tickText: { color: "#5a7080", family: "JetBrains Mono,monospace", size: 11 },
       },
       crosshair: {
         horizontal: { line: { style: "dashed", dashedValue: [4,2], color: "#5a7080" },
           text: { color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2,
-            borderColor: "#1c2b3a", backgroundColor: "#111820", size: 11, family: "JetBrains Mono, monospace" } },
+            borderColor: "#1c2b3a", backgroundColor: "#111820", size: 11, family: "JetBrains Mono,monospace" } },
         vertical: { line: { style: "dashed", dashedValue: [4,2], color: "#5a7080" },
           text: { color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2,
-            borderColor: "#1c2b3a", backgroundColor: "#111820", size: 11, family: "JetBrains Mono, monospace" } },
-      },
-      overlay: {
-        point: { color: "#00e5a0" },
-        line:  { size: 1, color: "#4da6ff" },
-        rect:  { color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1 },
-        polygon: { color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1 },
-        text: { color: "#d4dde8", size: 12, family: "Inter, sans-serif" },
+            borderColor: "#1c2b3a", backgroundColor: "#111820", size: 11, family: "JetBrains Mono,monospace" } },
       },
       separator: { size: 1, color: "#1c2b3a", activeBackgroundColor: "#1e2d3d" },
     },
@@ -444,11 +499,13 @@ function initChart() {
     document.getElementById("volToggleBtn").classList.add("active");
   } catch(e) { console.warn("VOL:", e); }
 
-  // Crosshair → status bar
+  // Crosshair → status bar + track price for context menu
   try {
     chart.subscribeAction("onCrosshairChange", (data) => {
       if (!data || !data.kLineData) return;
       const d = data.kLineData;
+      // Track price for right-click context menu
+      lastCrosshairPrice = d.close;
       const idx = allCandles.findIndex(c => c.timestamp === d.timestamp);
       const prev = idx > 0 ? allCandles[idx - 1] : null;
       const chgPct = prev ? ((d.close - prev.close) / prev.close * 100).toFixed(2) : null;
@@ -474,102 +531,78 @@ window.addEventListener("resize", () => {
   }
 });
 
-// ── Data loading ──────────────────────────────────────────────────────────────
-async function loadData(sym, tf) {
-  showLoading(`Loading ${sym} ${tf.toUpperCase()}…`);
-  stopPlay();
-  try {
-    const res  = await fetch(`/api/chart-data?symbol=${sym}&tf=${tf}`);
-    const json = await res.json();
-    if (json.error) { showToast("Error: " + json.error, true); return; }
-
-    allCandles = json.candles.map(c => ({
-      timestamp: c.t, open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v
-    }));
-    visibleEnd  = allCandles.length - 1;
-    replayMode  = false;
-
-    // Set replay date immediately (90 days before last candle)
-    if (allCandles.length) {
-      try {
-        const last = new Date(allCandles[allCandles.length - 1].timestamp);
-        const def  = new Date(last); def.setDate(def.getDate() - 90);
-        document.getElementById("replayDate").value = def.toISOString().slice(0, 10);
-      } catch(_) {}
-    }
-
-    chart.clearData();
-    chart.applyNewData(allCandles);
-
-    document.getElementById("sbSymbol").textContent = sym;
-    document.getElementById("sbTF").textContent     = tf.toUpperCase();
-    document.getElementById("sbCount").textContent  = allCandles.length + " bars";
-    updateProgress();
-    showToast(`${sym} ${tf.toUpperCase()} — ${allCandles.length} bars`);
-  } catch(e) {
-    showToast("Load failed: " + e.message, true);
-  } finally {
-    hideLoading();
-  }
-}
-
-function selectSymbol(sym, btn) {
-  if (sym === currentSymbol) return;
-  currentSymbol = sym;
-  document.querySelectorAll(".sym-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  loadData(sym, currentTF);
-}
-
-function selectTF(tf, btn) {
-  if (tf === currentTF) return;
-  currentTF = tf;
-  document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  loadData(currentSymbol, tf);
-}
-
 // ── Custom overlays ───────────────────────────────────────────────────────────
 function registerCustomOverlays() {
 
-  // Ranged Fibonacci Retracement
+  // Trade price level line (entry/TP/SL with label)
+  klinecharts.registerOverlay({
+    name: "tradeLine",
+    totalStep: 1,
+    needDefaultPointFigure: false,
+    createPointFigures: ({ overlay, coordinates }) => {
+      if (!coordinates.length) return [];
+      const [p] = coordinates;
+      const { color = "#f0c040", label = "", dashed = false } = overlay.extendData || {};
+      return [
+        { type: "line",
+          attrs: { coordinates: [{ x: 0, y: p.y }, { x: Number.MAX_SAFE_INTEGER, y: p.y }] },
+          styles: { color, size: 1, style: dashed ? "dashed" : "solid", dashedValue: [6, 3] } },
+        { type: "text",
+          attrs: { x: 4, y: p.y - 13, text: label },
+          styles: { color, size: 11, family: "JetBrains Mono,monospace", weight: "600",
+            backgroundColor: "rgba(7,9,13,0.85)",
+            paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2, borderRadius: 3 } },
+      ];
+    },
+  });
+
+  // Ranged Fibonacci — shows dot at point 1 while waiting for point 2
   klinecharts.registerOverlay({
     name: "fibRetracement",
     totalStep: 2,
     needDefaultPointFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
-      if (coordinates.length < 2) return [];
+      if (!coordinates.length) return [];
+      // Only 1 point set: show dot + hint
+      if (coordinates.length < 2) {
+        const [p1] = coordinates;
+        return [
+          { type: "circle",
+            attrs: { x: p1.x, y: p1.y, r: 6 },
+            styles: { style: "fill", color: "#4da6ff40", borderColor: "#4da6ff", borderSize: 2 } },
+          { type: "text",
+            attrs: { x: p1.x + 10, y: p1.y - 6, text: "← click 2nd point" },
+            styles: { color: "#5a7080", size: 10, family: "Inter,sans-serif" } },
+        ];
+      }
       const [p1, p2] = coordinates;
       const xL = Math.min(p1.x, p2.x), xR = Math.max(p1.x, p2.x);
       const pts = overlay.points;
       if (!pts || pts.length < 2 || pts[0].value == null || pts[1].value == null) return [];
       const v1 = pts[0].value, v2 = pts[1].value;
       const LEVELS = [
-        { l: 0,     label: "0.000",   col: "#ffffff" },
-        { l: 0.236, label: "23.6%",   col: "#f0c040" },
-        { l: 0.382, label: "38.2%",   col: "#00e5a0" },
-        { l: 0.5,   label: "50.0%",   col: "#4da6ff" },
-        { l: 0.618, label: "61.8%",   col: "#ff4757" },
-        { l: 0.786, label: "78.6%",   col: "#f0c040" },
-        { l: 1,     label: "100.0%",  col: "#ffffff" },
+        { l: 0,     label: "0",    col: "#aaaaaa" },
+        { l: 0.236, label: "23.6", col: "#f0c040" },
+        { l: 0.382, label: "38.2", col: "#00e5a0" },
+        { l: 0.5,   label: "50.0", col: "#4da6ff" },
+        { l: 0.618, label: "61.8", col: "#ff4757" },
+        { l: 0.786, label: "78.6", col: "#f0c040" },
+        { l: 1,     label: "100",  col: "#aaaaaa" },
       ];
       const figs = [];
-      // Diagonal connector
       figs.push({ type: "line",
         attrs: { coordinates: [{ x: p1.x, y: p1.y }, { x: p2.x, y: p2.y }] },
-        styles: { color: "rgba(255,255,255,0.2)", size: 1, style: "dashed", dashedValue: [4,4] }
-      });
+        styles: { color: "rgba(255,255,255,0.15)", size: 1, style: "dashed", dashedValue: [4,4] } });
       for (const { l, label, col } of LEVELS) {
         const y = p1.y + (p2.y - p1.y) * l;
         const price = v1 + (v2 - v1) * l;
         figs.push({ type: "line",
           attrs: { coordinates: [{ x: xL, y }, { x: xR, y }] },
-          styles: { color: col, size: 1, style: "solid" }
-        });
+          styles: { color: col, size: 1 } });
         figs.push({ type: "text",
-          attrs: { x: xR + 4, y: y - 1, text: `${label}  ${fmt(price)}` },
-          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "normal" }
-        });
+          attrs: { x: xR + 5, y: y - 1, text: `${label}%  ${fmt(price)}` },
+          styles: { color: col, size: 10, family: "JetBrains Mono,monospace",
+            backgroundColor: "rgba(7,9,13,0.7)", paddingLeft: 2, paddingRight: 2 } });
       }
       return figs;
     },
@@ -588,48 +621,71 @@ function registerCustomOverlays() {
       return [
         { type: "text",
           attrs: { x: p.x, y: p.y, text: txt },
-          styles: { color: col, size: 13, family: "Inter, sans-serif", weight: "600",
+          styles: { color: col, size: 13, family: "Inter,sans-serif", weight: "600",
             paddingLeft: 6, paddingRight: 6, paddingTop: 3, paddingBottom: 3,
-            borderRadius: 3, borderSize: 1, borderColor: col,
-            backgroundColor: "rgba(0,0,0,0.6)" } }
+            borderRadius: 3, borderSize: 1, borderColor: col, backgroundColor: "rgba(0,0,0,0.6)" } },
       ];
     },
   });
 
-  // Long Position (entry click → SL click → TP click — all three draggable)
+  // Long Position: 3 clicks — entry → SL → TP (ALL three draggable via needDefaultPointFigure)
   klinecharts.registerOverlay({
     name: "longPosition",
     totalStep: 3,
     needDefaultPointFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
-      if (coordinates.length < 2) return [];
+      if (!coordinates.length) return [];
       const [ep, slp, tpp] = coordinates;
-      const entry = ep.y;
-      const sl    = slp ? slp.y : entry + 40;
-      const tp    = tpp ? tpp.y : entry - 60;
-      const left  = Math.min(...coordinates.map(c => c.x)) - 10;
-      const right = Math.max(...coordinates.map(c => c.x)) + 60;
-      const col   = overlay.extendData?.color || "#00e5a0";
-      return [
-        { type: "rect",
-          attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
-          styles: { style: "fill", color: "rgba(0,229,160,.10)", borderColor: col, borderSize: 1 } },
-        { type: "rect",
-          attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
-          styles: { style: "fill", color: "rgba(255,71,87,.10)", borderColor: "#ff4757", borderSize: 1 } },
-        { type: "line",
-          attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
-          styles: { color: "#f0c040", size: 2, style: "solid" } },
-        { type: "text",
-          attrs: { x: right + 2, y: entry - 2, text: "ENTRY" },
-          styles: { color: "#f0c040", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
-        { type: "text",
-          attrs: { x: right + 2, y: Math.min(entry, tp) + 2, text: "TP" },
-          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
-        { type: "text",
-          attrs: { x: right + 2, y: Math.max(entry, sl) - 10, text: "SL" },
-          styles: { color: "#ff4757", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
-      ];
+      const eY = ep.y;
+      const sY = slp ? slp.y : eY + 50;
+      const tY = tpp ? tpp.y : eY - 70;
+      const xL = ep.x - 20;
+      const xR = ep.x + 140;
+      const col = overlay.extendData?.color || "#00e5a0";
+      const figs = [];
+
+      // SL zone (red above entry for long)
+      figs.push({ type: "rect",
+        attrs: { x: xL, y: Math.min(eY, sY), width: xR - xL, height: Math.abs(sY - eY) },
+        styles: { style: "fill", color: "rgba(255,71,87,.13)", borderColor: "#ff4757", borderSize: 1 } });
+      // TP zone
+      figs.push({ type: "rect",
+        attrs: { x: xL, y: Math.min(eY, tY), width: xR - xL, height: Math.abs(tY - eY) },
+        styles: { style: "fill", color: "rgba(0,229,160,.13)", borderColor: col, borderSize: 1 } });
+
+      // Price lines
+      figs.push({ type: "line", attrs: { coordinates: [{ x: xL, y: eY }, { x: xR, y: eY }] },
+        styles: { color: "#f0c040", size: 2 } });
+      figs.push({ type: "line", attrs: { coordinates: [{ x: xL, y: sY }, { x: xR, y: sY }] },
+        styles: { color: "#ff4757", size: 1, style: "dashed", dashedValue: [4,3] } });
+      figs.push({ type: "line", attrs: { coordinates: [{ x: xL, y: tY }, { x: xR, y: tY }] },
+        styles: { color: col,      size: 1, style: "dashed", dashedValue: [4,3] } });
+
+      // Labels — staggered to avoid overlap
+      figs.push({ type: "text", attrs: { x: xR + 4, y: eY - 14, text: "ENTRY" },
+        styles: { color: "#f0c040", size: 10, family: "JetBrains Mono,monospace", weight: "700" } });
+      figs.push({ type: "text", attrs: { x: xR + 4, y: sY - 2, text: "SL" },
+        styles: { color: "#ff4757", size: 10, family: "JetBrains Mono,monospace", weight: "700" } });
+      figs.push({ type: "text", attrs: { x: xR + 4, y: tY - 2, text: "TP" },
+        styles: { color: col, size: 10, family: "JetBrains Mono,monospace", weight: "700" } });
+
+      // R:R ratio
+      if (slp && tpp && Math.abs(sY - eY) > 0) {
+        const rr = (Math.abs(tY - eY) / Math.abs(sY - eY)).toFixed(1);
+        figs.push({ type: "text", attrs: { x: xL + 4, y: eY + 12, text: `R:R  1:${rr}` },
+          styles: { color: "#d4dde8", size: 10, family: "JetBrains Mono,monospace", weight: "600",
+            backgroundColor: "rgba(7,9,13,0.7)", paddingLeft: 3, paddingRight: 3 } });
+      }
+
+      // Step hint — shown only while drawing (less than totalStep clicks)
+      if (coordinates.length === 1) {
+        figs.push({ type: "text", attrs: { x: ep.x - 60, y: eY + 18, text: "Step 2/3: click SL" },
+          styles: { color: "#5a7080", size: 10, family: "Inter,sans-serif" } });
+      } else if (coordinates.length === 2) {
+        figs.push({ type: "text", attrs: { x: ep.x - 60, y: eY + 18, text: "Step 3/3: click TP" },
+          styles: { color: "#5a7080", size: 10, family: "Inter,sans-serif" } });
+      }
+      return figs;
     },
   });
 
@@ -639,38 +695,55 @@ function registerCustomOverlays() {
     totalStep: 3,
     needDefaultPointFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
-      if (coordinates.length < 2) return [];
+      if (!coordinates.length) return [];
       const [ep, slp, tpp] = coordinates;
-      const entry = ep.y;
-      const sl    = slp ? slp.y : entry - 40;
-      const tp    = tpp ? tpp.y : entry + 60;
-      const left  = Math.min(...coordinates.map(c => c.x)) - 10;
-      const right = Math.max(...coordinates.map(c => c.x)) + 60;
-      const col   = overlay.extendData?.color || "#ff4757";
-      return [
-        { type: "rect",
-          attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
-          styles: { style: "fill", color: "rgba(0,229,160,.10)", borderColor: "#00e5a0", borderSize: 1 } },
-        { type: "rect",
-          attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
-          styles: { style: "fill", color: "rgba(255,71,87,.10)", borderColor: col, borderSize: 1 } },
-        { type: "line",
-          attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
-          styles: { color: "#f0c040", size: 2, style: "solid" } },
-        { type: "text",
-          attrs: { x: right + 2, y: entry - 2, text: "ENTRY" },
-          styles: { color: "#f0c040", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
-        { type: "text",
-          attrs: { x: right + 2, y: Math.min(entry, tp) + 2, text: "TP" },
-          styles: { color: "#00e5a0", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
-        { type: "text",
-          attrs: { x: right + 2, y: Math.max(entry, sl) - 10, text: "SL" },
-          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
-      ];
+      const eY = ep.y;
+      const sY = slp ? slp.y : eY - 50;
+      const tY = tpp ? tpp.y : eY + 70;
+      const xL = ep.x - 20;
+      const xR = ep.x + 140;
+      const col = overlay.extendData?.color || "#ff4757";
+      const figs = [];
+
+      figs.push({ type: "rect",
+        attrs: { x: xL, y: Math.min(eY, sY), width: xR - xL, height: Math.abs(sY - eY) },
+        styles: { style: "fill", color: "rgba(255,71,87,.13)", borderColor: col, borderSize: 1 } });
+      figs.push({ type: "rect",
+        attrs: { x: xL, y: Math.min(eY, tY), width: xR - xL, height: Math.abs(tY - eY) },
+        styles: { style: "fill", color: "rgba(0,229,160,.13)", borderColor: "#00e5a0", borderSize: 1 } });
+
+      figs.push({ type: "line", attrs: { coordinates: [{ x: xL, y: eY }, { x: xR, y: eY }] },
+        styles: { color: "#f0c040", size: 2 } });
+      figs.push({ type: "line", attrs: { coordinates: [{ x: xL, y: sY }, { x: xR, y: sY }] },
+        styles: { color: col,       size: 1, style: "dashed", dashedValue: [4,3] } });
+      figs.push({ type: "line", attrs: { coordinates: [{ x: xL, y: tY }, { x: xR, y: tY }] },
+        styles: { color: "#00e5a0", size: 1, style: "dashed", dashedValue: [4,3] } });
+
+      figs.push({ type: "text", attrs: { x: xR + 4, y: eY - 14, text: "ENTRY" },
+        styles: { color: "#f0c040", size: 10, family: "JetBrains Mono,monospace", weight: "700" } });
+      figs.push({ type: "text", attrs: { x: xR + 4, y: sY - 2, text: "SL" },
+        styles: { color: col, size: 10, family: "JetBrains Mono,monospace", weight: "700" } });
+      figs.push({ type: "text", attrs: { x: xR + 4, y: tY - 2, text: "TP" },
+        styles: { color: "#00e5a0", size: 10, family: "JetBrains Mono,monospace", weight: "700" } });
+
+      if (slp && tpp && Math.abs(sY - eY) > 0) {
+        const rr = (Math.abs(tY - eY) / Math.abs(sY - eY)).toFixed(1);
+        figs.push({ type: "text", attrs: { x: xL + 4, y: eY + 12, text: `R:R  1:${rr}` },
+          styles: { color: "#d4dde8", size: 10, family: "JetBrains Mono,monospace", weight: "600",
+            backgroundColor: "rgba(7,9,13,0.7)", paddingLeft: 3, paddingRight: 3 } });
+      }
+      if (coordinates.length === 1) {
+        figs.push({ type: "text", attrs: { x: ep.x - 60, y: eY - 18, text: "Step 2/3: click SL" },
+          styles: { color: "#5a7080", size: 10, family: "Inter,sans-serif" } });
+      } else if (coordinates.length === 2) {
+        figs.push({ type: "text", attrs: { x: ep.x - 60, y: eY - 18, text: "Step 3/3: click TP" },
+          styles: { color: "#5a7080", size: 10, family: "Inter,sans-serif" } });
+      }
+      return figs;
     },
   });
 
-  // Trade entry marker (auto-placed on position open)
+  // Trade entry/exit arrow marker
   klinecharts.registerOverlay({
     name: "tradeEntryMarker",
     totalStep: 1,
@@ -680,19 +753,18 @@ function registerCustomOverlays() {
       const [p] = coordinates;
       const isLong = overlay.extendData?.direction === "BUY";
       const col    = isLong ? "#00e5a0" : "#ff4757";
-      const yOff   = isLong ? -14 : 14;
+      const label  = overlay.extendData?.label || "";
       return [
         { type: "polygon",
           attrs: { coordinates: isLong
             ? [{ x: p.x, y: p.y - 14 }, { x: p.x - 7, y: p.y }, { x: p.x + 7, y: p.y }]
             : [{ x: p.x, y: p.y + 14 }, { x: p.x - 7, y: p.y }, { x: p.x + 7, y: p.y }]
           },
-          styles: { style: "fill", color: col, borderColor: col, borderSize: 1 }
-        },
+          styles: { style: "fill", color: col, borderColor: col, borderSize: 1 } },
         { type: "text",
-          attrs: { x: p.x + 10, y: p.y + yOff / 2, text: overlay.extendData?.label || "" },
-          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "600" }
-        }
+          attrs: { x: p.x + 10, y: p.y + (isLong ? -14 : 4), text: label },
+          styles: { color: col, size: 10, family: "JetBrains Mono,monospace", weight: "600",
+            backgroundColor: "rgba(7,9,13,0.75)", paddingLeft: 3, paddingRight: 3, paddingTop: 1, paddingBottom: 1, borderRadius: 3 } },
       ];
     },
   });
@@ -703,27 +775,51 @@ function setTool(tool, btn) {
   activeTool = tool;
   document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
-
-  if (tool === "cursor") { return; }
+  hideStepHint();
+  if (tool === "cursor") return;
 
   if (tool === "textOverlay") {
-    const txt = prompt("Enter label text:", "Note");
+    const txt = prompt("Label text:", "Note");
     if (!txt) { setTool("cursor", document.querySelector('[data-tool="cursor"]')); return; }
     try {
-      const id = chart.createOverlay({ name: "textOverlay", extendData: { text: txt, color: drawColor } });
+      const id = chart.createOverlay({
+        name: "textOverlay",
+        extendData: { text: txt, color: drawColor },
+        onDrawEnd: () => setTool("cursor", document.querySelector('[data-tool="cursor"]')),
+      });
       if (id) overlayIds.push(id);
-    } catch(e) { showToast("Text tool error: " + e.message, true); }
+    } catch(e) { showToast("Text tool: " + e.message, true); }
+    setTimeout(() => setTool("cursor", document.querySelector('[data-tool="cursor"]')), 50);
     return;
   }
 
+  if (tool === "longPosition" || tool === "shortPosition") {
+    showStepHint(`${tool === "longPosition" ? "🟢 Long" : "🔴 Short"} R:R — Step 1/3: click entry price`);
+  }
+
   try {
-    const styles = buildOverlayStyles(tool);
-    const id = chart.createOverlay({ name: tool, styles, extendData: { color: drawColor } });
+    const id = chart.createOverlay({
+      name: tool,
+      styles: buildOverlayStyles(tool),
+      extendData: { color: drawColor },
+      onDrawEnd: () => {
+        hideStepHint();
+        setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+      },
+    });
     if (id) overlayIds.push(id);
   } catch(e) {
     showToast("Tool error: " + e.message, true);
-    console.warn("Overlay error:", e);
+    setTool("cursor", document.querySelector('[data-tool="cursor"]'));
   }
+}
+
+function showStepHint(msg) {
+  const el = document.getElementById("stepHint");
+  el.textContent = msg; el.classList.add("visible");
+}
+function hideStepHint() {
+  document.getElementById("stepHint").classList.remove("visible");
 }
 
 function buildOverlayStyles(tool) {
@@ -742,33 +838,117 @@ function setDrawColor(c) {
   drawColor = c;
   document.getElementById("colorSwatch").style.background = c;
 }
-// Set initial swatch
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("colorSwatch").style.background = drawColor;
-});
 
 function clearDrawings() {
   try { chart.removeOverlay(); } catch(_) {}
   overlayIds = [];
-  showToast("Drawings cleared");
+  hideStepHint();
   setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+  showToast("Drawings cleared");
 }
 
 function toggleVolume() {
   const btn = document.getElementById("volToggleBtn");
   if (volVisible) {
-    try { chart.removeIndicator("VOL", "vol_pane"); } catch(_) {}
+    try { chart.removeIndicator("vol_pane", "VOL"); } catch(_) {}
     volVisible = false;
     btn.classList.remove("active");
     showToast("Volume pane hidden");
   } else {
-    try {
-      volIndicatorId = chart.createIndicator("VOL", false, { id: "vol_pane", height: 80 });
-    } catch(_) {}
+    try { volIndicatorId = chart.createIndicator("VOL", false, { id: "vol_pane", height: 80 }); } catch(_) {}
     volVisible = true;
     btn.classList.add("active");
     showToast("Volume pane shown");
   }
+}
+
+// ── Theme ─────────────────────────────────────────────────────────────────────
+const THEMES = {
+  dark:  { bg: "#07090d", bg2: "#0c1018", panel: "#111820", border: "#1c2b3a", grid: "#1c2b3a", text: "#d4dde8" },
+  navy:  { bg: "#04101e", bg2: "#071829", panel: "#0c2036", border: "#0d2d45", grid: "#0d2035", text: "#cce8ff" },
+  slate: { bg: "#0d1117", bg2: "#151b23", panel: "#1c2128", border: "#30363d", grid: "#21262d", text: "#e6edf3" },
+  light: { bg: "#f6f8fa", bg2: "#eef1f5", panel: "#ffffff", border: "#d0d7de", grid: "#e1e4e8", text: "#24292f" },
+};
+function applyTheme(name) {
+  const t = THEMES[name] || THEMES.dark;
+  const r = document.documentElement.style;
+  r.setProperty("--bg",     t.bg);
+  r.setProperty("--bg2",    t.bg2);
+  r.setProperty("--panel",  t.panel);
+  r.setProperty("--border", t.border);
+  r.setProperty("--text",   t.text);
+  if (name === "light") {
+    r.setProperty("--muted",  "#57606a");
+    r.setProperty("--faint",  "#f0f1f3");
+    r.setProperty("--panel2", "#f0f2f4");
+  } else {
+    r.setProperty("--muted",  "#5a7080");
+    r.setProperty("--faint",  "#1e2d3d");
+    r.setProperty("--panel2", "#161f2a");
+  }
+  try {
+    chart.setStyles({
+      grid: {
+        horizontal: { color: t.grid },
+        vertical:   { color: t.grid },
+      },
+    });
+  } catch(e) {}
+  localStorage.setItem("chartTheme", name);
+}
+
+// ── Auto-fit ──────────────────────────────────────────────────────────────────
+function fitChart() {
+  if (!chart || !allCandles.length) return;
+  const idx = replayMode ? Math.max(0, visibleEnd - 1) : allCandles.length - 1;
+  try { chart.scrollToTimestamp(allCandles[idx].timestamp, 200); } catch(e) {}
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+async function loadData(sym, tf) {
+  showLoading(`Loading ${sym} ${tf.toUpperCase()}…`);
+  stopPlay();
+  try {
+    const res  = await fetch(`/api/chart-data?symbol=${sym}&tf=${tf}`);
+    const json = await res.json();
+    if (json.error) { showToast("Error: " + json.error, true); return; }
+    allCandles = json.candles.map(c => ({ timestamp: c.t, open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v }));
+    visibleEnd = allCandles.length - 1;
+    replayMode = false;
+    // Set replay date (90 days before end)
+    if (allCandles.length) {
+      try {
+        const last = new Date(allCandles[allCandles.length - 1].timestamp);
+        const def  = new Date(last); def.setDate(def.getDate() - 90);
+        document.getElementById("replayDate").value = def.toISOString().slice(0, 10);
+      } catch(_) {}
+    }
+    chart.clearData();
+    chart.applyNewData(allCandles);
+    document.getElementById("sbSymbol").textContent = sym;
+    document.getElementById("sbTF").textContent     = tf.toUpperCase();
+    document.getElementById("sbCount").textContent  = allCandles.length + " bars";
+    updateProgress();
+    setTimeout(fitChart, 100);
+    showToast(`${sym} ${tf.toUpperCase()} — ${allCandles.length} bars`);
+  } catch(e) {
+    showToast("Load failed: " + e.message, true);
+  } finally { hideLoading(); }
+}
+
+function selectSymbol(sym, btn) {
+  if (sym === currentSymbol) return;
+  currentSymbol = sym;
+  document.querySelectorAll(".sym-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadData(sym, currentTF);
+}
+function selectTF(tf, btn) {
+  if (tf === currentTF) return;
+  currentTF = tf;
+  document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadData(currentSymbol, tf);
 }
 
 // ── Replay ────────────────────────────────────────────────────────────────────
@@ -780,12 +960,12 @@ function replayReset() {
   let idx = allCandles.findIndex(c => c.timestamp >= target);
   if (idx < 0) idx = allCandles.length - 1;
   if (idx < 1) idx = 1;
-
   replayMode = true;
   visibleEnd = idx;
   chart.clearData();
   chart.applyNewData(allCandles.slice(0, visibleEnd));
   updateProgress();
+  setTimeout(fitChart, 100);
 }
 
 function replayEnd() {
@@ -795,13 +975,13 @@ function replayEnd() {
   chart.clearData();
   chart.applyNewData(allCandles);
   updateProgress();
+  setTimeout(fitChart, 100);
 }
 
 function replayStep(delta) {
   if (!replayMode) replayReset();
   const next = Math.max(1, Math.min(allCandles.length, visibleEnd + delta));
   if (next === visibleEnd) return;
-
   if (delta > 0) {
     for (let i = visibleEnd; i < next; i++) {
       processBar(allCandles[i]);
@@ -820,12 +1000,14 @@ function togglePlay() {
   if (!replayMode) replayReset();
   const btn = document.getElementById("btnPlay");
   btn.textContent = "⏸"; btn.classList.add("playing");
+  startCountdown();
   playInterval = setInterval(() => {
     if (visibleEnd >= allCandles.length) { stopPlay(); return; }
     processBar(allCandles[visibleEnd]);
     chart.updateData(allCandles[visibleEnd]);
     visibleEnd++;
     updateProgress();
+    cdMs = playSpeed; // reset countdown each bar
   }, playSpeed);
 }
 
@@ -833,6 +1015,7 @@ function stopPlay() {
   if (playInterval) { clearInterval(playInterval); playInterval = null; }
   const btn = document.getElementById("btnPlay");
   btn.textContent = "▶"; btn.classList.remove("playing");
+  stopCountdown();
 }
 
 function setSpeed(ms, btn) {
@@ -845,8 +1028,32 @@ function setSpeed(ms, btn) {
 function updateProgress() {
   const total = allCandles.length;
   const cur   = replayMode ? visibleEnd : total;
-  document.getElementById("replayProgress").textContent =
-    `Bar ${cur.toLocaleString()} / ${total.toLocaleString()}`;
+  document.getElementById("replayProgress").textContent = `Bar ${cur.toLocaleString()} / ${total.toLocaleString()}`;
+}
+
+// ── Countdown ─────────────────────────────────────────────────────────────────
+function startCountdown() {
+  stopCountdown();
+  cdMs = playSpeed;
+  cdHandle = setInterval(() => {
+    cdMs -= 50;
+    if (cdMs < 0) cdMs = playSpeed;
+    renderCountdown();
+  }, 50);
+}
+function stopCountdown() {
+  if (cdHandle) clearInterval(cdHandle);
+  cdHandle = null;
+  document.getElementById("cdTimer").textContent = "";
+}
+function renderCountdown() {
+  if (!replayMode || visibleEnd >= allCandles.length) return;
+  const bar = allCandles[visibleEnd];
+  const dt  = new Date(bar.timestamp);
+  const pad = n => String(n).padStart(2, "0");
+  const barTime = `${pad(dt.getUTCMonth()+1)}/${pad(dt.getUTCDate())} ${pad(dt.getUTCHours())}:${pad(dt.getUTCMinutes())}`;
+  const pct  = Math.round((1 - cdMs / playSpeed) * 100);
+  document.getElementById("cdTimer").textContent = `▶ ${barTime}  ${pct}%`;
 }
 
 // ── Order engine ──────────────────────────────────────────────────────────────
@@ -854,7 +1061,7 @@ function processBar(candle) {
   const { timestamp, high, low } = candle;
   let needRender = false;
 
-  // Trigger pending limit / stop orders
+  // Trigger pending orders
   openOrders.filter(o => o.status === "pending").forEach(order => {
     let hit = false;
     if (order.order_type === "limit") {
@@ -865,11 +1072,12 @@ function processBar(candle) {
       if (order.direction === "SELL" && low  <= order.trigger_price) hit = true;
     }
     if (hit) {
-      order.status       = "open";
-      order.entry_price  = order.trigger_price;
-      order.entry_ts     = timestamp;
+      order.status      = "open";
+      order.entry_price = order.trigger_price;
+      order.entry_ts    = timestamp;
       updateTradeOnServer(order, { status: "open", entry_price: order.entry_price, entry_ts: timestamp });
       placeEntryMarker(order);
+      addPositionLines(order);
       showToast(`${order.direction} filled @ ${fmt(order.entry_price)}`);
       needRender = true;
     }
@@ -888,19 +1096,80 @@ function processBar(candle) {
     if (hit) { closePosition(pos, hitPrice, timestamp, hit); needRender = true; }
   });
 
+  updatePositionLines();
   if (needRender) renderPositions();
 }
 
-function placeEntryMarker(order) {
+// ── Live position lines ───────────────────────────────────────────────────────
+function addPositionLines(order) {
+  if (!chart || !order.entry_price || !order.entry_ts) return;
+  const ids = {};
+  const ts  = order.entry_ts;
+  try {
+    ids.entryId = chart.createOverlay({
+      name: "tradeLine", lock: true,
+      points: [{ timestamp: ts, value: order.entry_price }],
+      extendData: { color: "#f0c040", dashed: false,
+        label: `${order.direction} ${order.lots}L  P&L: $0.00` },
+    });
+  } catch(_) {}
+  if (order.tp_price) {
+    try {
+      ids.tpId = chart.createOverlay({
+        name: "tradeLine", lock: true,
+        points: [{ timestamp: ts, value: order.tp_price }],
+        extendData: { color: "#00e5a0", dashed: true, label: `TP  ${fmt(order.tp_price)}` },
+      });
+    } catch(_) {}
+  }
+  if (order.sl_price) {
+    try {
+      ids.slId = chart.createOverlay({
+        name: "tradeLine", lock: true,
+        points: [{ timestamp: ts, value: order.sl_price }],
+        extendData: { color: "#ff4757", dashed: true, label: `SL  ${fmt(order.sl_price)}` },
+      });
+    } catch(_) {}
+  }
+  positionLines.set(order._localId, ids);
+}
+
+function updatePositionLines() {
   if (!chart) return;
+  const curBar = replayMode && visibleEnd > 0
+    ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)]
+    : null;
+  if (!curBar) return;
+
+  openOrders.filter(o => o.status === "open").forEach(order => {
+    const ids = positionLines.get(order._localId);
+    if (!ids || !ids.entryId) return;
+    const pnl    = calcPnL(order.direction, order.lots, order.entry_price, curBar.close);
+    const pnlStr = (pnl >= 0 ? "+" : "") + "$" + pnl.toFixed(2);
+    const col    = pnl >= 0 ? "#00e5a0" : "#ff4757";
+    try {
+      chart.modifyOverlay({ id: ids.entryId,
+        extendData: { color: col, dashed: false,
+          label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` } });
+    } catch(_) {}
+  });
+}
+
+function removePositionLines(order) {
+  const ids = positionLines.get(order._localId);
+  if (!ids) return;
+  ["entryId", "tpId", "slId"].forEach(k => {
+    if (ids[k]) { try { chart.removeOverlay(ids[k]); } catch(_) {} }
+  });
+  positionLines.delete(order._localId);
+}
+
+function placeEntryMarker(order) {
   try {
     chart.createOverlay({
       name: "tradeEntryMarker",
       points: [{ timestamp: order.entry_ts, value: order.entry_price }],
-      extendData: {
-        direction: order.direction,
-        label: `${order.direction} ${order.lots}L`,
-      },
+      extendData: { direction: order.direction, label: `${order.direction} ${order.lots}L` },
       lock: true,
     });
   } catch(_) {}
@@ -912,10 +1181,8 @@ function closePosition(pos, price, ts, reason) {
   pos.exit_reason = reason;
   pos.pnl_usd     = calcPnL(pos.direction, pos.lots, pos.entry_price, price);
   pos.status      = "closed";
-  updateTradeOnServer(pos, {
-    exit_price: price, exit_ts: ts, exit_reason: reason,
-    pnl_usd: pos.pnl_usd, status: "closed",
-  });
+  removePositionLines(pos);
+  updateTradeOnServer(pos, { exit_price: price, exit_ts: ts, exit_reason: reason, pnl_usd: pos.pnl_usd, status: "closed" });
   // Exit marker
   try {
     chart.createOverlay({
@@ -923,13 +1190,13 @@ function closePosition(pos, price, ts, reason) {
       points: [{ timestamp: ts, value: price }],
       extendData: {
         direction: pos.direction === "BUY" ? "SELL" : "BUY",
-        label: `${reason} ${pos.pnl_usd >= 0 ? "+" : ""}$${pos.pnl_usd.toFixed(0)}`,
+        label: `${reason}  ${pos.pnl_usd >= 0 ? "+" : ""}$${pos.pnl_usd.toFixed(0)}`,
       },
       lock: true,
     });
   } catch(_) {}
   const icon = pos.pnl_usd >= 0 ? "✅" : "❌";
-  showToast(`${icon} ${pos.direction} ${reason} @ ${fmt(price)} | ${pos.pnl_usd >= 0 ? "+" : ""}$${pos.pnl_usd.toFixed(2)}`);
+  showToast(`${icon} ${pos.direction} ${reason} @ ${fmt(price)}  ${pos.pnl_usd >= 0 ? "+" : ""}$${pos.pnl_usd.toFixed(2)}`);
   updateSessionStats();
 }
 
@@ -942,20 +1209,15 @@ function calcPnL(direction, lots, entry, exit) {
 // ── Trade panel UI ────────────────────────────────────────────────────────────
 function toggleTradePanel() {
   panelOpen = !panelOpen;
-  const panel = document.getElementById("tradePanel");
-  const inner = document.getElementById("panelInner");
-  const btn   = document.getElementById("panelToggleBtn");
-  panel.classList.toggle("collapsed", !panelOpen);
-  inner.style.display = panelOpen ? "" : "none";
-  btn.textContent = panelOpen ? "⟩" : "⟨";
+  document.getElementById("tradePanel").classList.toggle("collapsed", !panelOpen);
+  document.getElementById("panelInner").style.display = panelOpen ? "" : "none";
+  document.getElementById("panelToggleBtn").textContent = panelOpen ? "⟩" : "⟨";
 }
-
 function setDir(dir, btn) {
   tradeDir = dir;
-  document.getElementById("btnBuy").classList.toggle("active", dir === "BUY");
+  document.getElementById("btnBuy").classList.toggle("active",  dir === "BUY");
   document.getElementById("btnSell").classList.toggle("active", dir === "SELL");
 }
-
 function onOrderTypeChange() {
   const t = document.getElementById("orderType").value;
   const show = t !== "market";
@@ -964,8 +1226,8 @@ function onOrderTypeChange() {
 }
 
 function placeOrder() {
-  if (!currentSessionId) { showToast("No active session — click the session badge to start one", true); return; }
-  if (!replayMode)       { showToast("Start replay first (click ⏮ or change date)", true); return; }
+  if (!currentSessionId) { showToast("No active session — click the session name to start one", true); return; }
+  if (!replayMode)       { showToast("Start replay first (set a date and click ⏮)", true); return; }
   if (visibleEnd < 1 || visibleEnd > allCandles.length) return;
 
   const lots      = parseFloat(document.getElementById("lotsInput").value) || 0.01;
@@ -973,38 +1235,37 @@ function placeOrder() {
   const tpRaw     = document.getElementById("tpInput").value;
   const slRaw     = document.getElementById("slInput").value;
   const trigRaw   = document.getElementById("triggerInput").value;
-  const currentBar = allCandles[visibleEnd - 1];
-  const mktPrice  = currentBar.close;
-
-  const tp = tpRaw  ? parseFloat(tpRaw)  : null;
-  const sl = slRaw  ? parseFloat(slRaw)  : null;
+  const curBar    = allCandles[visibleEnd - 1];
+  const mktPrice  = curBar.close;
+  const tp = tpRaw ? parseFloat(tpRaw) : null;
+  const sl = slRaw ? parseFloat(slRaw) : null;
   const trigger = otype !== "market" ? (parseFloat(trigRaw) || null) : null;
 
   if (otype !== "market" && !trigger) { showToast("Enter a trigger price for limit/stop orders", true); return; }
 
   const order = {
+    _localId:      ++_orderSeq,
     id:            null,
     direction:     tradeDir,
     order_type:    otype,
     lots,
     trigger_price: trigger,
     entry_price:   otype === "market" ? mktPrice : null,
-    entry_ts:      otype === "market" ? currentBar.timestamp : null,
+    entry_ts:      otype === "market" ? curBar.timestamp : null,
     tp_price:      tp,
     sl_price:      sl,
-    exit_price:    null,
-    exit_ts:       null,
-    exit_reason:   null,
+    exit_price:    null, exit_ts: null, exit_reason: null,
     pnl_usd:       0,
     status:        otype === "market" ? "open" : "pending",
   };
 
   openOrders.push(order);
-  if (otype === "market") placeEntryMarker(order);
+  if (otype === "market") {
+    placeEntryMarker(order);
+    addPositionLines(order);
+  }
   renderPositions();
   updateSessionStats();
-
-  // Persist to server
   saveTradeToServer(order);
   showToast(`${otype === "market" ? "Opened" : "Placed"} ${tradeDir} ${lots}L`);
 }
@@ -1012,23 +1273,18 @@ function placeOrder() {
 async function saveTradeToServer(order) {
   if (!currentSessionId) return;
   try {
-    const res = await fetch(`/api/backtest/sessions/${currentSessionId}/trades`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(order),
+    const res  = await fetch(`/api/backtest/sessions/${currentSessionId}/trades`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(order),
     });
     const data = await res.json();
     order.id = data.id;
   } catch(e) { console.warn("Save trade:", e); }
 }
-
 async function updateTradeOnServer(order, patch) {
   if (!currentSessionId || !order.id) return;
   try {
     await fetch(`/api/backtest/sessions/${currentSessionId}/trades/${order.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(patch),
+      method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch),
     });
   } catch(e) { console.warn("Update trade:", e); }
 }
@@ -1040,7 +1296,6 @@ function manualClose(localIdx) {
   closePosition(pos, bar.close, bar.timestamp, "manual");
   renderPositions();
 }
-
 function cancelPending(localIdx) {
   const order = openOrders.filter(o => o.status === "pending")[localIdx];
   if (!order) return;
@@ -1054,18 +1309,17 @@ function cancelPending(localIdx) {
 }
 
 function renderPositions() {
-  const el = document.getElementById("positionsList");
+  const el      = document.getElementById("positionsList");
   const pending = openOrders.filter(o => o.status === "pending");
   const open    = openOrders.filter(o => o.status === "open");
-  const curPrice = (replayMode && visibleEnd > 0) ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)].close : null;
+  const curPrice = (replayMode && visibleEnd > 0)
+    ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)].close : null;
 
   if (!pending.length && !open.length) {
-    el.innerHTML = '<div class="empty-msg">No open positions</div>';
-    return;
+    el.innerHTML = '<div class="empty-msg">No open positions</div>'; return;
   }
 
   let html = "";
-
   pending.forEach((o, i) => {
     html += `<div class="pos-card pending">
       <div class="pos-header">
@@ -1078,10 +1332,8 @@ function renderPositions() {
         <span>@ ${fmt(o.trigger_price)}</span>
         ${o.tp_price ? `<span>TP:${fmt(o.tp_price)}</span>` : ""}
         ${o.sl_price ? `<span>SL:${fmt(o.sl_price)}</span>` : ""}
-      </div>
-    </div>`;
+      </div></div>`;
   });
-
   open.forEach((o, i) => {
     const livePnl = curPrice ? calcPnL(o.direction, o.lots, o.entry_price, curPrice) : 0;
     const cls = livePnl >= 0 ? "up" : "dn";
@@ -1089,7 +1341,7 @@ function renderPositions() {
       <div class="pos-header">
         <span class="pos-dir ${o.direction.toLowerCase()}">${o.direction === "BUY" ? "▲" : "▼"} ${o.direction}</span>
         <span class="pos-type-badge">${o.lots}L</span>
-        <button class="pos-close-btn" onclick="manualClose(${i})" title="Close at market">✕</button>
+        <button class="pos-close-btn" onclick="manualClose(${i})" title="Close">✕</button>
       </div>
       <div class="pos-detail">
         <span>In:${fmt(o.entry_price)}</span>
@@ -1099,7 +1351,6 @@ function renderPositions() {
       <div class="pos-pnl ${cls}">${livePnl >= 0 ? "+" : ""}$${livePnl.toFixed(2)}</div>
     </div>`;
   });
-
   el.innerHTML = html;
 }
 
@@ -1119,11 +1370,8 @@ async function loadSessions() {
   try {
     const res  = await fetch("/api/backtest/sessions");
     const list = await res.json();
-    if (!list.length) {
-      await createNewSession();
-    } else {
-      showSessionModal(list);
-    }
+    if (!list.length) { await createNewSession(); }
+    else              { showSessionModal(list); }
   } catch(e) { console.warn("Sessions:", e); }
 }
 
@@ -1131,20 +1379,42 @@ function showSessionModal(sessions) {
   document.getElementById("sessionBackdrop").classList.remove("hidden");
   const el = document.getElementById("sessionListEl");
   if (!sessions || !sessions.length) {
-    el.innerHTML = '<div class="empty-msg">No previous sessions</div>';
-    return;
+    el.innerHTML = '<div class="empty-msg">No previous sessions</div>'; return;
   }
-  el.innerHTML = sessions.map((s, i) => `
-    <div class="session-item">
+  el.innerHTML = sessions.map(s => `
+    <div class="session-item" id="sess-${s.id}">
       <div class="session-item-info">
         <div class="session-item-name">${s.name || "Unnamed"}</div>
-        <div class="session-item-meta">${s.symbol || ""} ${(s.timeframe || "").toUpperCase()} · ${s.trade_count} trades · ${s.created_at}</div>
+        <div class="session-item-meta">${s.symbol || ""} ${(s.timeframe||"").toUpperCase()} · ${s.trade_count} trades · ${s.created_at}</div>
       </div>
       <div class="session-item-actions">
-        <button class="btn-continue" onclick="continueSession(${s.id})">Continue ►</button>
-        <button class="btn-delete"   onclick="deleteSession(${s.id}, this)">✕</button>
+        <button class="btn-continue"    onclick="continueSession(${s.id})">Continue ►</button>
+        <button class="btn-delete-sess" onclick="deleteSessionFromModal(${s.id})">🗑</button>
       </div>
     </div>`).join("");
+}
+
+async function deleteSessionFromModal(id) {
+  if (!confirm("Delete this session and all its trades permanently?")) return;
+  try {
+    const res = await fetch(`/api/backtest/sessions/${id}`, { method: "DELETE" });
+    if (!res.ok) { showToast("Delete failed", true); return; }
+    const el = document.getElementById(`sess-${id}`);
+    if (el) el.remove();
+    if (id === currentSessionId) {
+      currentSessionId = null;
+      openOrders = [];
+      positionLines.clear();
+      document.getElementById("navSessionName").textContent = "No session";
+      updateSessionStats();
+      renderPositions();
+    }
+    showToast("Session deleted");
+    // If no sessions left, close modal
+    if (!document.querySelector(".session-item")) {
+      document.getElementById("sessionBackdrop").classList.add("hidden");
+    }
+  } catch(e) { showToast("Delete error: " + e.message, true); }
 }
 
 async function continueSession(id) {
@@ -1154,8 +1424,7 @@ async function continueSession(id) {
     const data = await res.json();
     currentSessionId = data.id;
     document.getElementById("navSessionName").textContent = data.name || `Session #${id}`;
-    // Restore trades
-    openOrders = (data.trades || []);
+    openOrders = (data.trades || []).map((t, i) => ({ ...t, _localId: ++_orderSeq }));
     updateSessionStats();
     renderPositions();
     showToast(`Resumed: ${data.name}`);
@@ -1167,8 +1436,7 @@ async function createNewSession() {
   const name = `${currentSymbol} ${currentTF.toUpperCase()} — ${new Date().toLocaleDateString()}`;
   try {
     const res  = await fetch("/api/backtest/sessions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, symbol: currentSymbol, timeframe: currentTF }),
     });
     const data = await res.json();
@@ -1181,53 +1449,31 @@ async function createNewSession() {
   } catch(e) { showToast("Could not create session", true); }
 }
 
-async function deleteSession(id, btn) {
-  if (!confirm("Delete this session and all its trades?")) return;
-  try {
-    await fetch(`/api/backtest/sessions/${id}`, { method: "DELETE" });
-    btn.closest(".session-item").remove();
-    if (id === currentSessionId) {
-      currentSessionId = null;
-      document.getElementById("navSessionName").textContent = "No session";
-    }
-    showToast("Session deleted");
-  } catch(e) { showToast("Delete failed", true); }
-}
-
 // ── Summary modal ─────────────────────────────────────────────────────────────
 function showSummary() {
   const closed = openOrders.filter(o => o.status === "closed");
   const wins   = closed.filter(o => o.pnl_usd > 0);
   const losses = closed.filter(o => o.pnl_usd <= 0);
   const total  = closed.reduce((s, o) => s + (o.pnl_usd || 0), 0);
-  const avgWin  = wins.length   ? wins.reduce((s,o) => s + o.pnl_usd, 0) / wins.length     : 0;
-  const avgLoss = losses.length ? losses.reduce((s,o) => s + o.pnl_usd, 0) / losses.length : 0;
-  const pf      = losses.reduce((s,o) => s + Math.abs(o.pnl_usd), 0);
-  const pw      = wins.reduce((s,o) => s + o.pnl_usd, 0);
-  const profitFactor = pf > 0 ? (pw / pf).toFixed(2) : "∞";
-  const winRate = closed.length ? ((wins.length / closed.length) * 100).toFixed(1) : "0.0";
-
-  // Max drawdown
-  let peak = 0, dd = 0, maxDD = 0, eq = 0;
-  closed.forEach(o => {
-    eq += o.pnl_usd;
-    if (eq > peak) peak = eq;
-    dd = peak - eq;
-    if (dd > maxDD) maxDD = dd;
-  });
-
-  const totalCls = total >= 0 ? "up" : "dn";
-  const el = document.getElementById("summaryContent");
-  el.innerHTML = `
+  const avgWin  = wins.length   ? wins.reduce((s,o) => s+o.pnl_usd,0)/wins.length : 0;
+  const avgLoss = losses.length ? losses.reduce((s,o) => s+o.pnl_usd,0)/losses.length : 0;
+  const pw = wins.reduce((s,o) => s+o.pnl_usd,0);
+  const pl = losses.reduce((s,o) => s+Math.abs(o.pnl_usd),0);
+  const pf = pl > 0 ? (pw/pl).toFixed(2) : "∞";
+  const wr = closed.length ? (wins.length/closed.length*100).toFixed(1) : "0.0";
+  let peak=0,dd=0,maxDD=0,eq=0;
+  closed.forEach(o => { eq+=o.pnl_usd; if(eq>peak)peak=eq; dd=peak-eq; if(dd>maxDD)maxDD=dd; });
+  const tCls = total >= 0 ? "up" : "dn";
+  document.getElementById("summaryContent").innerHTML = `
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-label">Net P&amp;L</div>
-        <div class="stat-value ${totalCls}">${total >= 0 ? "+" : ""}$${total.toFixed(2)}</div></div>
+        <div class="stat-value ${tCls}">${total>=0?"+":""}$${total.toFixed(2)}</div></div>
       <div class="stat-card"><div class="stat-label">Win Rate</div>
-        <div class="stat-value neutral">${winRate}%</div></div>
+        <div class="stat-value neutral">${wr}%</div></div>
       <div class="stat-card"><div class="stat-label">Trades</div>
         <div class="stat-value neutral">${closed.length}</div></div>
       <div class="stat-card"><div class="stat-label">Profit Factor</div>
-        <div class="stat-value neutral">${profitFactor}</div></div>
+        <div class="stat-value neutral">${pf}</div></div>
       <div class="stat-card"><div class="stat-label">Avg Win</div>
         <div class="stat-value up">+$${avgWin.toFixed(2)}</div></div>
       <div class="stat-card"><div class="stat-label">Avg Loss</div>
@@ -1238,32 +1484,20 @@ function showSummary() {
         <div class="stat-value neutral">${wins.length} / ${losses.length}</div></div>
     </div>
     ${closed.length ? `
-    <div class="trade-log">
-      <div class="trade-log-title">Trade Log</div>
-      <div class="trade-row header">
-        <span>#</span><span>Dir</span><span>Type</span><span>Entry</span><span>Exit</span><span>P&amp;L</span>
-      </div>
-      ${closed.map((o, i) => `
-        <div class="trade-row">
-          <span style="color:var(--muted)">${i + 1}</span>
-          <span style="color:${o.direction==="BUY"?"var(--green)":"var(--red)"}">${o.direction}</span>
-          <span style="color:var(--muted)">${o.exit_reason || ""}</span>
-          <span>${fmt(o.entry_price)}</span>
-          <span>${fmt(o.exit_price)}</span>
-          <span style="color:${o.pnl_usd>=0?"var(--green)":"var(--red)"}">${o.pnl_usd>=0?"+":""}$${(o.pnl_usd||0).toFixed(2)}</span>
-        </div>`).join("")}
-    </div>` : '<div class="empty-msg" style="margin:16px 0">No closed trades yet — take some trades first!</div>'}
-  `;
-
-  if (currentSessionId) {
-    document.getElementById("fullResultsLink").href = `/backtest/results/${currentSessionId}`;
-  }
+    <div class="trade-log"><div class="trade-log-title">Trade Log</div>
+      <div class="trade-row header"><span>#</span><span>Dir</span><span>Type</span><span>Entry</span><span>Exit</span><span>P&amp;L</span></div>
+      ${closed.map((o,i)=>`<div class="trade-row">
+        <span style="color:var(--muted)">${i+1}</span>
+        <span style="color:${o.direction==="BUY"?"var(--green)":"var(--red)"}">${o.direction}</span>
+        <span style="color:var(--muted)">${o.exit_reason||""}</span>
+        <span>${fmt(o.entry_price)}</span><span>${fmt(o.exit_price)}</span>
+        <span style="color:${o.pnl_usd>=0?"var(--green)":"var(--red)"}">${o.pnl_usd>=0?"+":""}$${(o.pnl_usd||0).toFixed(2)}</span>
+      </div>`).join("")}
+    </div>` : '<div class="empty-msg" style="margin:16px 0">No closed trades yet</div>'}`;
+  if (currentSessionId) document.getElementById("fullResultsLink").href = `/backtest/results/${currentSessionId}`;
   document.getElementById("summaryBackdrop").classList.remove("hidden");
 }
-
-function closeSummary() {
-  document.getElementById("summaryBackdrop").classList.add("hidden");
-}
+function closeSummary() { document.getElementById("summaryBackdrop").classList.add("hidden"); }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmt(v) {
@@ -1272,14 +1506,12 @@ function fmt(v) {
   if (Math.abs(v) >= 10)    return v.toFixed(3);
   return v.toFixed(5);
 }
-
 function showLoading(msg) {
   document.getElementById("loadingLabel").textContent = msg || "Loading…";
   document.getElementById("loadingOverlay").classList.remove("hidden");
 }
 function hideLoading() { document.getElementById("loadingOverlay").classList.add("hidden"); }
-
-function showToast(msg, isError = false, dur = 2800) {
+function showToast(msg, isError=false, dur=2800) {
   const t = document.getElementById("toast");
   t.textContent = msg;
   t.className = "toast show" + (isError ? " error" : "");
@@ -1288,9 +1520,7 @@ function showToast(msg, isError = false, dur = 2800) {
 
 // Close modals on backdrop click
 document.getElementById("sessionBackdrop").addEventListener("click", e => {
-  if (e.target === e.currentTarget && currentSessionId) {
-    e.currentTarget.classList.add("hidden");
-  }
+  if (e.target === e.currentTarget && currentSessionId) e.currentTarget.classList.add("hidden");
 });
 document.getElementById("summaryBackdrop").addEventListener("click", e => {
   if (e.target === e.currentTarget) closeSummary();
