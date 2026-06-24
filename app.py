@@ -1050,65 +1050,95 @@ _STALE_AFTER = {
 
 
 def _fetch_and_cache(symbol_key: str, tf: str):
-    """Pull OHLCV from yfinance and upsert into ChartCandle + update ChartMeta."""
+    """Pull OHLCV from yfinance and bulk-insert new candles into ChartCandle."""
     import yfinance as yf
     import pandas as pd
+    import time as _time
 
     ticker_sym = CHART_SYMBOLS.get(symbol_key)
     if not ticker_sym:
         return
 
     period, interval = _YF_PARAMS[tf]
-    try:
-        df = yf.Ticker(ticker_sym).history(period=period, interval=interval, auto_adjust=True)
-    except Exception as e:
-        print(f"[chart] yfinance fetch error {symbol_key}/{tf}: {e}")
+
+    # Retry up to 3 times with backoff — Yahoo rate-limits cloud IPs on first hit
+    df = None
+    for attempt in range(3):
+        try:
+            df = yf.Ticker(ticker_sym).history(
+                period=period, interval=interval,
+                auto_adjust=True, raise_errors=False)
+            if df is not None and not df.empty:
+                break
+            df = None
+        except Exception as e:
+            print(f"[chart] attempt {attempt+1} failed for {symbol_key}/{tf}: {e}")
+        if attempt < 2:
+            _time.sleep(2 ** attempt)   # 1s, 2s
+
+    if df is None or df.empty:
+        print(f"[chart] no data returned for {symbol_key}/{tf} after retries")
         return
 
-    if df.empty:
-        return
+    # Flatten multi-level columns (newer yfinance versions)
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = [col[0] for col in df.columns]
 
     # Resample 1h → 4h
     if tf == "4h":
+        df.index = pd.to_datetime(df.index, utc=True)
         df = (df.resample("4h")
                 .agg({"Open": "first", "High": "max", "Low": "min",
                       "Close": "last", "Volume": "sum"})
                 .dropna(subset=["Open", "Close"]))
 
-    # Upsert candles
+    # ── Bulk upsert ───────────────────────────────────────────────────────────
+    # One query to get ALL existing timestamps — avoids 13k individual SELECTs
+    existing_ts = {
+        row[0] for row in db.session.execute(
+            text("SELECT ts FROM chart_candles WHERE symbol=:s AND timeframe=:t"),
+            {"s": symbol_key, "t": tf}
+        ).fetchall()
+    }
+
+    new_objs = []
     for ts_idx, row in df.iterrows():
-        # Normalise to UTC epoch ms
         try:
             ts_ms = int(pd.Timestamp(ts_idx).timestamp() * 1000)
         except Exception:
             continue
-
-        existing = ChartCandle.query.filter_by(
-            symbol=symbol_key, timeframe=tf, ts=ts_ms).first()
-        if existing:
-            existing.open   = float(row["Open"])
-            existing.high   = float(row["High"])
-            existing.low    = float(row["Low"])
-            existing.close  = float(row["Close"])
-            existing.volume = float(row.get("Volume", 0) or 0)
-        else:
-            db.session.add(ChartCandle(
+        if ts_ms in existing_ts:
+            continue
+        try:
+            new_objs.append(ChartCandle(
                 symbol=symbol_key, timeframe=tf, ts=ts_ms,
-                open=float(row["Open"]),   high=float(row["High"]),
-                low=float(row["Low"]),     close=float(row["Close"]),
+                open=float(row["Open"]),  high=float(row["High"]),
+                low=float(row["Low"]),    close=float(row["Close"]),
                 volume=float(row.get("Volume", 0) or 0),
             ))
+        except (KeyError, TypeError, ValueError):
+            continue
+
+    if new_objs:
+        db.session.add_all(new_objs)   # single bulk INSERT
 
     # Update meta
     meta = ChartMeta.query.filter_by(symbol=symbol_key, timeframe=tf).first()
     if not meta:
         meta = ChartMeta(symbol=symbol_key, timeframe=tf)
         db.session.add(meta)
-    meta.last_fetched = datetime.now(timezone.utc).replace(tzinfo=None)
+    meta.last_fetched = datetime.utcnow()
     db.session.commit()
-    meta.candle_count = ChartCandle.query.filter_by(
-        symbol=symbol_key, timeframe=tf).count()
-    db.session.commit()
+    print(f"[chart] {symbol_key}/{tf}: +{len(new_objs)} new candles")
+
+
+def _background_fetch(app_ctx, symbol_key: str, tf: str):
+    """Run _fetch_and_cache in a thread with its own app context."""
+    with app_ctx.app_context():
+        try:
+            _fetch_and_cache(symbol_key, tf)
+        except Exception as e:
+            print(f"[chart] background fetch error {symbol_key}/{tf}: {e}")
 
 
 @app.route("/backtest")
@@ -1120,6 +1150,7 @@ def backtest_page():
 @app.route("/api/chart-data")
 @login_required
 def chart_data():
+    import threading as _threading
     symbol = request.args.get("symbol", "XAUUSD").upper()
     tf     = request.args.get("tf", "1h").lower()
 
@@ -1128,15 +1159,25 @@ def chart_data():
     if tf not in _YF_PARAMS:
         return jsonify({"error": "Unknown timeframe"}), 400
 
-    # Check staleness
+    # Check cache
     meta = ChartMeta.query.filter_by(symbol=symbol, timeframe=tf).first()
+    cached_count = ChartCandle.query.filter_by(symbol=symbol, timeframe=tf).count()
     stale = True
     if meta and meta.last_fetched:
         age = (datetime.utcnow() - meta.last_fetched).total_seconds()
         stale = age > _STALE_AFTER[tf]
 
-    if stale:
+    if cached_count == 0:
+        # No data at all: fetch synchronously so the user gets something
+        # (bulk ops are fast enough to stay within the 120s timeout)
         _fetch_and_cache(symbol, tf)
+    elif stale:
+        # Data exists but is stale: return cache immediately, refresh in background
+        _threading.Thread(
+            target=_background_fetch,
+            args=(app, symbol, tf),
+            daemon=True
+        ).start()
 
     candles = (ChartCandle.query
                .filter_by(symbol=symbol, timeframe=tf)
@@ -1148,4 +1189,4 @@ def chart_data():
              "v": round(c.volume, 2)} for c in candles]
 
     return jsonify({"symbol": symbol, "tf": tf, "candles": data,
-                    "count": len(data)})
+                    "count": len(data), "stale": stale})
