@@ -374,10 +374,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Hide context menu on outside click
   document.addEventListener("click", hideCtxMenu);
-  // Right-click on chart
+  // Right-click on chart — use convertFromPixel to get the exact Y-axis price at cursor,
+  // NOT the candle close (which stays constant when moving vertically within the same candle).
   document.getElementById("chartWrap").addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    const price = lastCrosshairPrice;
+    let price = null;
+    try {
+      const chartEl = document.getElementById("kline-chart");
+      const rect    = chartEl.getBoundingClientRect();
+      const relX    = e.clientX - rect.left;
+      const relY    = e.clientY - rect.top;
+      const result  = chart.convertFromPixel(
+        { x: relX, y: relY },
+        { paneId: "candle_pane", absolute: true }
+      );
+      // convertFromPixel returns {timestamp, dataIndex, value} where value = price
+      price = result?.value ?? null;
+    } catch (_) {}
+    // Fall back to crosshair price if conversion failed
+    if (price == null) price = lastCrosshairPrice;
     if (price == null) return;
     const priceStr = fmt(price);
     ["ctxPriceLbl","ctxPriceLbl2","ctxPriceLbl3","ctxPriceLbl4"].forEach(id => {
