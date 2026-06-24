@@ -898,7 +898,7 @@ def coach_insights():
     if trade_id:
         t = next((x for x in trades if x['id'] == trade_id), None)
         if t:
-            trade_context = f"\nMOST RECENT TRADE JUST LOGGED: {t.get('trade_date')} {t.get('instrument')} {t.get('direction')} | P&L=${t.get('realized_pnl')} R={t.get('realized_r')} | sentiment: {t.get('sentiment_label')} | notes: {t.get('notes','')[:200]}"
+            trade_context = f"\nMOST RECENT TRADE JUST LOGGED: {t.get('trade_date')} {t.get('instrument')} {t.get('direction')} | P&L=${t.get('realized_pnl')} R={t.get('realized_r')} | sentiment: {t.get('sentiment_label')} | notes: {(t.get('notes') or '')[:200]}"
 
     system = f"""You are a brutally honest trading coach with deep knowledge of SMC/ICT methodology, prop firm rules, and trading psychology.
 You have full access to this trader's journal. Your job is to find patterns they haven't noticed and tell them things they might not want to hear.
