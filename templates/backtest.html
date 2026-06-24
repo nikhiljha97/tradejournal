@@ -35,6 +35,18 @@
     .color-wrap{position:relative;display:inline-flex;align-items:center;cursor:pointer}
     .color-wrap input[type=color]{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer}
     .color-swatch{width:22px;height:22px;border-radius:4px;border:2px solid var(--border);background:var(--blue);flex-shrink:0;pointer-events:none}
+    /* Text options panel */
+    .text-panel{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--panel2);border-bottom:1px solid var(--border2);flex-shrink:0;animation:slideDown .12s ease}
+    .text-panel.hidden{display:none}
+    .text-panel-input{font-size:12px;padding:4px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);width:170px;font-family:Inter,sans-serif;outline:none}
+    .text-panel-input:focus{border-color:var(--green)}
+    .text-panel-font{font-size:11px;padding:3px 6px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;outline:none}
+    .text-panel-size{width:55px;accent-color:var(--green);cursor:pointer}
+    .text-panel-sizelbl{font-size:10px;color:var(--muted);width:26px;text-align:center}
+    .text-panel-btn{font-size:11px;padding:3px 9px;border-radius:5px;border:1px solid var(--green);background:rgba(0,229,160,.12);color:var(--green);cursor:pointer;font-weight:600}
+    .text-panel-cancel{font-size:11px;padding:3px 7px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer}
+    .text-panel-label{font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap}
+    @keyframes slideDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
     .theme-btn{font-size:11px;padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s}
     .theme-btn:hover{border-color:var(--border2);color:var(--text)}
     .session-badge{font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
@@ -232,7 +244,8 @@
   <button class="tool-btn" data-tool="shortPosition"                onclick="setTool('shortPosition',this)"          title="Short R:R (3 clicks: Entry→SL→TP)">🔴S</button>
 
   <div class="toolbar-sep"></div>
-  <label class="color-wrap" title="Drawing color">
+  <span class="toolbar-label" id="colorLabel" style="font-size:10px;color:var(--muted)">Color:</span>
+  <label class="color-wrap" title="Tool color (per-tool, changes only the active tool's color)">
     <input type="color" id="colorPicker" value="#4da6ff" onchange="setDrawColor(this.value)">
     <div class="color-swatch" id="colorSwatch"></div>
   </label>
@@ -250,6 +263,30 @@
 
   <div class="toolbar-sep"></div>
   <button class="tool-btn" onclick="fitChart()" title="Auto-fit chart (Auto scale)">⊞ Fit</button>
+</div>
+
+<!-- TEXT OPTIONS PANEL (shown when Text tool is active) -->
+<div id="textPanel" class="text-panel hidden">
+  <span class="text-panel-label">T:</span>
+  <input id="textPanelInput" class="text-panel-input" type="text" placeholder="Label text…" onkeydown="if(event.key==='Enter')activateTextOverlay();if(event.key==='Escape')cancelTextPanel()">
+  <span class="text-panel-label">Color:</span>
+  <label class="color-wrap" title="Text color">
+    <input type="color" id="textPanelColor" value="#f0c040" onchange="onTextColorChange(this.value)">
+    <div class="color-swatch" id="textPanelSwatch" style="background:#f0c040"></div>
+  </label>
+  <span class="text-panel-label">Font:</span>
+  <select id="textPanelFont" class="text-panel-font" onchange="textSettings.font=this.value">
+    <option value="Inter,sans-serif">Inter</option>
+    <option value="JetBrains Mono,monospace">Mono</option>
+    <option value="Georgia,serif">Georgia</option>
+    <option value="Arial,sans-serif">Arial</option>
+    <option value="Impact,sans-serif">Impact</option>
+  </select>
+  <span class="text-panel-label">Size:</span>
+  <input type="range" id="textPanelSize" class="text-panel-size" min="10" max="28" value="13" oninput="textSettings.size=+this.value;document.getElementById('textPanelSizeLbl').textContent=this.value+'px'">
+  <span class="text-panel-sizelbl" id="textPanelSizeLbl">13px</span>
+  <button class="text-panel-btn" onclick="activateTextOverlay()">Click chart to place →</button>
+  <button class="text-panel-cancel" onclick="cancelTextPanel()">✕</button>
 </div>
 
 <!-- STEP HINT -->
@@ -346,7 +383,23 @@ let chart;
 let allCandles = [], visibleEnd = 0, replayMode = false;
 let playInterval = null, playSpeed = 250;
 let currentSymbol = "{{ symbols[0] }}", currentTF = "1h";
-let activeTool = "cursor", drawColor = "#4da6ff";
+let activeTool = "cursor";
+const toolColors = {
+  cursor:               "#4da6ff",
+  horizontalStraightLine:"#4da6ff",
+  segment:              "#4da6ff",
+  rayLine:              "#4da6ff",
+  customRect:           "#4da6ff",
+  parallelStraightLine: "#4da6ff",
+  fibonacciLine:        "#f0c040",
+  textOverlay:          "#f0c040",
+  longPosition:         "#00e5a0",
+  shortPosition:        "#ff4757",
+};
+// Text tool settings (font, size independent from color)
+const textSettings = { text: "", color: "#f0c040", font: "Inter,sans-serif", size: 13 };
+// Convenience getter so legacy refs still work
+function drawColor() { return toolColors[activeTool] || "#4da6ff"; }
 let overlayIds = [];
 let volVisible = true, volIndicatorId = null;
 let currentSessionId = null;
@@ -366,7 +419,7 @@ const CONTRACT = { XAUUSD: 100, USOIL: 1000, BTCUSD: 1, ETHUSD: 1, EURUSD: 10000
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  document.getElementById("colorSwatch").style.background = drawColor;
+  document.getElementById("colorSwatch").style.background = drawColor();
   registerCustomOverlays();
   initChart();
   loadData(currentSymbol, currentTF);
@@ -662,14 +715,15 @@ function registerCustomOverlays() {
     createPointFigures: ({ overlay, coordinates }) => {
       if (!coordinates.length) return [];
       const [p] = coordinates;
-      const txt = overlay.extendData?.text || "Label";
-      const col = overlay.extendData?.color || "#f0c040";
+      if (!p || p.x == null) return [];
+      const { text: txt = "Label", color: col = "#f0c040",
+              font = "Inter,sans-serif", size = 13 } = overlay.extendData || {};
       return [
         { type: "text",
           attrs: { x: p.x, y: p.y, text: txt },
-          styles: { color: col, size: 13, family: "Inter,sans-serif", weight: "600",
+          styles: { color: col, size, family: font, weight: "600",
             paddingLeft: 6, paddingRight: 6, paddingTop: 3, paddingBottom: 3,
-            borderRadius: 3, borderSize: 1, borderColor: col, backgroundColor: "rgba(0,0,0,0.6)" } },
+            borderRadius: 3, borderSize: 1, borderColor: col, backgroundColor: "rgba(0,0,0,0.7)" } },
       ];
     },
   });
@@ -818,25 +872,34 @@ function registerCustomOverlays() {
 
 // ── Drawing tools ─────────────────────────────────────────────────────────────
 function setTool(tool, btn) {
+  // Close text panel if switching away from text
+  if (activeTool === "textOverlay" && tool !== "textOverlay") {
+    document.getElementById("textPanel").classList.add("hidden");
+  }
+
   activeTool = tool;
   document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
   if (btn) btn.classList.add("active");
   hideStepHint();
+
+  // Sync global color swatch to this tool's color
+  const toolColor = toolColors[tool] || "#4da6ff";
+  document.getElementById("colorPicker").value = toolColor;
+  document.getElementById("colorSwatch").style.background = toolColor;
+
   if (tool === "cursor") return;
 
   if (tool === "textOverlay") {
-    const txt = prompt("Label text:", "Note");
-    if (!txt) { setTool("cursor", document.querySelector('[data-tool="cursor"]')); return; }
-    try {
-      const id = chart.createOverlay({
-        name: "textOverlay",
-        extendData: { text: txt, color: drawColor },
-        onDrawEnd: () => setTool("cursor", document.querySelector('[data-tool="cursor"]')),
-      });
-      if (id) overlayIds.push(id);
-    } catch(e) { showToast("Text tool: " + e.message, true); setTool("cursor", document.querySelector('[data-tool="cursor"]')); }
-    // Do NOT reset to cursor here — user still needs to click the chart to place the text label
-    return;
+    // Show text options panel instead of prompt
+    const col = toolColors.textOverlay || "#f0c040";
+    document.getElementById("textPanelColor").value = col;
+    document.getElementById("textPanelSwatch").style.background = col;
+    document.getElementById("textPanelFont").value = textSettings.font;
+    document.getElementById("textPanelSize").value = textSettings.size;
+    document.getElementById("textPanelSizeLbl").textContent = textSettings.size + "px";
+    document.getElementById("textPanel").classList.remove("hidden");
+    setTimeout(() => document.getElementById("textPanelInput").focus(), 50);
+    return; // user fills panel, then clicks "Place on chart"
   }
 
   if (tool === "longPosition" || tool === "shortPosition") {
@@ -847,7 +910,7 @@ function setTool(tool, btn) {
     const id = chart.createOverlay({
       name: tool,
       styles: buildOverlayStyles(tool),
-      extendData: { color: drawColor },
+      extendData: { color: toolColors[tool] || "#4da6ff" },
       onDrawEnd: () => {
         hideStepHint();
         setTool("cursor", document.querySelector('[data-tool="cursor"]'));
@@ -869,7 +932,7 @@ function hideStepHint() {
 }
 
 function buildOverlayStyles(tool) {
-  const c = drawColor;
+  const c = toolColors[tool] || drawColor();
   return {
     line:    { color: c, size: 1 },
     rect:    { borderColor: c, color: c + "18", borderSize: 1 },
@@ -881,8 +944,52 @@ function buildOverlayStyles(tool) {
 }
 
 function setDrawColor(c) {
-  drawColor = c;
+  // Only affects the active tool's color (not all tools)
+  if (activeTool !== "cursor") toolColors[activeTool] = c;
   document.getElementById("colorSwatch").style.background = c;
+  // If text panel is open, sync its color swatch too
+  if (activeTool === "textOverlay") {
+    document.getElementById("textPanelColor").value = c;
+    document.getElementById("textPanelSwatch").style.background = c;
+    textSettings.color = c;
+  }
+}
+
+// Text panel helper — syncs text panel color picker back to toolbar swatch
+function onTextColorChange(c) {
+  toolColors.textOverlay = c;
+  textSettings.color = c;
+  document.getElementById("textPanelSwatch").style.background = c;
+  document.getElementById("colorPicker").value = c;
+  document.getElementById("colorSwatch").style.background = c;
+}
+
+// Called when user clicks "Place on chart →" in the text panel
+function activateTextOverlay() {
+  const txt = document.getElementById("textPanelInput").value.trim();
+  if (!txt) { document.getElementById("textPanelInput").focus(); showToast("Enter label text first", true); return; }
+  textSettings.text  = txt;
+  textSettings.color = document.getElementById("textPanelColor").value;
+  textSettings.font  = document.getElementById("textPanelFont").value;
+  textSettings.size  = +document.getElementById("textPanelSize").value;
+  try {
+    const id = chart.createOverlay({
+      name: "textOverlay",
+      extendData: { text: textSettings.text, color: textSettings.color, font: textSettings.font, size: textSettings.size },
+      onDrawEnd: () => {
+        document.getElementById("textPanel").classList.add("hidden");
+        document.getElementById("textPanelInput").value = "";
+        setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+      },
+    });
+    if (id) overlayIds.push(id);
+  } catch(e) { showToast("Text: " + e.message, true); }
+}
+
+function cancelTextPanel() {
+  document.getElementById("textPanel").classList.add("hidden");
+  document.getElementById("textPanelInput").value = "";
+  setTool("cursor", document.querySelector('[data-tool="cursor"]'));
 }
 
 function clearDrawings() {
