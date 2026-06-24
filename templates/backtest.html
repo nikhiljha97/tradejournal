@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Chart Replay — TradeJournal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/klinecharts@9.8.4/dist/umd/klinecharts.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07090d;--bg2:#0c1018;--panel:#111820;--panel2:#161f2a;
+      --border:#1c2b3a;--border2:#243447;--text:#d4dde8;--muted:#5a7080;
+      --faint:#1e2d3d;--green:#00e5a0;--green2:#00c88a;--gdim:#003d2b;
+      --red:#ff4757;--gold:#f0c040;--blue:#4da6ff;
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+    a{color:inherit;text-decoration:none}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+    .nav-logo{font-size:16px;font-weight:900}.nav-logo span{color:var(--green)}
+    .nav-links{display:flex;gap:20px;align-items:center}
+    .nav-links a{font-size:12px;color:var(--muted);font-weight:500;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--text)}
+    .nav-user{font-size:12px;color:var(--muted)}
+
+    /* TOOLBAR ROW */
+    .toolbar{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .sym-btn,.tf-btn,.tool-btn{
+      font-size:12px;font-weight:600;padding:5px 12px;border-radius:6px;border:1px solid var(--border);
+      background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;
+      font-family:"Inter",sans-serif;white-space:nowrap
+    }
+    .sym-btn:hover,.tf-btn:hover,.tool-btn:hover{border-color:var(--border2);color:var(--text)}
+    .sym-btn.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
+    .tf-btn.active{background:var(--panel2);border-color:var(--border2);color:var(--text)}
+    .tool-btn.active{background:rgba(0,229,160,.12);border-color:var(--green);color:var(--green)}
+    .toolbar-sep{width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 4px}
+
+    /* CHART WRAPPER */
+    .chart-wrap{flex:1;position:relative;overflow:hidden}
+    #kline-chart{width:100%;height:100%}
+
+    /* LOADING OVERLAY */
+    .loading-overlay{position:absolute;inset:0;background:rgba(7,9,13,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:14px}
+    .loading-overlay.hidden{display:none}
+    .spinner{width:36px;height:36px;border:3px solid var(--faint);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-label{font-size:13px;color:var(--muted)}
+
+    /* REPLAY BAR */
+    .replay-bar{display:flex;align-items:center;gap:10px;padding:7px 14px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .replay-label{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+    .replay-date{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;font-size:12px;font-family:"JetBrains Mono",monospace;outline:none}
+    .replay-date:focus{border-color:var(--green)}
+    .rep-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;flex-shrink:0}
+    .rep-btn:hover{border-color:var(--border2);background:var(--panel2)}
+    .rep-btn.playing{border-color:var(--green);color:var(--green);background:var(--gdim)}
+    .rep-btn:disabled{opacity:.35;cursor:not-allowed}
+    .speed-wrap{display:flex;align-items:center;gap:6px;margin-left:4px}
+    .speed-label{font-size:11px;color:var(--muted)}
+    .speed-btn{font-size:11px;font-weight:700;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif}
+    .speed-btn.active{border-color:var(--green);color:var(--green);background:var(--gdim)}
+    .replay-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+    .replay-progress{font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace;white-space:nowrap;margin-left:auto}
+
+    /* STATUS BAR */
+    .status-bar{display:flex;align-items:center;gap:16px;padding:4px 14px;background:var(--bg);border-top:1px solid var(--border);flex-shrink:0;font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+    .status-price{color:var(--text);font-weight:600}
+    .status-up{color:var(--green)}.status-dn{color:var(--red)}
+
+    /* LAYOUT */
+    body{display:flex;flex-direction:column}
+    .main{display:flex;flex:1;overflow:hidden;flex-direction:column}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--green);color:var(--green);font-size:12px;font-weight:600;padding:8px 18px;border-radius:8px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none}
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">Trade<span>·</span>Journal</a>
+  <div class="nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/ideas">Trade Ideas</a>
+    <a href="/backtest" class="active">Chart Replay</a>
+    <a href="/blog">Blog</a>
+  </div>
+  <div class="nav-user">{{ username }}</div>
+</nav>
+
+<!-- TOOLBAR -->
+<div class="toolbar" id="toolbar">
+  <!-- Symbol tabs -->
+  <span class="replay-label">Symbol:</span>
+  {% for sym in symbols %}
+  <button class="sym-btn{% if loop.first %} active{% endif %}" data-sym="{{ sym }}" onclick="selectSymbol('{{ sym }}',this)">{{ sym }}</button>
+  {% endfor %}
+
+  <div class="toolbar-sep"></div>
+
+  <!-- Timeframe tabs -->
+  <span class="replay-label">TF:</span>
+  <button class="tf-btn" data-tf="15m" onclick="selectTF('15m',this)">15m</button>
+  <button class="tf-btn" data-tf="30m" onclick="selectTF('30m',this)">30m</button>
+  <button class="tf-btn active" data-tf="1h" onclick="selectTF('1h',this)">1H</button>
+  <button class="tf-btn" data-tf="4h" onclick="selectTF('4h',this)">4H</button>
+  <button class="tf-btn" data-tf="1d" onclick="selectTF('1d',this)">1D</button>
+
+  <div class="toolbar-sep"></div>
+
+  <!-- Drawing tools -->
+  <span class="replay-label">Draw:</span>
+  <button class="tool-btn" data-tool="cursor"               onclick="setTool('cursor',this)"            title="Cursor">🖱</button>
+  <button class="tool-btn" data-tool="horizontalStraightLine" onclick="setTool('horizontalStraightLine',this)" title="Horizontal Line">━</button>
+  <button class="tool-btn" data-tool="segmentLine"          onclick="setTool('segmentLine',this)"        title="Trend Line">╱</button>
+  <button class="tool-btn" data-tool="rayLine"              onclick="setTool('rayLine',this)"            title="Ray">⇒</button>
+  <button class="tool-btn" data-tool="rect"                 onclick="setTool('rect',this)"               title="Rectangle">▭</button>
+  <button class="tool-btn" data-tool="parallelStraightLine" onclick="setTool('parallelStraightLine',this)" title="Parallel Channel">⫼</button>
+  <button class="tool-btn" data-tool="fibonacciLine"        onclick="setTool('fibonacciLine',this)"      title="Fibonacci Retracement">Φ</button>
+  <button class="tool-btn" data-tool="longPosition"         onclick="setTool('longPosition',this)"       title="Long Position">🟢L</button>
+  <button class="tool-btn" data-tool="shortPosition"        onclick="setTool('shortPosition',this)"      title="Short Position">🔴S</button>
+  <button class="tool-btn" id="clearBtn"                    onclick="clearDrawings()"                    title="Clear all drawings" style="margin-left:4px">🗑</button>
+</div>
+
+<!-- MAIN CHART AREA -->
+<div class="main">
+  <div class="chart-wrap" id="chartWrap">
+    <div id="kline-chart"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+      <div class="loading-label" id="loadingLabel">Loading chart data…</div>
+    </div>
+  </div>
+
+  <!-- REPLAY CONTROLS -->
+  <div class="replay-bar">
+    <span class="replay-label">Replay from:</span>
+    <input type="date" class="replay-date" id="replayDate" title="Start replay from this date"/>
+    <button class="rep-btn" id="btnReset"   onclick="replayReset()"    title="Reset to start date">⏮</button>
+    <button class="rep-btn" id="btnBack"    onclick="replayStep(-1)"   title="Step back 1 bar">◀</button>
+    <button class="rep-btn" id="btnPlay"    onclick="togglePlay()"     title="Play / Pause">▶</button>
+    <button class="rep-btn" id="btnForward" onclick="replayStep(1)"    title="Step forward 1 bar">▶|</button>
+    <button class="rep-btn" id="btnEnd"     onclick="replayEnd()"      title="Jump to latest">⏭</button>
+    <div class="replay-sep"></div>
+    <span class="speed-label">Speed:</span>
+    <button class="speed-btn" data-spd="800"  onclick="setSpeed(800,this)">Slow</button>
+    <button class="speed-btn active" data-spd="250" onclick="setSpeed(250,this)">Normal</button>
+    <button class="speed-btn" data-spd="80"   onclick="setSpeed(80,this)">Fast</button>
+    <button class="speed-btn" data-spd="20"   onclick="setSpeed(20,this)">Turbo</button>
+    <div class="replay-sep"></div>
+    <span class="replay-progress" id="replayProgress">— / —</span>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span id="sbSymbol">—</span>
+    <span id="sbTF">—</span>
+    <span>O: <span id="sbO">—</span></span>
+    <span>H: <span id="sbH">—</span></span>
+    <span>L: <span id="sbL">—</span></span>
+    <span>C: <span id="sbC" class="status-price">—</span></span>
+    <span id="sbChg" class="status-up">—</span>
+    <span style="margin-left:auto;color:var(--faint)" id="sbCount">0 bars</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let chart, candleSeries, volSeries;
+let allCandles = [];       // full dataset from API
+let visibleEnd  = 0;       // index of last visible bar (replay cursor)
+let replayMode  = false;
+let playInterval = null;
+let playSpeed    = 250;
+let currentSymbol = "{{ symbols[0] }}";
+let currentTF     = "1h";
+let activeTool    = "cursor";
+let overlayIds    = [];    // track created overlay IDs for clearing
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  initChart();
+  loadData(currentSymbol, currentTF);
+});
+
+window.addEventListener("resize", () => {
+  if (chart) {
+    const wrap = document.getElementById("chartWrap");
+    chart.resize(wrap.clientWidth, wrap.clientHeight);
+  }
+});
+
+function initChart() {
+  const wrap = document.getElementById("chartWrap");
+  chart = klinecharts.init("kline-chart", {
+    styles: {
+      grid: {
+        show: true,
+        horizontal: { show: true, size: 1, color: "#1c2b3a", style: "dashed", dashedValue: [2, 2] },
+        vertical:   { show: true, size: 1, color: "#1c2b3a", style: "dashed", dashedValue: [2, 2] },
+      },
+      candle: {
+        type: "candle_solid",
+        bar: {
+          upColor:        "#00e5a0",
+          downColor:      "#ff4757",
+          noChangeColor:  "#5a7080",
+          upBorderColor:  "#00e5a0",
+          downBorderColor:"#ff4757",
+          noChangeBorderColor:"#5a7080",
+          upWickColor:    "#00e5a0",
+          downWickColor:  "#ff4757",
+          noChangeWickColor:"#5a7080",
+        },
+        tooltip: {
+          showRule: "always",
+          showType:  "rect",
+          labels:    ["T","O","H","L","C","V"],
+          defaultValue: "—",
+          rect: {
+            offsetLeft: 8, offsetTop: 8, offsetRight: 8,
+            borderRadius: 4, borderSize: 1,
+            borderColor: "#1c2b3a", color: "#0c1018",
+          },
+          text: { size: 12, family: "JetBrains Mono, monospace", weight: "normal", color: "#5a7080", marginLeft: 8, marginTop: 6, marginRight: 8, marginBottom: 6 },
+        },
+        priceMark: {
+          show: true,
+          high: { show: true, color: "#00e5a0", textOffset: 5, textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
+          low:  { show: true, color: "#ff4757", textOffset: 5, textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
+          last: { show: true, upColor: "#00e5a0", downColor: "#ff4757", noChangeColor: "#5a7080",
+            line: { show: true, style: "dashed", dashedValue: [4, 4], size: 1 },
+            text: { show: true, size: 12, paddingTop: 2, paddingBottom: 2, paddingLeft: 4, paddingRight: 4,
+              borderRadius: 2, borderSize: 1, borderColor: "#00e5a0", color: "#000", weight: "700", family: "Inter, sans-serif" } }
+        },
+      },
+      indicator: {
+        ohlc: { upColor: "#00e5a0", downColor: "#ff4757", noChangeColor: "#5a7080" },
+        bars: [{ style: "fill", borderStyle: "solid", upColor: "#00e5a040", downColor: "#ff475740", noChangeColor: "#5a708040", upBorderColor: "#00e5a0", downBorderColor: "#ff4757", noChangeBorderColor: "#5a7080" }],
+        lines: [{ size: 1, style: "solid", color: "#4da6ff" },{ size: 1, style: "solid", color: "#f0c040" }],
+      },
+      xAxis: {
+        show: true, size: "auto",
+        axisLine: { show: true, color: "#1c2b3a", size: 1 },
+        tickLine: { show: true, size: 1, length: 3, color: "#1c2b3a" },
+        tickText: { show: true, color: "#5a7080", family: "JetBrains Mono, monospace", weight: "normal", size: 10 },
+      },
+      yAxis: {
+        show: true, size: "auto", position: "right", type: "normal",
+        inside: false, reverse: false,
+        axisLine: { show: true, color: "#1c2b3a", size: 1 },
+        tickLine: { show: true, size: 1, length: 3, color: "#1c2b3a" },
+        tickText: { show: true, color: "#5a7080", family: "JetBrains Mono, monospace", weight: "normal", size: 11 },
+      },
+      separator: { size: 1, color: "#1c2b3a", fill: true, activeBackgroundColor: "#1e2d3d" },
+      crosshair: {
+        show: true,
+        horizontal: { show: true, line: { show: true, style: "dashed", dashedValue: [4, 2], size: 1, color: "#5a7080" },
+          text: { show: true, size: 11, family: "JetBrains Mono, monospace", weight: "normal", color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2, borderSize: 1, borderRadius: 2, borderColor: "#1c2b3a", backgroundColor: "#111820" } },
+        vertical: { show: true, line: { show: true, style: "dashed", dashedValue: [4, 2], size: 1, color: "#5a7080" },
+          text: { show: true, size: 11, family: "JetBrains Mono, monospace", weight: "normal", color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2, borderSize: 1, borderRadius: 2, borderColor: "#1c2b3a", backgroundColor: "#111820" } },
+      },
+      overlay: {
+        point: { color: "#00e5a0" },
+        line:  { style: "solid", smooth: false, size: 1, color: "#4da6ff", dashedValue: [2, 2] },
+        rect:  { style: "fill", color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1, borderStyle: "solid", borderRadius: 0 },
+        polygon: { style: "fill", color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1, borderStyle: "solid" },
+        circle: { style: "fill", color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1, borderStyle: "solid" },
+        arc:    { style: "solid", size: 1, color: "#4da6ff" },
+        text:   { style: "fill", color: "#d4dde8", size: 12, family: "Inter, sans-serif", weight: "normal", paddingLeft: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, borderRadius: 0, borderSize: 0, borderColor: "transparent", backgroundColor: "transparent" },
+      },
+    },
+    timezone: "UTC",
+    thousandsSeparator: ",",
+    decimalFoldThreshold: 0,
+    customApi: {
+      formatDate: (dateTimeFormat, timestamp, format, type) => {
+        const d = new Date(timestamp);
+        const pad = n => String(n).padStart(2,"0");
+        const mo = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()];
+        if (currentTF === "1d") return `${d.getUTCFullYear()}-${mo}-${pad(d.getUTCDate())}`;
+        return `${mo}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+      },
+    },
+  });
+
+  // Volume indicator in sub-pane
+  chart.createIndicator("VOL", false, { id: "candle_pane" });
+
+  // Crosshair events → update status bar
+  chart.subscribeAction("onCrosshairChange", (data) => {
+    if (!data || !data.kLineData) return;
+    const d = data.kLineData;
+    const prev = allCandles[allCandles.indexOf(d) - 1];
+    const chgPct = prev ? ((d.close - prev.close) / prev.close * 100).toFixed(2) : null;
+    document.getElementById("sbO").textContent = fmt(d.open);
+    document.getElementById("sbH").textContent = fmt(d.high);
+    document.getElementById("sbL").textContent = fmt(d.low);
+    const cel = document.getElementById("sbC");
+    cel.textContent = fmt(d.close);
+    cel.className = "status-price " + (d.close >= d.open ? "status-up" : "status-dn");
+    const chgEl = document.getElementById("sbChg");
+    if (chgPct !== null) {
+      chgEl.textContent = (chgPct >= 0 ? "+" : "") + chgPct + "%";
+      chgEl.className = chgPct >= 0 ? "status-up" : "status-dn";
+    } else {
+      chgEl.textContent = "";
+    }
+  });
+}
+
+// ── Data loading ─────────────────────────────────────────────────────────────
+async function loadData(sym, tf) {
+  showLoading(`Loading ${sym} ${tf.toUpperCase()}…`);
+  stopPlay();
+  try {
+    const res  = await fetch(`/api/chart-data?symbol=${sym}&tf=${tf}`);
+    const json = await res.json();
+    if (json.error) { showToast("Error: " + json.error); return; }
+
+    allCandles = json.candles.map(c => ({
+      timestamp: c.t, open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v
+    }));
+
+    visibleEnd = allCandles.length - 1;
+    replayMode = false;
+
+    chart.clearData();
+    chart.applyNewData(allCandles);
+
+    // Update status bar info
+    document.getElementById("sbSymbol").textContent = sym;
+    document.getElementById("sbTF").textContent     = tf.toUpperCase();
+    document.getElementById("sbCount").textContent  = allCandles.length + " bars";
+    updateProgress();
+
+    // Set replay date to 90 days before end
+    if (allCandles.length > 0) {
+      const last = new Date(allCandles[allCandles.length - 1].timestamp);
+      const def  = new Date(last); def.setDate(def.getDate() - 90);
+      document.getElementById("replayDate").value = def.toISOString().slice(0,10);
+    }
+
+    showToast(`${sym} ${tf.toUpperCase()} loaded — ${allCandles.length} bars`);
+  } catch(e) {
+    showToast("Failed to load: " + e.message);
+  } finally {
+    hideLoading();
+  }
+}
+
+function selectSymbol(sym, btn) {
+  if (sym === currentSymbol) return;
+  currentSymbol = sym;
+  document.querySelectorAll(".sym-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadData(sym, currentTF);
+}
+
+function selectTF(tf, btn) {
+  if (tf === currentTF) return;
+  currentTF = tf;
+  document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  loadData(currentSymbol, tf);
+}
+
+// ── Drawing tools ─────────────────────────────────────────────────────────────
+const CUSTOM_TOOLS = { longPosition: true, shortPosition: true };
+
+function registerCustomOverlays() {
+  // Long Position tool
+  klinecharts.registerOverlay({
+    name: "longPosition",
+    totalStep: 3,
+    needDefaultPointFigure: true,
+    needDefaultXAxisFigure: true,
+    needDefaultYAxisFigure: true,
+    createPointFigures: ({ overlay, coordinates }) => {
+      if (coordinates.length < 2) return [];
+      const entry = coordinates[0].y;
+      const sl    = coordinates[1] ? coordinates[1].y : entry + 40;
+      const tp    = coordinates[2] ? coordinates[2].y : entry - 40;
+      const left  = Math.min(...coordinates.map(c => c.x)) - 20;
+      const right = Math.max(...coordinates.map(c => c.x)) + 80;
+      return [
+        // TP zone (green)
+        { type: "rect", attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
+          styles: { style: "fill", color: "rgba(0,229,160,.12)", borderColor: "#00e5a0", borderSize: 1 } },
+        // SL zone (red)
+        { type: "rect", attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
+          styles: { style: "fill", color: "rgba(255,71,87,.12)", borderColor: "#ff4757", borderSize: 1 } },
+        // Entry line
+        { type: "line", attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
+          styles: { color: "#f0c040", size: 2, style: "solid" } },
+      ];
+    },
+  });
+
+  // Short Position tool
+  klinecharts.registerOverlay({
+    name: "shortPosition",
+    totalStep: 3,
+    needDefaultPointFigure: true,
+    needDefaultXAxisFigure: true,
+    needDefaultYAxisFigure: true,
+    createPointFigures: ({ overlay, coordinates }) => {
+      if (coordinates.length < 2) return [];
+      const entry = coordinates[0].y;
+      const sl    = coordinates[1] ? coordinates[1].y : entry - 40;
+      const tp    = coordinates[2] ? coordinates[2].y : entry + 40;
+      const left  = Math.min(...coordinates.map(c => c.x)) - 20;
+      const right = Math.max(...coordinates.map(c => c.x)) + 80;
+      return [
+        // TP zone (green for short)
+        { type: "rect", attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
+          styles: { style: "fill", color: "rgba(0,229,160,.12)", borderColor: "#00e5a0", borderSize: 1 } },
+        // SL zone (red)
+        { type: "rect", attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
+          styles: { style: "fill", color: "rgba(255,71,87,.12)", borderColor: "#ff4757", borderSize: 1 } },
+        // Entry line
+        { type: "line", attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
+          styles: { color: "#ff4757", size: 2, style: "solid" } },
+      ];
+    },
+  });
+}
+
+function setTool(tool, btn) {
+  activeTool = tool;
+  document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  if (tool === "cursor") {
+    chart.removeOverlay();
+    chart.setMaxOffsetRightDistance && chart.setMaxOffsetRightDistance(50);
+    return;
+  }
+  try {
+    const id = chart.createOverlay({ name: tool });
+    if (id) overlayIds.push(id);
+  } catch(e) {
+    showToast("Tool not supported: " + tool);
+    console.warn("Overlay error:", e);
+  }
+}
+
+function clearDrawings() {
+  chart.removeOverlay();
+  overlayIds = [];
+  showToast("Drawings cleared");
+  // Reset tool to cursor
+  setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+}
+
+// ── Replay logic ──────────────────────────────────────────────────────────────
+function replayReset() {
+  const dateVal = document.getElementById("replayDate").value;
+  if (!dateVal || !allCandles.length) return;
+  stopPlay();
+
+  const target = new Date(dateVal + "T00:00:00Z").getTime();
+  let idx = allCandles.findIndex(c => c.timestamp >= target);
+  if (idx < 0) idx = 0;
+  if (idx === 0) idx = 1;  // always show at least 1 bar
+
+  replayMode = true;
+  visibleEnd = idx;
+  chart.clearData();
+  chart.applyNewData(allCandles.slice(0, visibleEnd));
+  updateProgress();
+}
+
+function replayEnd() {
+  stopPlay();
+  replayMode = false;
+  visibleEnd = allCandles.length - 1;
+  chart.clearData();
+  chart.applyNewData(allCandles);
+  updateProgress();
+}
+
+function replayStep(delta) {
+  if (!replayMode) replayReset();
+  const next = Math.max(1, Math.min(allCandles.length, visibleEnd + delta));
+  if (next === visibleEnd) return;
+  visibleEnd = next;
+  if (delta > 0) {
+    chart.updateData(allCandles[visibleEnd - 1]);
+  } else {
+    chart.clearData();
+    chart.applyNewData(allCandles.slice(0, visibleEnd));
+  }
+  updateProgress();
+}
+
+function togglePlay() {
+  if (playInterval) { stopPlay(); return; }
+  if (!replayMode) replayReset();
+  const btn = document.getElementById("btnPlay");
+  btn.textContent = "⏸";
+  btn.classList.add("playing");
+  playInterval = setInterval(() => {
+    if (visibleEnd >= allCandles.length) { stopPlay(); return; }
+    chart.updateData(allCandles[visibleEnd]);
+    visibleEnd++;
+    updateProgress();
+  }, playSpeed);
+}
+
+function stopPlay() {
+  if (playInterval) { clearInterval(playInterval); playInterval = null; }
+  const btn = document.getElementById("btnPlay");
+  btn.textContent = "▶";
+  btn.classList.remove("playing");
+}
+
+function setSpeed(ms, btn) {
+  playSpeed = ms;
+  document.querySelectorAll(".speed-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  if (playInterval) { stopPlay(); togglePlay(); }  // restart at new speed
+}
+
+function updateProgress() {
+  const total = allCandles.length;
+  const cur   = replayMode ? visibleEnd : total;
+  document.getElementById("replayProgress").textContent =
+    `Bar ${cur.toLocaleString()} / ${total.toLocaleString()}`;
+
+  // show current date of visible end
+  if (allCandles.length && visibleEnd > 0) {
+    const ts = allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)].timestamp;
+    const d  = new Date(ts);
+    document.getElementById("sbSymbol").textContent = currentSymbol;
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmt(v) {
+  if (v == null) return "—";
+  return v >= 1000 ? v.toFixed(2) : v >= 10 ? v.toFixed(3) : v.toFixed(5);
+}
+
+function showLoading(msg) {
+  document.getElementById("loadingLabel").textContent = msg || "Loading…";
+  document.getElementById("loadingOverlay").classList.remove("hidden");
+}
+function hideLoading() {
+  document.getElementById("loadingOverlay").classList.add("hidden");
+}
+
+function showToast(msg, dur=2500) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), dur);
+}
+
+// Register custom overlays on load
+registerCustomOverlays();
+</script>
+</body>
+</html>

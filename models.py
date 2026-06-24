@@ -229,3 +229,31 @@ class IdeaLike(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     is_like = db.Column(db.Boolean, default=True)
     __table_args__ = (db.UniqueConstraint("idea_id","user_id"),)
+
+
+# ── Chart Replay / Backtest cache ─────────────────────────────────────────────
+
+class ChartCandle(db.Model):
+    """One OHLCV bar per symbol+timeframe+timestamp.  All timestamps are UTC ms."""
+    __tablename__ = "chart_candles"
+    id        = db.Column(db.Integer, primary_key=True)
+    symbol    = db.Column(db.String(20), nullable=False, index=True)
+    timeframe = db.Column(db.String(10), nullable=False)
+    ts        = db.Column(db.BigInteger, nullable=False)   # epoch ms UTC
+    open      = db.Column(db.Float)
+    high      = db.Column(db.Float)
+    low       = db.Column(db.Float)
+    close     = db.Column(db.Float)
+    volume    = db.Column(db.Float, default=0.0)
+    __table_args__ = (db.UniqueConstraint("symbol", "timeframe", "ts", name="uq_candle"),)
+
+
+class ChartMeta(db.Model):
+    """Tracks when we last fetched data for a symbol+timeframe so we know when to refresh."""
+    __tablename__ = "chart_meta"
+    id           = db.Column(db.Integer, primary_key=True)
+    symbol       = db.Column(db.String(20), nullable=False)
+    timeframe    = db.Column(db.String(10), nullable=False)
+    last_fetched = db.Column(db.DateTime)
+    candle_count = db.Column(db.Integer, default=0)
+    __table_args__ = (db.UniqueConstraint("symbol", "timeframe", name="uq_meta"),)

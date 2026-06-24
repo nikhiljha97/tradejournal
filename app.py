@@ -20,7 +20,7 @@ except ImportError:
     pass
 
 from config import Config, INSTRUMENT_PIP, SESSIONS, SETUP_TAGS
-from models import db, Trade, Settings, ImportLog, User, BlogPost, TradeIdea, PostComment, PostLike, IdeaComment, IdeaLike
+from models import db, Trade, Settings, ImportLog, User, BlogPost, TradeIdea, PostComment, PostLike, IdeaComment, IdeaLike, ChartCandle, ChartMeta
 import metrics as kpi
 import sentiment as sent
 import importer as imp
@@ -1017,3 +1017,135 @@ Focus on: streak effects, session timing, emotion-to-loss correlation, RR discip
         return jsonify({"patterns": [], "message": "Pattern analysis returned unexpected format."})
     except Exception as e:
         return jsonify({"patterns": [], "message": f"Analysis unavailable: {str(e)[:80]}"}), 500
+
+
+# ── Chart Replay / Backtest ───────────────────────────────────────────────────
+
+# Display name → yfinance ticker
+CHART_SYMBOLS = {
+    "XAUUSD":  "GC=F",
+    "USOIL":   "CL=F",
+    "BTCUSD":  "BTC-USD",
+    "ETHUSD":  "ETH-USD",
+    "EURUSD":  "EURUSD=X",
+}
+
+# How far back to fetch per timeframe
+_YF_PARAMS = {
+    "15m": ("60d",  "15m"),
+    "30m": ("60d",  "30m"),
+    "1h":  ("730d", "1h"),
+    "4h":  ("730d", "1h"),   # fetch 1h, resample → 4h
+    "1d":  ("max",  "1d"),
+}
+
+# Staleness thresholds (seconds) before we refresh from yfinance
+_STALE_AFTER = {
+    "15m": 900,    # 15 min
+    "30m": 1800,   # 30 min
+    "1h":  3600,   # 1 h
+    "4h":  3600,
+    "1d":  86400,  # 24 h
+}
+
+
+def _fetch_and_cache(symbol_key: str, tf: str):
+    """Pull OHLCV from yfinance and upsert into ChartCandle + update ChartMeta."""
+    import yfinance as yf
+    import pandas as pd
+
+    ticker_sym = CHART_SYMBOLS.get(symbol_key)
+    if not ticker_sym:
+        return
+
+    period, interval = _YF_PARAMS[tf]
+    try:
+        df = yf.Ticker(ticker_sym).history(period=period, interval=interval, auto_adjust=True)
+    except Exception as e:
+        print(f"[chart] yfinance fetch error {symbol_key}/{tf}: {e}")
+        return
+
+    if df.empty:
+        return
+
+    # Resample 1h → 4h
+    if tf == "4h":
+        df = (df.resample("4h")
+                .agg({"Open": "first", "High": "max", "Low": "min",
+                      "Close": "last", "Volume": "sum"})
+                .dropna(subset=["Open", "Close"]))
+
+    # Upsert candles
+    for ts_idx, row in df.iterrows():
+        # Normalise to UTC epoch ms
+        try:
+            ts_ms = int(pd.Timestamp(ts_idx).timestamp() * 1000)
+        except Exception:
+            continue
+
+        existing = ChartCandle.query.filter_by(
+            symbol=symbol_key, timeframe=tf, ts=ts_ms).first()
+        if existing:
+            existing.open   = float(row["Open"])
+            existing.high   = float(row["High"])
+            existing.low    = float(row["Low"])
+            existing.close  = float(row["Close"])
+            existing.volume = float(row.get("Volume", 0) or 0)
+        else:
+            db.session.add(ChartCandle(
+                symbol=symbol_key, timeframe=tf, ts=ts_ms,
+                open=float(row["Open"]),   high=float(row["High"]),
+                low=float(row["Low"]),     close=float(row["Close"]),
+                volume=float(row.get("Volume", 0) or 0),
+            ))
+
+    # Update meta
+    meta = ChartMeta.query.filter_by(symbol=symbol_key, timeframe=tf).first()
+    if not meta:
+        meta = ChartMeta(symbol=symbol_key, timeframe=tf)
+        db.session.add(meta)
+    meta.last_fetched = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.session.commit()
+    meta.candle_count = ChartCandle.query.filter_by(
+        symbol=symbol_key, timeframe=tf).count()
+    db.session.commit()
+
+
+@app.route("/backtest")
+@login_required
+def backtest_page():
+    return render_template("backtest.html", symbols=list(CHART_SYMBOLS.keys()))
+
+
+@app.route("/api/chart-data")
+@login_required
+def chart_data():
+    symbol = request.args.get("symbol", "XAUUSD").upper()
+    tf     = request.args.get("tf", "1h").lower()
+
+    if symbol not in CHART_SYMBOLS:
+        return jsonify({"error": "Unknown symbol"}), 400
+    if tf not in _YF_PARAMS:
+        return jsonify({"error": "Unknown timeframe"}), 400
+
+    # Check staleness
+    meta = ChartMeta.query.filter_by(symbol=symbol, timeframe=tf).first()
+    stale = True
+    if meta and meta.last_fetched:
+        age = (datetime.utcnow() - meta.last_fetched).total_seconds()
+        stale = age > _STALE_AFTER[tf]
+
+    if stale:
+        _fetch_and_cache(symbol, tf)
+
+    candles = (ChartCandle.query
+               .filter_by(symbol=symbol, timeframe=tf)
+               .order_by(ChartCandle.ts.asc())
+               .all())
+
+    data = [{"t": c.ts, "o": round(c.open, 5), "h": round(c.high, 5),
+             "l": round(c.low, 5),  "c": round(c.close, 5),
+             "v": round(c.volume, 2)} for c in candles]
+
+    return jsonify({"symbol": symbol, "tf": tf, "candles": data,
+                    "count": len(data)})
