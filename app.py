@@ -1209,15 +1209,21 @@ def chart_data():
 # ── Backtest sessions ─────────────────────────────────────────────────────────
 
 def _bt_db(fn):
-    """Run fn() with one SSL-retry on OperationalError (Neon cold-start drops)."""
-    for attempt in range(2):
+    """Run fn() with up to 3 retries + exponential backoff on OperationalError (Neon cold-start SSL drops)."""
+    from sqlalchemy.exc import OperationalError as _AnyOpErr
+    for attempt in range(3):
         try:
             return fn()
-        except _OpErr:
-            db.session.remove()
-            if attempt == 1:
+        except (_OpErr, _AnyOpErr, Exception) as e:
+            # Only retry on DB connection errors, not logic errors
+            err_str = str(e).lower()
+            is_db_err = any(k in err_str for k in ("ssl", "connection", "operational", "server closed", "lost connection", "timeout"))
+            if not is_db_err or attempt == 2:
                 raise
-            _time.sleep(1)
+            db.session.remove()
+            wait = 2 ** attempt  # 1s, 2s
+            print(f"[bt_db] DB error attempt {attempt+1}, retrying in {wait}s: {e}")
+            _time.sleep(wait)
 
 
 @app.route("/api/backtest/sessions", methods=["GET"])

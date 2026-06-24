@@ -1186,19 +1186,42 @@ function updatePositionLines() {
     : null;
   if (!curBar) return;
 
+  // KLineChart stops calling createPointFigures once the anchor timestamp scrolls off the
+  // left edge of the visible window. Fix: slide every line's anchor to the current bar so
+  // the point is always on-screen and the full-width horizontal line keeps rendering.
+  const ts = curBar.timestamp;
+
   openOrders.filter(o => o.status === "open").forEach(order => {
     const ids = positionLines.get(order._localId);
-    if (!ids || !ids.entryId) return;
+    if (!ids) return;
     const pnl    = calcPnL(order.direction, order.lots, order.entry_price, curBar.close);
     const pnlStr = (pnl >= 0 ? "+" : "") + "$" + pnl.toFixed(2);
     const col    = pnl >= 0 ? "#00e5a0" : "#ff4757";
-    // v9 uses overrideOverlay (not modifyOverlay)
-    chart.overrideOverlay({ id: ids.entryId,
-      extendData: { color: col, dashed: false,
-        label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` } });
-    // Also update P&L on positions panel
-    renderPositions();
+
+    if (ids.entryId) {
+      chart.overrideOverlay({
+        id: ids.entryId,
+        points: [{ timestamp: ts, value: order.entry_price }],
+        extendData: { color: col, dashed: false,
+          label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` },
+      });
+    }
+    if (ids.tpId && order.tp_price) {
+      chart.overrideOverlay({
+        id: ids.tpId,
+        points: [{ timestamp: ts, value: order.tp_price }],
+        extendData: { color: "#00e5a0", dashed: true, label: `TP  ${fmt(order.tp_price)}` },
+      });
+    }
+    if (ids.slId && order.sl_price) {
+      chart.overrideOverlay({
+        id: ids.slId,
+        points: [{ timestamp: ts, value: order.sl_price }],
+        extendData: { color: "#ff4757", dashed: true, label: `SL  ${fmt(order.sl_price)}` },
+      });
+    }
   });
+  renderPositions(); // refresh live P&L in panel
 }
 
 function removePositionLines(order) {
@@ -1413,13 +1436,31 @@ function updateSessionStats() {
 }
 
 // ── Session management ────────────────────────────────────────────────────────
-async function loadSessions() {
+async function loadSessions(retrying = false) {
   try {
-    const res  = await fetch("/api/backtest/sessions");
+    const res = await fetch("/api/backtest/sessions");
+    if (!res.ok) {
+      if (!retrying) {
+        // Backend cold-start — wait 2s and retry once
+        showToast("Connecting to database…", false, 2000);
+        await new Promise(r => setTimeout(r, 2500));
+        return loadSessions(true);
+      }
+      // Second attempt also failed — just start a fresh session
+      console.warn("Sessions API unavailable, starting fresh session");
+      return createNewSession();
+    }
     const list = await res.json();
     if (!list.length) { await createNewSession(); }
     else              { showSessionModal(list); }
-  } catch(e) { console.warn("Sessions:", e); }
+  } catch(e) {
+    console.warn("Sessions:", e);
+    if (!retrying) {
+      await new Promise(r => setTimeout(r, 2500));
+      return loadSessions(true);
+    }
+    createNewSession(); // last resort
+  }
 }
 
 function showSessionModal(sessions) {
