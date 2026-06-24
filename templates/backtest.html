@@ -19,64 +19,142 @@
     a{color:inherit;text-decoration:none}
 
     /* NAV */
-    nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:48px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
     .nav-logo{font-size:16px;font-weight:900}.nav-logo span{color:var(--green)}
     .nav-links{display:flex;gap:20px;align-items:center}
     .nav-links a{font-size:12px;color:var(--muted);font-weight:500;transition:color .2s}.nav-links a:hover,.nav-links a.active{color:var(--text)}
-    .nav-user{font-size:12px;color:var(--muted)}
+    .nav-right{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
 
-    /* TOOLBAR ROW */
-    .toolbar{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-    .sym-btn,.tf-btn,.tool-btn{
-      font-size:12px;font-weight:600;padding:5px 12px;border-radius:6px;border:1px solid var(--border);
-      background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;
-      font-family:"Inter",sans-serif;white-space:nowrap
-    }
+    /* TOOLBAR */
+    .toolbar{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .sym-btn,.tf-btn,.tool-btn{font-size:11px;font-weight:600;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif;white-space:nowrap}
     .sym-btn:hover,.tf-btn:hover,.tool-btn:hover{border-color:var(--border2);color:var(--text)}
     .sym-btn.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
     .tf-btn.active{background:var(--panel2);border-color:var(--border2);color:var(--text)}
     .tool-btn.active{background:rgba(0,229,160,.12);border-color:var(--green);color:var(--green)}
-    .toolbar-sep{width:1px;height:22px;background:var(--border);flex-shrink:0;margin:0 4px}
+    .toolbar-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 3px}
+    .toolbar-label{font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap}
 
-    /* CHART WRAPPER */
-    .chart-wrap{flex:1;position:relative;overflow:hidden}
-    #kline-chart{width:100%;height:100%}
+    /* Color picker */
+    .color-wrap{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+    .color-wrap input[type=color]{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer}
+    .color-swatch{width:22px;height:22px;border-radius:4px;border:2px solid var(--border);background:var(--blue);flex-shrink:0;pointer-events:none}
 
-    /* LOADING OVERLAY */
-    .loading-overlay{position:absolute;inset:0;background:rgba(7,9,13,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:14px}
-    .loading-overlay.hidden{display:none}
-    .spinner{width:36px;height:36px;border:3px solid var(--faint);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .loading-label{font-size:13px;color:var(--muted)}
-
-    /* REPLAY BAR */
-    .replay-bar{display:flex;align-items:center;gap:10px;padding:7px 14px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-    .replay-label{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
-    .replay-date{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 10px;font-size:12px;font-family:"JetBrains Mono",monospace;outline:none}
-    .replay-date:focus{border-color:var(--green)}
-    .rep-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;flex-shrink:0}
-    .rep-btn:hover{border-color:var(--border2);background:var(--panel2)}
-    .rep-btn.playing{border-color:var(--green);color:var(--green);background:var(--gdim)}
-    .rep-btn:disabled{opacity:.35;cursor:not-allowed}
-    .speed-wrap{display:flex;align-items:center;gap:6px;margin-left:4px}
-    .speed-label{font-size:11px;color:var(--muted)}
-    .speed-btn{font-size:11px;font-weight:700;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif}
-    .speed-btn.active{border-color:var(--green);color:var(--green);background:var(--gdim)}
-    .replay-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
-    .replay-progress{font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace;white-space:nowrap;margin-left:auto}
-
-    /* STATUS BAR */
-    .status-bar{display:flex;align-items:center;gap:16px;padding:4px 14px;background:var(--bg);border-top:1px solid var(--border);flex-shrink:0;font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace}
-    .status-price{color:var(--text);font-weight:600}
-    .status-up{color:var(--green)}.status-dn{color:var(--red)}
+    /* Session badge */
+    .session-badge{font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+    .session-badge:hover{border-color:var(--border2);color:var(--text)}
 
     /* LAYOUT */
     body{display:flex;flex-direction:column}
     .main{display:flex;flex:1;overflow:hidden;flex-direction:column}
+    .chart-container{display:flex;flex:1;overflow:hidden}
+
+    /* CHART */
+    .chart-wrap{flex:1;position:relative;overflow:hidden;min-width:0}
+    #kline-chart{width:100%;height:100%}
+    .loading-overlay{position:absolute;inset:0;background:rgba(7,9,13,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;gap:14px}
+    .loading-overlay.hidden{display:none}
+    .spinner{width:32px;height:32px;border:3px solid var(--faint);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading-label{font-size:12px;color:var(--muted)}
+
+    /* TRADE PANEL */
+    .trade-panel{width:240px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s}
+    .trade-panel.collapsed{width:28px}
+    .panel-toggle{width:28px;height:100%;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border-left:1px solid var(--border);transition:color .2s}
+    .panel-toggle:hover{color:var(--text)}
+    .panel-inner{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;min-width:212px}
+    .panel-section-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:4px 0 2px}
+
+    /* Order form */
+    .dir-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .dir-btn{padding:7px 0;border-radius:6px;border:1px solid var(--border);background:var(--panel);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif}
+    .dir-btn.buy{color:#00e5a0}.dir-btn.buy.active{background:var(--gdim);border-color:var(--green)}
+    .dir-btn.sell{color:#ff4757}.dir-btn.sell.active{background:#2d0a0e;border-color:var(--red)}
+    .form-label{font-size:10px;color:var(--muted);font-weight:600;margin-top:4px}
+    .form-input{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:12px;font-family:"JetBrains Mono",monospace;outline:none}
+    .form-input:focus{border-color:var(--green)}
+    .form-select{width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer}
+    .place-btn{width:100%;padding:8px;border-radius:6px;border:none;background:var(--green);color:#000;font-weight:700;font-size:12px;cursor:pointer;margin-top:4px;transition:background .15s;font-family:"Inter",sans-serif}
+    .place-btn:hover{background:var(--green2)}
+    .place-btn:disabled{background:var(--faint);color:var(--muted);cursor:not-allowed}
+
+    /* Positions list */
+    .pos-card{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:11px}
+    .pos-card.buy{border-left:2px solid var(--green)}
+    .pos-card.sell{border-left:2px solid var(--red)}
+    .pos-card.pending{opacity:.7;border-left:2px solid var(--gold)}
+    .pos-header{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+    .pos-dir{font-weight:700;font-size:11px}
+    .pos-dir.buy{color:var(--green)}.pos-dir.sell{color:var(--red)}.pos-dir.pending{color:var(--gold)}
+    .pos-type-badge{font-size:9px;background:var(--faint);color:var(--muted);padding:1px 5px;border-radius:3px}
+    .pos-close-btn{margin-left:auto;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;line-height:1}
+    .pos-close-btn:hover{color:var(--red)}
+    .pos-detail{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:10px;font-family:"JetBrains Mono",monospace}
+    .pos-pnl{font-size:11px;font-weight:700;margin-top:3px;font-family:"JetBrains Mono",monospace}
+    .pos-pnl.up{color:var(--green)}.pos-pnl.dn{color:var(--red)}.pos-pnl.zero{color:var(--muted)}
+    .empty-msg{font-size:11px;color:var(--muted);text-align:center;padding:12px 0;font-style:italic}
+
+    /* Session P&L bar */
+    .pnl-bar{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 9px;display:flex;justify-content:space-between;align-items:center;font-size:11px}
+    .pnl-bar span:first-child{color:var(--muted)}
+    .summary-btn{width:100%;padding:7px;border-radius:6px;border:1px solid var(--border2);background:var(--panel2);color:var(--text);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif}
+    .summary-btn:hover{border-color:var(--green);color:var(--green)}
+
+    /* REPLAY BAR */
+    .replay-bar{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
+    .replay-label{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+    .replay-date{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:4px 9px;font-size:12px;font-family:"JetBrains Mono",monospace;outline:none}
+    .replay-date:focus{border-color:var(--green)}
+    .rep-btn{width:30px;height:30px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;flex-shrink:0}
+    .rep-btn:hover{border-color:var(--border2);background:var(--panel2)}
+    .rep-btn.playing{border-color:var(--green);color:var(--green);background:var(--gdim)}
+    .speed-btn{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s}
+    .speed-btn.active{border-color:var(--green);color:var(--green);background:var(--gdim)}
+    .replay-sep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+    .replay-progress{font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace;white-space:nowrap;margin-left:auto}
+
+    /* STATUS BAR */
+    .status-bar{display:flex;align-items:center;gap:14px;padding:3px 12px;background:var(--bg);border-top:1px solid var(--border);flex-shrink:0;font-size:11px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+    .status-price{color:var(--text);font-weight:600}
+    .status-up{color:var(--green)}.status-dn{color:var(--red)}
+
+    /* MODALS */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center}
+    .modal-backdrop.hidden{display:none}
+    .modal-box{background:var(--panel2);border:1px solid var(--border2);border-radius:12px;padding:24px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto}
+    .modal-box.wide{max-width:640px}
+    .modal-title{font-size:18px;font-weight:800;margin-bottom:4px}
+    .modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px}
+    .session-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;margin-bottom:8px}
+    .session-item-info{flex:1;min-width:0}
+    .session-item-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .session-item-meta{font-size:11px;color:var(--muted);margin-top:2px}
+    .session-item-actions{display:flex;gap:6px;flex-shrink:0}
+    .btn-continue{font-size:11px;font-weight:700;padding:5px 12px;border-radius:5px;border:1px solid var(--green);background:var(--gdim);color:var(--green);cursor:pointer;font-family:"Inter",sans-serif}
+    .btn-delete{font-size:11px;padding:5px 8px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif}
+    .btn-delete:hover{border-color:var(--red);color:var(--red)}
+    .btn-new{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;margin-top:10px;font-family:"Inter",sans-serif;transition:all .15s}
+    .btn-new:hover{border-color:var(--green);color:var(--green)}
+
+    /* Summary modal */
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+    .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px}
+    .stat-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+    .stat-value{font-size:22px;font-weight:800;margin-top:2px;font-family:"JetBrains Mono",monospace}
+    .stat-value.up{color:var(--green)}.stat-value.dn{color:var(--red)}.stat-value.neutral{color:var(--text)}
+    .trade-log{margin-top:12px}
+    .trade-log-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px}
+    .trade-row{display:grid;grid-template-columns:40px 45px 60px 1fr 1fr 70px;gap:6px;align-items:center;font-size:11px;padding:6px 0;border-bottom:1px solid var(--border);font-family:"JetBrains Mono",monospace}
+    .trade-row.header{font-weight:700;color:var(--muted);font-family:"Inter",sans-serif;font-size:10px}
+    .modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:flex-end}
+    .modal-close-btn{padding:8px 18px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;font-size:12px;font-family:"Inter",sans-serif}
+    .modal-primary-btn{padding:8px 18px;border-radius:6px;border:none;background:var(--green);color:#000;font-weight:700;font-size:12px;cursor:pointer;font-family:"Inter",sans-serif;text-decoration:none;display:inline-flex;align-items:center}
 
     /* TOAST */
-    .toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--green);color:var(--green);font-size:12px;font-weight:600;padding:8px 18px;border-radius:8px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none}
+    .toast{position:fixed;bottom:56px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--green);color:var(--green);font-size:12px;font-weight:600;padding:7px 16px;border-radius:7px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
     .toast.show{opacity:1}
+    .toast.error{border-color:var(--red);color:var(--red)}
   </style>
 </head>
 <body>
@@ -89,21 +167,43 @@
     <a href="/backtest" class="active">Chart Replay</a>
     <a href="/blog">Blog</a>
   </div>
-  <div class="nav-user">{{ username }}</div>
+  <div class="nav-right">
+    <span id="navSessionName" class="session-badge" onclick="showSessionModal()" title="Click to switch session">No session</span>
+    <span>{{ username }}</span>
+  </div>
 </nav>
 
+<!-- SESSION MODAL -->
+<div class="modal-backdrop hidden" id="sessionBackdrop">
+  <div class="modal-box">
+    <div class="modal-title">📈 Chart Replay Session</div>
+    <div class="modal-sub">Continue a previous session or start a new one</div>
+    <div id="sessionListEl"></div>
+    <button class="btn-new" onclick="createNewSession()">+ Start New Session</button>
+  </div>
+</div>
+
+<!-- SUMMARY MODAL -->
+<div class="modal-backdrop hidden" id="summaryBackdrop">
+  <div class="modal-box wide">
+    <div class="modal-title">📊 Session Summary</div>
+    <div id="summaryContent"></div>
+    <div class="modal-actions">
+      <button class="modal-close-btn" onclick="closeSummary()">Close</button>
+      <a id="fullResultsLink" href="#" target="_blank" class="modal-primary-btn">Full Results →</a>
+    </div>
+  </div>
+</div>
+
 <!-- TOOLBAR -->
-<div class="toolbar" id="toolbar">
-  <!-- Symbol tabs -->
-  <span class="replay-label">Symbol:</span>
+<div class="toolbar">
+  <span class="toolbar-label">Symbol:</span>
   {% for sym in symbols %}
   <button class="sym-btn{% if loop.first %} active{% endif %}" data-sym="{{ sym }}" onclick="selectSymbol('{{ sym }}',this)">{{ sym }}</button>
   {% endfor %}
 
   <div class="toolbar-sep"></div>
-
-  <!-- Timeframe tabs -->
-  <span class="replay-label">TF:</span>
+  <span class="toolbar-label">TF:</span>
   <button class="tf-btn" data-tf="15m" onclick="selectTF('15m',this)">15m</button>
   <button class="tf-btn" data-tf="30m" onclick="selectTF('30m',this)">30m</button>
   <button class="tf-btn active" data-tf="1h" onclick="selectTF('1h',this)">1H</button>
@@ -111,42 +211,111 @@
   <button class="tf-btn" data-tf="1d" onclick="selectTF('1d',this)">1D</button>
 
   <div class="toolbar-sep"></div>
-
-  <!-- Drawing tools -->
-  <span class="replay-label">Draw:</span>
-  <button class="tool-btn" data-tool="cursor"               onclick="setTool('cursor',this)"            title="Cursor">🖱</button>
+  <span class="toolbar-label">Draw:</span>
+  <button class="tool-btn" data-tool="cursor"                 onclick="setTool('cursor',this)"                title="Cursor / Select">🖱</button>
   <button class="tool-btn" data-tool="horizontalStraightLine" onclick="setTool('horizontalStraightLine',this)" title="Horizontal Line">━</button>
-  <button class="tool-btn" data-tool="segmentLine"          onclick="setTool('segmentLine',this)"        title="Trend Line">╱</button>
-  <button class="tool-btn" data-tool="rayLine"              onclick="setTool('rayLine',this)"            title="Ray">⇒</button>
-  <button class="tool-btn" data-tool="rect"                 onclick="setTool('rect',this)"               title="Rectangle">▭</button>
-  <button class="tool-btn" data-tool="parallelStraightLine" onclick="setTool('parallelStraightLine',this)" title="Parallel Channel">⫼</button>
-  <button class="tool-btn" data-tool="fibonacciLine"        onclick="setTool('fibonacciLine',this)"      title="Fibonacci Retracement">Φ</button>
-  <button class="tool-btn" data-tool="longPosition"         onclick="setTool('longPosition',this)"       title="Long Position">🟢L</button>
-  <button class="tool-btn" data-tool="shortPosition"        onclick="setTool('shortPosition',this)"      title="Short Position">🔴S</button>
-  <button class="tool-btn" id="clearBtn"                    onclick="clearDrawings()"                    title="Clear all drawings" style="margin-left:4px">🗑</button>
+  <button class="tool-btn" data-tool="segmentLine"            onclick="setTool('segmentLine',this)"            title="Trend Line">╱</button>
+  <button class="tool-btn" data-tool="rayLine"                onclick="setTool('rayLine',this)"                title="Ray">⇒</button>
+  <button class="tool-btn" data-tool="rect"                   onclick="setTool('rect',this)"                   title="Rectangle">▭</button>
+  <button class="tool-btn" data-tool="parallelStraightLine"   onclick="setTool('parallelStraightLine',this)"   title="Parallel Channel">⫼</button>
+  <button class="tool-btn" data-tool="fibRetracement"         onclick="setTool('fibRetracement',this)"         title="Fibonacci (ranged)">Φ</button>
+  <button class="tool-btn" data-tool="textOverlay"            onclick="setTool('textOverlay',this)"            title="Text Label">T</button>
+  <button class="tool-btn" data-tool="longPosition"           onclick="setTool('longPosition',this)"           title="Long R:R">🟢L</button>
+  <button class="tool-btn" data-tool="shortPosition"          onclick="setTool('shortPosition',this)"          title="Short R:R">🔴S</button>
+
+  <div class="toolbar-sep"></div>
+  <!-- Color picker -->
+  <label class="color-wrap" title="Drawing color">
+    <input type="color" id="colorPicker" value="#4da6ff" onchange="setDrawColor(this.value)">
+    <div class="color-swatch" id="colorSwatch"></div>
+  </label>
+
+  <div class="toolbar-sep"></div>
+  <!-- Volume toggle -->
+  <button class="tool-btn" id="volToggleBtn" onclick="toggleVolume()" title="Toggle volume pane">VOL</button>
+  <!-- Clear -->
+  <button class="tool-btn" onclick="clearDrawings()" title="Clear all drawings" style="margin-left:2px">🗑</button>
 </div>
 
-<!-- MAIN CHART AREA -->
+<!-- MAIN -->
 <div class="main">
-  <div class="chart-wrap" id="chartWrap">
-    <div id="kline-chart"></div>
-    <div class="loading-overlay" id="loadingOverlay">
-      <div class="spinner"></div>
-      <div class="loading-label" id="loadingLabel">Loading chart data…</div>
-    </div>
-  </div>
+  <div class="chart-container">
 
-  <!-- REPLAY CONTROLS -->
+    <!-- Chart -->
+    <div class="chart-wrap" id="chartWrap">
+      <div id="kline-chart"></div>
+      <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-label" id="loadingLabel">Loading chart data…</div>
+      </div>
+    </div>
+
+    <!-- Trade panel -->
+    <div class="trade-panel" id="tradePanel">
+      <div style="display:flex;height:100%">
+        <button class="panel-toggle" id="panelToggleBtn" onclick="toggleTradePanel()" title="Toggle panel">⟩</button>
+        <div class="panel-inner" id="panelInner">
+          <div class="panel-section-title">Order</div>
+
+          <!-- Direction -->
+          <div class="dir-row">
+            <button class="dir-btn buy active" id="btnBuy" onclick="setDir('BUY',this)">▲ BUY</button>
+            <button class="dir-btn sell" id="btnSell" onclick="setDir('SELL',this)">▼ SELL</button>
+          </div>
+
+          <!-- Order type -->
+          <div class="form-label">Type</div>
+          <select class="form-select" id="orderType" onchange="onOrderTypeChange()">
+            <option value="market">Market</option>
+            <option value="limit">Limit</option>
+            <option value="stop">Stop</option>
+          </select>
+
+          <!-- Lots -->
+          <div class="form-label">Lots</div>
+          <input class="form-input" type="number" id="lotsInput" value="0.01" step="0.01" min="0.001">
+
+          <!-- Trigger price (limit/stop only) -->
+          <div class="form-label" id="triggerLabel" style="display:none">Trigger Price</div>
+          <input class="form-input" type="number" id="triggerInput" step="0.00001" style="display:none" placeholder="e.g. 1.0850">
+
+          <!-- TP / SL -->
+          <div class="form-label">Take Profit</div>
+          <input class="form-input" type="number" id="tpInput" step="0.00001" placeholder="optional">
+          <div class="form-label">Stop Loss</div>
+          <input class="form-input" type="number" id="slInput" step="0.00001" placeholder="optional">
+
+          <button class="place-btn" id="placeBtn" onclick="placeOrder()">Place Order</button>
+
+          <!-- Positions -->
+          <div class="panel-section-title" style="margin-top:4px">Positions &amp; Orders</div>
+          <div id="positionsList"><div class="empty-msg">No open positions</div></div>
+
+          <!-- Session stats -->
+          <div class="pnl-bar">
+            <span>P&amp;L</span>
+            <span id="sessionPnlEl" class="status-up">$0.00</span>
+            <span id="sessionStatsEl" style="color:var(--muted)">0W / 0L</span>
+          </div>
+
+          <button class="summary-btn" onclick="showSummary()">📊 Session Summary</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- chart-container -->
+
+  <!-- Replay bar -->
   <div class="replay-bar">
     <span class="replay-label">Replay from:</span>
-    <input type="date" class="replay-date" id="replayDate" title="Start replay from this date"/>
-    <button class="rep-btn" id="btnReset"   onclick="replayReset()"    title="Reset to start date">⏮</button>
-    <button class="rep-btn" id="btnBack"    onclick="replayStep(-1)"   title="Step back 1 bar">◀</button>
-    <button class="rep-btn" id="btnPlay"    onclick="togglePlay()"     title="Play / Pause">▶</button>
-    <button class="rep-btn" id="btnForward" onclick="replayStep(1)"    title="Step forward 1 bar">▶|</button>
-    <button class="rep-btn" id="btnEnd"     onclick="replayEnd()"      title="Jump to latest">⏭</button>
+    <input type="date" class="replay-date" id="replayDate" onchange="replayReset()"/>
+    <button class="rep-btn" onclick="replayReset()"   title="Reset to start date">⏮</button>
+    <button class="rep-btn" onclick="replayStep(-1)"  title="Step back 1 bar">◀</button>
+    <button class="rep-btn" id="btnPlay" onclick="togglePlay()" title="Play / Pause">▶</button>
+    <button class="rep-btn" onclick="replayStep(1)"   title="Step forward 1 bar">▶|</button>
+    <button class="rep-btn" onclick="replayEnd()"     title="Jump to latest">⏭</button>
     <div class="replay-sep"></div>
-    <span class="speed-label">Speed:</span>
+    <span class="replay-label">Speed:</span>
     <button class="speed-btn" data-spd="800"  onclick="setSpeed(800,this)">Slow</button>
     <button class="speed-btn active" data-spd="250" onclick="setSpeed(250,this)">Normal</button>
     <button class="speed-btn" data-spd="80"   onclick="setSpeed(80,this)">Fast</button>
@@ -155,7 +324,7 @@
     <span class="replay-progress" id="replayProgress">— / —</span>
   </div>
 
-  <!-- STATUS BAR -->
+  <!-- Status bar -->
   <div class="status-bar">
     <span id="sbSymbol">—</span>
     <span id="sbTF">—</span>
@@ -163,142 +332,123 @@
     <span>H: <span id="sbH">—</span></span>
     <span>L: <span id="sbL">—</span></span>
     <span>C: <span id="sbC" class="status-price">—</span></span>
-    <span id="sbChg" class="status-up">—</span>
+    <span id="sbChg">—</span>
     <span style="margin-left:auto;color:var(--faint)" id="sbCount">0 bars</span>
+    <span style="color:var(--faint);font-size:10px">Space=play · ←/→=step · R=reset · Esc=cursor</span>
   </div>
-</div>
+</div><!-- main -->
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ── State ────────────────────────────────────────────────────────────────────
-let chart, candleSeries, volSeries;
-let allCandles = [];       // full dataset from API
-let visibleEnd  = 0;       // index of last visible bar (replay cursor)
-let replayMode  = false;
-let playInterval = null;
-let playSpeed    = 250;
-let currentSymbol = "{{ symbols[0] }}";
-let currentTF     = "1h";
-let activeTool    = "cursor";
-let overlayIds    = [];    // track created overlay IDs for clearing
+// ── State ─────────────────────────────────────────────────────────────────────
+let chart;
+let allCandles = [], visibleEnd = 0, replayMode = false;
+let playInterval = null, playSpeed = 250;
+let currentSymbol = "{{ symbols[0] }}", currentTF = "1h";
+let activeTool = "cursor", drawColor = "#4da6ff";
+let overlayIds = [];
+let volVisible = true, volIndicatorId = null;
+let currentSessionId = null;
+let openOrders = [];   // in-memory order book (includes closed for stats)
+let tradeDir = "BUY";
+let panelOpen = true;
 
-// ── Init ─────────────────────────────────────────────────────────────────────
-document.addEventListener("DOMContentLoaded", () => {
+// Contract multiplier: pnl = dirMult × (exit−entry) × lots × CONTRACT[sym]
+const CONTRACT = { XAUUSD: 100, USOIL: 1000, BTCUSD: 1, ETHUSD: 1, EURUSD: 100000 };
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
   registerCustomOverlays();
   initChart();
   loadData(currentSymbol, currentTF);
+  await loadSessions();
 });
 
-window.addEventListener("resize", () => {
-  if (chart) {
-    const wrap = document.getElementById("chartWrap");
-    chart.resize(wrap.clientWidth, wrap.clientHeight);
-  }
+// ── Keyboard shortcuts ────────────────────────────────────────────────────────
+document.addEventListener("keydown", (e) => {
+  const tag = document.activeElement.tagName;
+  if (["INPUT","SELECT","TEXTAREA"].includes(tag)) return;
+  if (e.code === "Space")      { e.preventDefault(); togglePlay(); }
+  if (e.code === "ArrowRight") { e.preventDefault(); replayStep(1); }
+  if (e.code === "ArrowLeft")  { e.preventDefault(); replayStep(-1); }
+  if (e.code === "KeyR")       replayReset();
+  if (e.code === "Escape")     setTool("cursor", document.querySelector('[data-tool="cursor"]'));
 });
 
+// ── Chart init ────────────────────────────────────────────────────────────────
 function initChart() {
-  const wrap = document.getElementById("chartWrap");
   chart = klinecharts.init("kline-chart", {
+    timezone: "UTC",
+    thousandsSeparator: { sign: "," },
     styles: {
       grid: {
-        show: true,
-        horizontal: { show: true, size: 1, color: "#1c2b3a", style: "dashed", dashedValue: [2, 2] },
-        vertical:   { show: true, size: 1, color: "#1c2b3a", style: "dashed", dashedValue: [2, 2] },
+        horizontal: { show: true, size: 1, color: "#1c2b3a", style: "dashed", dashedValue: [2,2] },
+        vertical:   { show: true, size: 1, color: "#1c2b3a", style: "dashed", dashedValue: [2,2] },
       },
       candle: {
         type: "candle_solid",
         bar: {
-          upColor:        "#00e5a0",
-          downColor:      "#ff4757",
-          noChangeColor:  "#5a7080",
-          upBorderColor:  "#00e5a0",
-          downBorderColor:"#ff4757",
-          noChangeBorderColor:"#5a7080",
-          upWickColor:    "#00e5a0",
-          downWickColor:  "#ff4757",
-          noChangeWickColor:"#5a7080",
-        },
-        tooltip: {
-          showRule: "always",
-          showType:  "rect",
-          labels:    ["T","O","H","L","C","V"],
-          defaultValue: "—",
-          rect: {
-            offsetLeft: 8, offsetTop: 8, offsetRight: 8,
-            borderRadius: 4, borderSize: 1,
-            borderColor: "#1c2b3a", color: "#0c1018",
-          },
-          text: { size: 12, family: "JetBrains Mono, monospace", weight: "normal", color: "#5a7080", marginLeft: 8, marginTop: 6, marginRight: 8, marginBottom: 6 },
+          upColor: "#00e5a0", downColor: "#ff4757", noChangeColor: "#5a7080",
+          upBorderColor: "#00e5a0", downBorderColor: "#ff4757", noChangeBorderColor: "#5a7080",
+          upWickColor: "#00e5a0", downWickColor: "#ff4757", noChangeWickColor: "#5a7080",
         },
         priceMark: {
           show: true,
-          high: { show: true, color: "#00e5a0", textOffset: 5, textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
-          low:  { show: true, color: "#ff4757", textOffset: 5, textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
+          high: { show: true, color: "#00e5a0", textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
+          low:  { show: true, color: "#ff4757", textSize: 10, textFamily: "Inter, sans-serif", textWeight: "600" },
           last: { show: true, upColor: "#00e5a0", downColor: "#ff4757", noChangeColor: "#5a7080",
-            line: { show: true, style: "dashed", dashedValue: [4, 4], size: 1 },
+            line: { show: true, style: "dashed", dashedValue: [4,4], size: 1 },
             text: { show: true, size: 12, paddingTop: 2, paddingBottom: 2, paddingLeft: 4, paddingRight: 4,
-              borderRadius: 2, borderSize: 1, borderColor: "#00e5a0", color: "#000", weight: "700", family: "Inter, sans-serif" } }
+              borderRadius: 2, borderSize: 1, color: "#000", weight: "700", family: "Inter, sans-serif" } }
         },
       },
       indicator: {
-        ohlc: { upColor: "#00e5a0", downColor: "#ff4757", noChangeColor: "#5a7080" },
-        bars: [{ style: "fill", borderStyle: "solid", upColor: "#00e5a040", downColor: "#ff475740", noChangeColor: "#5a708040", upBorderColor: "#00e5a0", downBorderColor: "#ff4757", noChangeBorderColor: "#5a7080" }],
-        lines: [{ size: 1, style: "solid", color: "#4da6ff" },{ size: 1, style: "solid", color: "#f0c040" }],
+        bars: [{ upColor: "#00e5a040", downColor: "#ff475740", noChangeColor: "#5a708040",
+                 upBorderColor: "#00e5a0", downBorderColor: "#ff4757", noChangeBorderColor: "#5a7080" }],
+        lines: [{ size: 1, color: "#4da6ff" }, { size: 1, color: "#f0c040" }],
       },
       xAxis: {
-        show: true, size: "auto",
-        axisLine: { show: true, color: "#1c2b3a", size: 1 },
-        tickLine: { show: true, size: 1, length: 3, color: "#1c2b3a" },
-        tickText: { show: true, color: "#5a7080", family: "JetBrains Mono, monospace", weight: "normal", size: 10 },
+        axisLine: { color: "#1c2b3a" },
+        tickLine: { color: "#1c2b3a" },
+        tickText: { color: "#5a7080", family: "JetBrains Mono, monospace", size: 10 },
       },
       yAxis: {
-        show: true, size: "auto", position: "right", type: "normal",
-        inside: false, reverse: false,
-        axisLine: { show: true, color: "#1c2b3a", size: 1 },
-        tickLine: { show: true, size: 1, length: 3, color: "#1c2b3a" },
-        tickText: { show: true, color: "#5a7080", family: "JetBrains Mono, monospace", weight: "normal", size: 11 },
+        position: "right",
+        axisLine: { color: "#1c2b3a" },
+        tickLine: { color: "#1c2b3a" },
+        tickText: { color: "#5a7080", family: "JetBrains Mono, monospace", size: 11 },
       },
-      separator: { size: 1, color: "#1c2b3a", fill: true, activeBackgroundColor: "#1e2d3d" },
       crosshair: {
-        show: true,
-        horizontal: { show: true, line: { show: true, style: "dashed", dashedValue: [4, 2], size: 1, color: "#5a7080" },
-          text: { show: true, size: 11, family: "JetBrains Mono, monospace", weight: "normal", color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2, borderSize: 1, borderRadius: 2, borderColor: "#1c2b3a", backgroundColor: "#111820" } },
-        vertical: { show: true, line: { show: true, style: "dashed", dashedValue: [4, 2], size: 1, color: "#5a7080" },
-          text: { show: true, size: 11, family: "JetBrains Mono, monospace", weight: "normal", color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2, borderSize: 1, borderRadius: 2, borderColor: "#1c2b3a", backgroundColor: "#111820" } },
+        horizontal: { line: { style: "dashed", dashedValue: [4,2], color: "#5a7080" },
+          text: { color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2,
+            borderColor: "#1c2b3a", backgroundColor: "#111820", size: 11, family: "JetBrains Mono, monospace" } },
+        vertical: { line: { style: "dashed", dashedValue: [4,2], color: "#5a7080" },
+          text: { color: "#d4dde8", paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2,
+            borderColor: "#1c2b3a", backgroundColor: "#111820", size: 11, family: "JetBrains Mono, monospace" } },
       },
       overlay: {
         point: { color: "#00e5a0" },
-        line:  { style: "solid", smooth: false, size: 1, color: "#4da6ff", dashedValue: [2, 2] },
-        rect:  { style: "fill", color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1, borderStyle: "solid", borderRadius: 0 },
-        polygon: { style: "fill", color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1, borderStyle: "solid" },
-        circle: { style: "fill", color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1, borderStyle: "solid" },
-        arc:    { style: "solid", size: 1, color: "#4da6ff" },
-        text:   { style: "fill", color: "#d4dde8", size: 12, family: "Inter, sans-serif", weight: "normal", paddingLeft: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, borderRadius: 0, borderSize: 0, borderColor: "transparent", backgroundColor: "transparent" },
+        line:  { size: 1, color: "#4da6ff" },
+        rect:  { color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1 },
+        polygon: { color: "rgba(77,166,255,.08)", borderColor: "#4da6ff", borderSize: 1 },
+        text: { color: "#d4dde8", size: 12, family: "Inter, sans-serif" },
       },
-    },
-    timezone: "UTC",
-    thousandsSeparator: { sign: "," },
-    customApi: {
-      formatDate: (dateTimeFormat, timestamp, format, type) => {
-        const d = new Date(timestamp);
-        const pad = n => String(n).padStart(2,"0");
-        const mo = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()];
-        if (currentTF === "1d") return `${d.getUTCFullYear()}-${mo}-${pad(d.getUTCDate())}`;
-        return `${mo}-${pad(d.getUTCDate())} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
-      },
+      separator: { size: 1, color: "#1c2b3a", activeBackgroundColor: "#1e2d3d" },
     },
   });
 
-  // Volume indicator in its own sub-pane
-  try { chart.createIndicator("VOL", false, { id: "vol_pane", height: 80 }); } catch(e) { console.warn("VOL indicator:", e); }
+  // Volume sub-pane
+  try {
+    volIndicatorId = chart.createIndicator("VOL", false, { id: "vol_pane", height: 80 });
+    document.getElementById("volToggleBtn").classList.add("active");
+  } catch(e) { console.warn("VOL:", e); }
 
-  // Crosshair events → update status bar
+  // Crosshair → status bar
   try {
     chart.subscribeAction("onCrosshairChange", (data) => {
       if (!data || !data.kLineData) return;
       const d = data.kLineData;
-      // find index by timestamp match (object refs differ after chart internal copy)
       const idx = allCandles.findIndex(c => c.timestamp === d.timestamp);
       const prev = idx > 0 ? allCandles[idx - 1] : null;
       const chgPct = prev ? ((d.close - prev.close) / prev.close * 100).toFixed(2) : null;
@@ -312,50 +462,52 @@ function initChart() {
       if (chgPct !== null) {
         chgEl.textContent = (chgPct >= 0 ? "+" : "") + chgPct + "%";
         chgEl.className = chgPct >= 0 ? "status-up" : "status-dn";
-      } else {
-        chgEl.textContent = "";
       }
     });
   } catch(e) { console.warn("subscribeAction:", e); }
 }
 
-// ── Data loading ─────────────────────────────────────────────────────────────
+window.addEventListener("resize", () => {
+  if (chart) {
+    const w = document.getElementById("chartWrap");
+    chart.resize(w.clientWidth, w.clientHeight);
+  }
+});
+
+// ── Data loading ──────────────────────────────────────────────────────────────
 async function loadData(sym, tf) {
   showLoading(`Loading ${sym} ${tf.toUpperCase()}…`);
   stopPlay();
   try {
     const res  = await fetch(`/api/chart-data?symbol=${sym}&tf=${tf}`);
     const json = await res.json();
-    if (json.error) { showToast("Error: " + json.error); return; }
+    if (json.error) { showToast("Error: " + json.error, true); return; }
 
     allCandles = json.candles.map(c => ({
       timestamp: c.t, open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v
     }));
+    visibleEnd  = allCandles.length - 1;
+    replayMode  = false;
 
-    visibleEnd = allCandles.length - 1;
-    replayMode = false;
-
-    // Set replay date immediately after data is ready (before any chart ops that could throw)
-    if (allCandles.length > 0) {
+    // Set replay date immediately (90 days before last candle)
+    if (allCandles.length) {
       try {
         const last = new Date(allCandles[allCandles.length - 1].timestamp);
         const def  = new Date(last); def.setDate(def.getDate() - 90);
         document.getElementById("replayDate").value = def.toISOString().slice(0, 10);
-      } catch(dateErr) { console.warn("Date set failed:", dateErr); }
+      } catch(_) {}
     }
 
     chart.clearData();
     chart.applyNewData(allCandles);
 
-    // Update status bar info
     document.getElementById("sbSymbol").textContent = sym;
     document.getElementById("sbTF").textContent     = tf.toUpperCase();
     document.getElementById("sbCount").textContent  = allCandles.length + " bars";
     updateProgress();
-
-    showToast(`${sym} ${tf.toUpperCase()} loaded — ${allCandles.length} bars`);
+    showToast(`${sym} ${tf.toUpperCase()} — ${allCandles.length} bars`);
   } catch(e) {
-    showToast("Failed to load: " + e.message);
+    showToast("Load failed: " + e.message, true);
   } finally {
     hideLoading();
   }
@@ -377,104 +529,257 @@ function selectTF(tf, btn) {
   loadData(currentSymbol, tf);
 }
 
-// ── Drawing tools ─────────────────────────────────────────────────────────────
-const CUSTOM_TOOLS = { longPosition: true, shortPosition: true };
-
+// ── Custom overlays ───────────────────────────────────────────────────────────
 function registerCustomOverlays() {
-  // Long Position tool
+
+  // Ranged Fibonacci Retracement
+  klinecharts.registerOverlay({
+    name: "fibRetracement",
+    totalStep: 2,
+    needDefaultPointFigure: true,
+    createPointFigures: ({ overlay, coordinates }) => {
+      if (coordinates.length < 2) return [];
+      const [p1, p2] = coordinates;
+      const xL = Math.min(p1.x, p2.x), xR = Math.max(p1.x, p2.x);
+      const pts = overlay.points;
+      if (!pts || pts.length < 2 || pts[0].value == null || pts[1].value == null) return [];
+      const v1 = pts[0].value, v2 = pts[1].value;
+      const LEVELS = [
+        { l: 0,     label: "0.000",   col: "#ffffff" },
+        { l: 0.236, label: "23.6%",   col: "#f0c040" },
+        { l: 0.382, label: "38.2%",   col: "#00e5a0" },
+        { l: 0.5,   label: "50.0%",   col: "#4da6ff" },
+        { l: 0.618, label: "61.8%",   col: "#ff4757" },
+        { l: 0.786, label: "78.6%",   col: "#f0c040" },
+        { l: 1,     label: "100.0%",  col: "#ffffff" },
+      ];
+      const figs = [];
+      // Diagonal connector
+      figs.push({ type: "line",
+        attrs: { coordinates: [{ x: p1.x, y: p1.y }, { x: p2.x, y: p2.y }] },
+        styles: { color: "rgba(255,255,255,0.2)", size: 1, style: "dashed", dashedValue: [4,4] }
+      });
+      for (const { l, label, col } of LEVELS) {
+        const y = p1.y + (p2.y - p1.y) * l;
+        const price = v1 + (v2 - v1) * l;
+        figs.push({ type: "line",
+          attrs: { coordinates: [{ x: xL, y }, { x: xR, y }] },
+          styles: { color: col, size: 1, style: "solid" }
+        });
+        figs.push({ type: "text",
+          attrs: { x: xR + 4, y: y - 1, text: `${label}  ${fmt(price)}` },
+          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "normal" }
+        });
+      }
+      return figs;
+    },
+  });
+
+  // Text label overlay
+  klinecharts.registerOverlay({
+    name: "textOverlay",
+    totalStep: 1,
+    needDefaultPointFigure: true,
+    createPointFigures: ({ overlay, coordinates }) => {
+      if (!coordinates.length) return [];
+      const [p] = coordinates;
+      const txt = overlay.extendData?.text || "Label";
+      const col = overlay.extendData?.color || "#f0c040";
+      return [
+        { type: "text",
+          attrs: { x: p.x, y: p.y, text: txt },
+          styles: { color: col, size: 13, family: "Inter, sans-serif", weight: "600",
+            paddingLeft: 6, paddingRight: 6, paddingTop: 3, paddingBottom: 3,
+            borderRadius: 3, borderSize: 1, borderColor: col,
+            backgroundColor: "rgba(0,0,0,0.6)" } }
+      ];
+    },
+  });
+
+  // Long Position (entry click → SL click → TP click — all three draggable)
   klinecharts.registerOverlay({
     name: "longPosition",
     totalStep: 3,
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
       if (coordinates.length < 2) return [];
-      const entry = coordinates[0].y;
-      const sl    = coordinates[1] ? coordinates[1].y : entry + 40;
-      const tp    = coordinates[2] ? coordinates[2].y : entry - 40;
-      const left  = Math.min(...coordinates.map(c => c.x)) - 20;
-      const right = Math.max(...coordinates.map(c => c.x)) + 80;
+      const [ep, slp, tpp] = coordinates;
+      const entry = ep.y;
+      const sl    = slp ? slp.y : entry + 40;
+      const tp    = tpp ? tpp.y : entry - 60;
+      const left  = Math.min(...coordinates.map(c => c.x)) - 10;
+      const right = Math.max(...coordinates.map(c => c.x)) + 60;
+      const col   = overlay.extendData?.color || "#00e5a0";
       return [
-        // TP zone (green)
-        { type: "rect", attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
-          styles: { style: "fill", color: "rgba(0,229,160,.12)", borderColor: "#00e5a0", borderSize: 1 } },
-        // SL zone (red)
-        { type: "rect", attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
-          styles: { style: "fill", color: "rgba(255,71,87,.12)", borderColor: "#ff4757", borderSize: 1 } },
-        // Entry line
-        { type: "line", attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
+        { type: "rect",
+          attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
+          styles: { style: "fill", color: "rgba(0,229,160,.10)", borderColor: col, borderSize: 1 } },
+        { type: "rect",
+          attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
+          styles: { style: "fill", color: "rgba(255,71,87,.10)", borderColor: "#ff4757", borderSize: 1 } },
+        { type: "line",
+          attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
           styles: { color: "#f0c040", size: 2, style: "solid" } },
+        { type: "text",
+          attrs: { x: right + 2, y: entry - 2, text: "ENTRY" },
+          styles: { color: "#f0c040", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
+        { type: "text",
+          attrs: { x: right + 2, y: Math.min(entry, tp) + 2, text: "TP" },
+          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
+        { type: "text",
+          attrs: { x: right + 2, y: Math.max(entry, sl) - 10, text: "SL" },
+          styles: { color: "#ff4757", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
       ];
     },
   });
 
-  // Short Position tool
+  // Short Position
   klinecharts.registerOverlay({
     name: "shortPosition",
     totalStep: 3,
     needDefaultPointFigure: true,
-    needDefaultXAxisFigure: true,
-    needDefaultYAxisFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
       if (coordinates.length < 2) return [];
-      const entry = coordinates[0].y;
-      const sl    = coordinates[1] ? coordinates[1].y : entry - 40;
-      const tp    = coordinates[2] ? coordinates[2].y : entry + 40;
-      const left  = Math.min(...coordinates.map(c => c.x)) - 20;
-      const right = Math.max(...coordinates.map(c => c.x)) + 80;
+      const [ep, slp, tpp] = coordinates;
+      const entry = ep.y;
+      const sl    = slp ? slp.y : entry - 40;
+      const tp    = tpp ? tpp.y : entry + 60;
+      const left  = Math.min(...coordinates.map(c => c.x)) - 10;
+      const right = Math.max(...coordinates.map(c => c.x)) + 60;
+      const col   = overlay.extendData?.color || "#ff4757";
       return [
-        // TP zone (green for short)
-        { type: "rect", attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
-          styles: { style: "fill", color: "rgba(0,229,160,.12)", borderColor: "#00e5a0", borderSize: 1 } },
-        // SL zone (red)
-        { type: "rect", attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
-          styles: { style: "fill", color: "rgba(255,71,87,.12)", borderColor: "#ff4757", borderSize: 1 } },
-        // Entry line
-        { type: "line", attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
-          styles: { color: "#ff4757", size: 2, style: "solid" } },
+        { type: "rect",
+          attrs: { x: left, y: Math.min(entry, tp), width: right - left, height: Math.abs(tp - entry) },
+          styles: { style: "fill", color: "rgba(0,229,160,.10)", borderColor: "#00e5a0", borderSize: 1 } },
+        { type: "rect",
+          attrs: { x: left, y: Math.min(entry, sl), width: right - left, height: Math.abs(sl - entry) },
+          styles: { style: "fill", color: "rgba(255,71,87,.10)", borderColor: col, borderSize: 1 } },
+        { type: "line",
+          attrs: { coordinates: [{ x: left, y: entry }, { x: right, y: entry }] },
+          styles: { color: "#f0c040", size: 2, style: "solid" } },
+        { type: "text",
+          attrs: { x: right + 2, y: entry - 2, text: "ENTRY" },
+          styles: { color: "#f0c040", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
+        { type: "text",
+          attrs: { x: right + 2, y: Math.min(entry, tp) + 2, text: "TP" },
+          styles: { color: "#00e5a0", size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
+        { type: "text",
+          attrs: { x: right + 2, y: Math.max(entry, sl) - 10, text: "SL" },
+          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "600" } },
+      ];
+    },
+  });
+
+  // Trade entry marker (auto-placed on position open)
+  klinecharts.registerOverlay({
+    name: "tradeEntryMarker",
+    totalStep: 1,
+    needDefaultPointFigure: false,
+    createPointFigures: ({ overlay, coordinates }) => {
+      if (!coordinates.length) return [];
+      const [p] = coordinates;
+      const isLong = overlay.extendData?.direction === "BUY";
+      const col    = isLong ? "#00e5a0" : "#ff4757";
+      const yOff   = isLong ? -14 : 14;
+      return [
+        { type: "polygon",
+          attrs: { coordinates: isLong
+            ? [{ x: p.x, y: p.y - 14 }, { x: p.x - 7, y: p.y }, { x: p.x + 7, y: p.y }]
+            : [{ x: p.x, y: p.y + 14 }, { x: p.x - 7, y: p.y }, { x: p.x + 7, y: p.y }]
+          },
+          styles: { style: "fill", color: col, borderColor: col, borderSize: 1 }
+        },
+        { type: "text",
+          attrs: { x: p.x + 10, y: p.y + yOff / 2, text: overlay.extendData?.label || "" },
+          styles: { color: col, size: 10, family: "JetBrains Mono, monospace", weight: "600" }
+        }
       ];
     },
   });
 }
 
+// ── Drawing tools ─────────────────────────────────────────────────────────────
 function setTool(tool, btn) {
   activeTool = tool;
   document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
+  if (btn) btn.classList.add("active");
 
-  if (tool === "cursor") {
-    chart.removeOverlay();
-    chart.setMaxOffsetRightDistance && chart.setMaxOffsetRightDistance(50);
+  if (tool === "cursor") { return; }
+
+  if (tool === "textOverlay") {
+    const txt = prompt("Enter label text:", "Note");
+    if (!txt) { setTool("cursor", document.querySelector('[data-tool="cursor"]')); return; }
+    try {
+      const id = chart.createOverlay({ name: "textOverlay", extendData: { text: txt, color: drawColor } });
+      if (id) overlayIds.push(id);
+    } catch(e) { showToast("Text tool error: " + e.message, true); }
     return;
   }
+
   try {
-    const id = chart.createOverlay({ name: tool });
+    const styles = buildOverlayStyles(tool);
+    const id = chart.createOverlay({ name: tool, styles, extendData: { color: drawColor } });
     if (id) overlayIds.push(id);
   } catch(e) {
-    showToast("Tool not supported: " + tool);
+    showToast("Tool error: " + e.message, true);
     console.warn("Overlay error:", e);
   }
 }
 
+function buildOverlayStyles(tool) {
+  const c = drawColor;
+  return {
+    line:    { color: c, size: 1 },
+    rect:    { borderColor: c, color: c + "18", borderSize: 1 },
+    polygon: { borderColor: c, color: c + "18", borderSize: 1 },
+    arc:     { color: c, size: 1 },
+    text:    { color: c },
+    point:   { color: c },
+  };
+}
+
+function setDrawColor(c) {
+  drawColor = c;
+  document.getElementById("colorSwatch").style.background = c;
+}
+// Set initial swatch
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("colorSwatch").style.background = drawColor;
+});
+
 function clearDrawings() {
-  chart.removeOverlay();
+  try { chart.removeOverlay(); } catch(_) {}
   overlayIds = [];
   showToast("Drawings cleared");
-  // Reset tool to cursor
   setTool("cursor", document.querySelector('[data-tool="cursor"]'));
 }
 
-// ── Replay logic ──────────────────────────────────────────────────────────────
+function toggleVolume() {
+  const btn = document.getElementById("volToggleBtn");
+  if (volVisible) {
+    try { chart.removeIndicator("VOL", "vol_pane"); } catch(_) {}
+    volVisible = false;
+    btn.classList.remove("active");
+    showToast("Volume pane hidden");
+  } else {
+    try {
+      volIndicatorId = chart.createIndicator("VOL", false, { id: "vol_pane", height: 80 });
+    } catch(_) {}
+    volVisible = true;
+    btn.classList.add("active");
+    showToast("Volume pane shown");
+  }
+}
+
+// ── Replay ────────────────────────────────────────────────────────────────────
 function replayReset() {
   const dateVal = document.getElementById("replayDate").value;
   if (!dateVal || !allCandles.length) return;
   stopPlay();
-
   const target = new Date(dateVal + "T00:00:00Z").getTime();
   let idx = allCandles.findIndex(c => c.timestamp >= target);
-  if (idx < 0) idx = 0;
-  if (idx === 0) idx = 1;  // always show at least 1 bar
+  if (idx < 0) idx = allCandles.length - 1;
+  if (idx < 1) idx = 1;
 
   replayMode = true;
   visibleEnd = idx;
@@ -496,13 +801,17 @@ function replayStep(delta) {
   if (!replayMode) replayReset();
   const next = Math.max(1, Math.min(allCandles.length, visibleEnd + delta));
   if (next === visibleEnd) return;
-  visibleEnd = next;
+
   if (delta > 0) {
-    chart.updateData(allCandles[visibleEnd - 1]);
+    for (let i = visibleEnd; i < next; i++) {
+      processBar(allCandles[i]);
+      chart.updateData(allCandles[i]);
+    }
   } else {
     chart.clearData();
-    chart.applyNewData(allCandles.slice(0, visibleEnd));
+    chart.applyNewData(allCandles.slice(0, next));
   }
+  visibleEnd = next;
   updateProgress();
 }
 
@@ -510,10 +819,10 @@ function togglePlay() {
   if (playInterval) { stopPlay(); return; }
   if (!replayMode) replayReset();
   const btn = document.getElementById("btnPlay");
-  btn.textContent = "⏸";
-  btn.classList.add("playing");
+  btn.textContent = "⏸"; btn.classList.add("playing");
   playInterval = setInterval(() => {
     if (visibleEnd >= allCandles.length) { stopPlay(); return; }
+    processBar(allCandles[visibleEnd]);
     chart.updateData(allCandles[visibleEnd]);
     visibleEnd++;
     updateProgress();
@@ -523,15 +832,14 @@ function togglePlay() {
 function stopPlay() {
   if (playInterval) { clearInterval(playInterval); playInterval = null; }
   const btn = document.getElementById("btnPlay");
-  btn.textContent = "▶";
-  btn.classList.remove("playing");
+  btn.textContent = "▶"; btn.classList.remove("playing");
 }
 
 function setSpeed(ms, btn) {
   playSpeed = ms;
   document.querySelectorAll(".speed-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
-  if (playInterval) { stopPlay(); togglePlay(); }  // restart at new speed
+  if (playInterval) { stopPlay(); togglePlay(); }
 }
 
 function updateProgress() {
@@ -539,36 +847,454 @@ function updateProgress() {
   const cur   = replayMode ? visibleEnd : total;
   document.getElementById("replayProgress").textContent =
     `Bar ${cur.toLocaleString()} / ${total.toLocaleString()}`;
+}
 
-  // show current date of visible end
-  if (allCandles.length && visibleEnd > 0) {
-    const ts = allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)].timestamp;
-    const d  = new Date(ts);
-    document.getElementById("sbSymbol").textContent = currentSymbol;
+// ── Order engine ──────────────────────────────────────────────────────────────
+function processBar(candle) {
+  const { timestamp, high, low } = candle;
+  let needRender = false;
+
+  // Trigger pending limit / stop orders
+  openOrders.filter(o => o.status === "pending").forEach(order => {
+    let hit = false;
+    if (order.order_type === "limit") {
+      if (order.direction === "BUY"  && low  <= order.trigger_price) hit = true;
+      if (order.direction === "SELL" && high >= order.trigger_price) hit = true;
+    } else if (order.order_type === "stop") {
+      if (order.direction === "BUY"  && high >= order.trigger_price) hit = true;
+      if (order.direction === "SELL" && low  <= order.trigger_price) hit = true;
+    }
+    if (hit) {
+      order.status       = "open";
+      order.entry_price  = order.trigger_price;
+      order.entry_ts     = timestamp;
+      updateTradeOnServer(order, { status: "open", entry_price: order.entry_price, entry_ts: timestamp });
+      placeEntryMarker(order);
+      showToast(`${order.direction} filled @ ${fmt(order.entry_price)}`);
+      needRender = true;
+    }
+  });
+
+  // Check TP / SL for open positions
+  openOrders.filter(o => o.status === "open").forEach(pos => {
+    let hit = null, hitPrice = null;
+    if (pos.direction === "BUY") {
+      if (pos.tp_price && high >= pos.tp_price) { hit = "TP"; hitPrice = pos.tp_price; }
+      else if (pos.sl_price && low <= pos.sl_price) { hit = "SL"; hitPrice = pos.sl_price; }
+    } else {
+      if (pos.tp_price && low  <= pos.tp_price) { hit = "TP"; hitPrice = pos.tp_price; }
+      else if (pos.sl_price && high >= pos.sl_price) { hit = "SL"; hitPrice = pos.sl_price; }
+    }
+    if (hit) { closePosition(pos, hitPrice, timestamp, hit); needRender = true; }
+  });
+
+  if (needRender) renderPositions();
+}
+
+function placeEntryMarker(order) {
+  if (!chart) return;
+  try {
+    chart.createOverlay({
+      name: "tradeEntryMarker",
+      points: [{ timestamp: order.entry_ts, value: order.entry_price }],
+      extendData: {
+        direction: order.direction,
+        label: `${order.direction} ${order.lots}L`,
+      },
+      lock: true,
+    });
+  } catch(_) {}
+}
+
+function closePosition(pos, price, ts, reason) {
+  pos.exit_price  = price;
+  pos.exit_ts     = ts;
+  pos.exit_reason = reason;
+  pos.pnl_usd     = calcPnL(pos.direction, pos.lots, pos.entry_price, price);
+  pos.status      = "closed";
+  updateTradeOnServer(pos, {
+    exit_price: price, exit_ts: ts, exit_reason: reason,
+    pnl_usd: pos.pnl_usd, status: "closed",
+  });
+  // Exit marker
+  try {
+    chart.createOverlay({
+      name: "tradeEntryMarker",
+      points: [{ timestamp: ts, value: price }],
+      extendData: {
+        direction: pos.direction === "BUY" ? "SELL" : "BUY",
+        label: `${reason} ${pos.pnl_usd >= 0 ? "+" : ""}$${pos.pnl_usd.toFixed(0)}`,
+      },
+      lock: true,
+    });
+  } catch(_) {}
+  const icon = pos.pnl_usd >= 0 ? "✅" : "❌";
+  showToast(`${icon} ${pos.direction} ${reason} @ ${fmt(price)} | ${pos.pnl_usd >= 0 ? "+" : ""}$${pos.pnl_usd.toFixed(2)}`);
+  updateSessionStats();
+}
+
+function calcPnL(direction, lots, entry, exit) {
+  const mult    = CONTRACT[currentSymbol] || 100000;
+  const dirMult = direction === "BUY" ? 1 : -1;
+  return parseFloat((dirMult * (exit - entry) * lots * mult).toFixed(2));
+}
+
+// ── Trade panel UI ────────────────────────────────────────────────────────────
+function toggleTradePanel() {
+  panelOpen = !panelOpen;
+  const panel = document.getElementById("tradePanel");
+  const inner = document.getElementById("panelInner");
+  const btn   = document.getElementById("panelToggleBtn");
+  panel.classList.toggle("collapsed", !panelOpen);
+  inner.style.display = panelOpen ? "" : "none";
+  btn.textContent = panelOpen ? "⟩" : "⟨";
+}
+
+function setDir(dir, btn) {
+  tradeDir = dir;
+  document.getElementById("btnBuy").classList.toggle("active", dir === "BUY");
+  document.getElementById("btnSell").classList.toggle("active", dir === "SELL");
+}
+
+function onOrderTypeChange() {
+  const t = document.getElementById("orderType").value;
+  const show = t !== "market";
+  document.getElementById("triggerLabel").style.display = show ? "" : "none";
+  document.getElementById("triggerInput").style.display = show ? "" : "none";
+}
+
+function placeOrder() {
+  if (!currentSessionId) { showToast("No active session — click the session badge to start one", true); return; }
+  if (!replayMode)       { showToast("Start replay first (click ⏮ or change date)", true); return; }
+  if (visibleEnd < 1 || visibleEnd > allCandles.length) return;
+
+  const lots      = parseFloat(document.getElementById("lotsInput").value) || 0.01;
+  const otype     = document.getElementById("orderType").value;
+  const tpRaw     = document.getElementById("tpInput").value;
+  const slRaw     = document.getElementById("slInput").value;
+  const trigRaw   = document.getElementById("triggerInput").value;
+  const currentBar = allCandles[visibleEnd - 1];
+  const mktPrice  = currentBar.close;
+
+  const tp = tpRaw  ? parseFloat(tpRaw)  : null;
+  const sl = slRaw  ? parseFloat(slRaw)  : null;
+  const trigger = otype !== "market" ? (parseFloat(trigRaw) || null) : null;
+
+  if (otype !== "market" && !trigger) { showToast("Enter a trigger price for limit/stop orders", true); return; }
+
+  const order = {
+    id:            null,
+    direction:     tradeDir,
+    order_type:    otype,
+    lots,
+    trigger_price: trigger,
+    entry_price:   otype === "market" ? mktPrice : null,
+    entry_ts:      otype === "market" ? currentBar.timestamp : null,
+    tp_price:      tp,
+    sl_price:      sl,
+    exit_price:    null,
+    exit_ts:       null,
+    exit_reason:   null,
+    pnl_usd:       0,
+    status:        otype === "market" ? "open" : "pending",
+  };
+
+  openOrders.push(order);
+  if (otype === "market") placeEntryMarker(order);
+  renderPositions();
+  updateSessionStats();
+
+  // Persist to server
+  saveTradeToServer(order);
+  showToast(`${otype === "market" ? "Opened" : "Placed"} ${tradeDir} ${lots}L`);
+}
+
+async function saveTradeToServer(order) {
+  if (!currentSessionId) return;
+  try {
+    const res = await fetch(`/api/backtest/sessions/${currentSessionId}/trades`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(order),
+    });
+    const data = await res.json();
+    order.id = data.id;
+  } catch(e) { console.warn("Save trade:", e); }
+}
+
+async function updateTradeOnServer(order, patch) {
+  if (!currentSessionId || !order.id) return;
+  try {
+    await fetch(`/api/backtest/sessions/${currentSessionId}/trades/${order.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+  } catch(e) { console.warn("Update trade:", e); }
+}
+
+function manualClose(localIdx) {
+  const pos = openOrders.filter(o => o.status === "open")[localIdx];
+  if (!pos || !replayMode || visibleEnd < 1) return;
+  const bar = allCandles[visibleEnd - 1];
+  closePosition(pos, bar.close, bar.timestamp, "manual");
+  renderPositions();
+}
+
+function cancelPending(localIdx) {
+  const order = openOrders.filter(o => o.status === "pending")[localIdx];
+  if (!order) return;
+  order.status = "cancelled";
+  if (order.id && currentSessionId) {
+    fetch(`/api/backtest/sessions/${currentSessionId}/trades/${order.id}`, { method: "DELETE" });
   }
+  openOrders = openOrders.filter(o => o !== order);
+  renderPositions();
+  showToast("Order cancelled");
+}
+
+function renderPositions() {
+  const el = document.getElementById("positionsList");
+  const pending = openOrders.filter(o => o.status === "pending");
+  const open    = openOrders.filter(o => o.status === "open");
+  const curPrice = (replayMode && visibleEnd > 0) ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)].close : null;
+
+  if (!pending.length && !open.length) {
+    el.innerHTML = '<div class="empty-msg">No open positions</div>';
+    return;
+  }
+
+  let html = "";
+
+  pending.forEach((o, i) => {
+    html += `<div class="pos-card pending">
+      <div class="pos-header">
+        <span class="pos-dir pending">${o.direction}</span>
+        <span class="pos-type-badge">${o.order_type.toUpperCase()}</span>
+        <span class="pos-type-badge">${o.lots}L</span>
+        <button class="pos-close-btn" onclick="cancelPending(${i})" title="Cancel">✕</button>
+      </div>
+      <div class="pos-detail">
+        <span>@ ${fmt(o.trigger_price)}</span>
+        ${o.tp_price ? `<span>TP:${fmt(o.tp_price)}</span>` : ""}
+        ${o.sl_price ? `<span>SL:${fmt(o.sl_price)}</span>` : ""}
+      </div>
+    </div>`;
+  });
+
+  open.forEach((o, i) => {
+    const livePnl = curPrice ? calcPnL(o.direction, o.lots, o.entry_price, curPrice) : 0;
+    const cls = livePnl >= 0 ? "up" : "dn";
+    html += `<div class="pos-card ${o.direction.toLowerCase()}">
+      <div class="pos-header">
+        <span class="pos-dir ${o.direction.toLowerCase()}">${o.direction === "BUY" ? "▲" : "▼"} ${o.direction}</span>
+        <span class="pos-type-badge">${o.lots}L</span>
+        <button class="pos-close-btn" onclick="manualClose(${i})" title="Close at market">✕</button>
+      </div>
+      <div class="pos-detail">
+        <span>In:${fmt(o.entry_price)}</span>
+        ${o.tp_price ? `<span>TP:${fmt(o.tp_price)}</span>` : ""}
+        ${o.sl_price ? `<span>SL:${fmt(o.sl_price)}</span>` : ""}
+      </div>
+      <div class="pos-pnl ${cls}">${livePnl >= 0 ? "+" : ""}$${livePnl.toFixed(2)}</div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function updateSessionStats() {
+  const closed = openOrders.filter(o => o.status === "closed");
+  const wins   = closed.filter(o => o.pnl_usd > 0);
+  const losses = closed.filter(o => o.pnl_usd <= 0);
+  const total  = closed.reduce((s, o) => s + (o.pnl_usd || 0), 0);
+  const el     = document.getElementById("sessionPnlEl");
+  el.textContent = (total >= 0 ? "+" : "") + "$" + total.toFixed(2);
+  el.className   = total >= 0 ? "status-up" : "status-dn";
+  document.getElementById("sessionStatsEl").textContent = `${wins.length}W / ${losses.length}L`;
+}
+
+// ── Session management ────────────────────────────────────────────────────────
+async function loadSessions() {
+  try {
+    const res  = await fetch("/api/backtest/sessions");
+    const list = await res.json();
+    if (!list.length) {
+      await createNewSession();
+    } else {
+      showSessionModal(list);
+    }
+  } catch(e) { console.warn("Sessions:", e); }
+}
+
+function showSessionModal(sessions) {
+  document.getElementById("sessionBackdrop").classList.remove("hidden");
+  const el = document.getElementById("sessionListEl");
+  if (!sessions || !sessions.length) {
+    el.innerHTML = '<div class="empty-msg">No previous sessions</div>';
+    return;
+  }
+  el.innerHTML = sessions.map((s, i) => `
+    <div class="session-item">
+      <div class="session-item-info">
+        <div class="session-item-name">${s.name || "Unnamed"}</div>
+        <div class="session-item-meta">${s.symbol || ""} ${(s.timeframe || "").toUpperCase()} · ${s.trade_count} trades · ${s.created_at}</div>
+      </div>
+      <div class="session-item-actions">
+        <button class="btn-continue" onclick="continueSession(${s.id})">Continue ►</button>
+        <button class="btn-delete"   onclick="deleteSession(${s.id}, this)">✕</button>
+      </div>
+    </div>`).join("");
+}
+
+async function continueSession(id) {
+  document.getElementById("sessionBackdrop").classList.add("hidden");
+  try {
+    const res  = await fetch(`/api/backtest/sessions/${id}`);
+    const data = await res.json();
+    currentSessionId = data.id;
+    document.getElementById("navSessionName").textContent = data.name || `Session #${id}`;
+    // Restore trades
+    openOrders = (data.trades || []);
+    updateSessionStats();
+    renderPositions();
+    showToast(`Resumed: ${data.name}`);
+  } catch(e) { showToast("Failed to load session", true); }
+}
+
+async function createNewSession() {
+  document.getElementById("sessionBackdrop").classList.add("hidden");
+  const name = `${currentSymbol} ${currentTF.toUpperCase()} — ${new Date().toLocaleDateString()}`;
+  try {
+    const res  = await fetch("/api/backtest/sessions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, symbol: currentSymbol, timeframe: currentTF }),
+    });
+    const data = await res.json();
+    currentSessionId = data.id;
+    openOrders = [];
+    document.getElementById("navSessionName").textContent = data.name;
+    updateSessionStats();
+    renderPositions();
+    showToast("New session started");
+  } catch(e) { showToast("Could not create session", true); }
+}
+
+async function deleteSession(id, btn) {
+  if (!confirm("Delete this session and all its trades?")) return;
+  try {
+    await fetch(`/api/backtest/sessions/${id}`, { method: "DELETE" });
+    btn.closest(".session-item").remove();
+    if (id === currentSessionId) {
+      currentSessionId = null;
+      document.getElementById("navSessionName").textContent = "No session";
+    }
+    showToast("Session deleted");
+  } catch(e) { showToast("Delete failed", true); }
+}
+
+// ── Summary modal ─────────────────────────────────────────────────────────────
+function showSummary() {
+  const closed = openOrders.filter(o => o.status === "closed");
+  const wins   = closed.filter(o => o.pnl_usd > 0);
+  const losses = closed.filter(o => o.pnl_usd <= 0);
+  const total  = closed.reduce((s, o) => s + (o.pnl_usd || 0), 0);
+  const avgWin  = wins.length   ? wins.reduce((s,o) => s + o.pnl_usd, 0) / wins.length     : 0;
+  const avgLoss = losses.length ? losses.reduce((s,o) => s + o.pnl_usd, 0) / losses.length : 0;
+  const pf      = losses.reduce((s,o) => s + Math.abs(o.pnl_usd), 0);
+  const pw      = wins.reduce((s,o) => s + o.pnl_usd, 0);
+  const profitFactor = pf > 0 ? (pw / pf).toFixed(2) : "∞";
+  const winRate = closed.length ? ((wins.length / closed.length) * 100).toFixed(1) : "0.0";
+
+  // Max drawdown
+  let peak = 0, dd = 0, maxDD = 0, eq = 0;
+  closed.forEach(o => {
+    eq += o.pnl_usd;
+    if (eq > peak) peak = eq;
+    dd = peak - eq;
+    if (dd > maxDD) maxDD = dd;
+  });
+
+  const totalCls = total >= 0 ? "up" : "dn";
+  const el = document.getElementById("summaryContent");
+  el.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Net P&amp;L</div>
+        <div class="stat-value ${totalCls}">${total >= 0 ? "+" : ""}$${total.toFixed(2)}</div></div>
+      <div class="stat-card"><div class="stat-label">Win Rate</div>
+        <div class="stat-value neutral">${winRate}%</div></div>
+      <div class="stat-card"><div class="stat-label">Trades</div>
+        <div class="stat-value neutral">${closed.length}</div></div>
+      <div class="stat-card"><div class="stat-label">Profit Factor</div>
+        <div class="stat-value neutral">${profitFactor}</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Win</div>
+        <div class="stat-value up">+$${avgWin.toFixed(2)}</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Loss</div>
+        <div class="stat-value dn">$${avgLoss.toFixed(2)}</div></div>
+      <div class="stat-card"><div class="stat-label">Max Drawdown</div>
+        <div class="stat-value dn">-$${maxDD.toFixed(2)}</div></div>
+      <div class="stat-card"><div class="stat-label">W / L</div>
+        <div class="stat-value neutral">${wins.length} / ${losses.length}</div></div>
+    </div>
+    ${closed.length ? `
+    <div class="trade-log">
+      <div class="trade-log-title">Trade Log</div>
+      <div class="trade-row header">
+        <span>#</span><span>Dir</span><span>Type</span><span>Entry</span><span>Exit</span><span>P&amp;L</span>
+      </div>
+      ${closed.map((o, i) => `
+        <div class="trade-row">
+          <span style="color:var(--muted)">${i + 1}</span>
+          <span style="color:${o.direction==="BUY"?"var(--green)":"var(--red)"}">${o.direction}</span>
+          <span style="color:var(--muted)">${o.exit_reason || ""}</span>
+          <span>${fmt(o.entry_price)}</span>
+          <span>${fmt(o.exit_price)}</span>
+          <span style="color:${o.pnl_usd>=0?"var(--green)":"var(--red)"}">${o.pnl_usd>=0?"+":""}$${(o.pnl_usd||0).toFixed(2)}</span>
+        </div>`).join("")}
+    </div>` : '<div class="empty-msg" style="margin:16px 0">No closed trades yet — take some trades first!</div>'}
+  `;
+
+  if (currentSessionId) {
+    document.getElementById("fullResultsLink").href = `/backtest/results/${currentSessionId}`;
+  }
+  document.getElementById("summaryBackdrop").classList.remove("hidden");
+}
+
+function closeSummary() {
+  document.getElementById("summaryBackdrop").classList.add("hidden");
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmt(v) {
   if (v == null) return "—";
-  return v >= 1000 ? v.toFixed(2) : v >= 10 ? v.toFixed(3) : v.toFixed(5);
+  if (Math.abs(v) >= 10000) return v.toFixed(2);
+  if (Math.abs(v) >= 10)    return v.toFixed(3);
+  return v.toFixed(5);
 }
 
 function showLoading(msg) {
   document.getElementById("loadingLabel").textContent = msg || "Loading…";
   document.getElementById("loadingOverlay").classList.remove("hidden");
 }
-function hideLoading() {
-  document.getElementById("loadingOverlay").classList.add("hidden");
-}
+function hideLoading() { document.getElementById("loadingOverlay").classList.add("hidden"); }
 
-function showToast(msg, dur=2500) {
+function showToast(msg, isError = false, dur = 2800) {
   const t = document.getElementById("toast");
-  t.textContent = msg; t.classList.add("show");
+  t.textContent = msg;
+  t.className = "toast show" + (isError ? " error" : "");
   setTimeout(() => t.classList.remove("show"), dur);
 }
 
-
+// Close modals on backdrop click
+document.getElementById("sessionBackdrop").addEventListener("click", e => {
+  if (e.target === e.currentTarget && currentSessionId) {
+    e.currentTarget.classList.add("hidden");
+  }
+});
+document.getElementById("summaryBackdrop").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closeSummary();
+});
 </script>
 </body>
 </html>

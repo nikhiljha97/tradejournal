@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Backtest Results — TradeJournal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07090d;--bg2:#0c1018;--panel:#111820;--panel2:#161f2a;
+      --border:#1c2b3a;--border2:#243447;--text:#d4dde8;--muted:#5a7080;
+      --faint:#1e2d3d;--green:#00e5a0;--green2:#00c88a;--gdim:#003d2b;
+      --red:#ff4757;--gold:#f0c040;--blue:#4da6ff;
+    }
+    html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased}
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:48px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10}
+    .nav-logo{font-size:16px;font-weight:900}.nav-logo span{color:var(--green)}
+    .nav-links{display:flex;gap:20px;align-items:center}
+    .nav-links a{font-size:12px;color:var(--muted);font-weight:500;text-decoration:none;transition:color .2s}.nav-links a:hover{color:var(--text)}
+    .nav-right{font-size:12px;color:var(--muted)}
+
+    .page-wrap{max-width:1200px;margin:0 auto;padding:28px 24px 60px}
+    .page-header{margin-bottom:28px}
+    .breadcrumb{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .breadcrumb a{color:var(--muted);text-decoration:none}.breadcrumb a:hover{color:var(--green)}
+    .page-title{font-size:28px;font-weight:900}
+    .page-sub{font-size:13px;color:var(--muted);margin-top:4px}
+
+    /* Stat cards */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+    .stat-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+    .stat-card.highlight{border-color:var(--green);background:var(--gdim)}
+    .stat-label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+    .stat-value{font-size:26px;font-weight:800;font-family:"JetBrains Mono",monospace}
+    .stat-value.up{color:var(--green)}.stat-value.dn{color:var(--red)}.stat-value.neutral{color:var(--text)}
+    .stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+    /* Section */
+    .section{margin-bottom:28px}
+    .section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .section-title::after{content:"";flex:1;height:1px;background:var(--border)}
+
+    /* Equity curve canvas */
+    .chart-wrap{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative}
+    #equityCanvas{width:100%;height:200px;display:block}
+
+    /* Trade log table */
+    .trade-table{width:100%;border-collapse:collapse}
+    .trade-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--panel)}
+    .trade-table td{font-size:12px;padding:8px 12px;border-bottom:1px solid var(--border);font-family:"JetBrains Mono",monospace}
+    .trade-table tr:last-child td{border-bottom:none}
+    .trade-table tr:hover td{background:var(--faint)}
+    .badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700}
+    .badge.buy{background:var(--gdim);color:var(--green)}.badge.sell{background:#2d0a0e;color:var(--red)}
+    .badge.tp{background:rgba(0,229,160,.1);color:var(--green)}.badge.sl{background:rgba(255,71,87,.1);color:var(--red)}
+    .badge.manual{background:rgba(240,192,64,.1);color:var(--gold)}
+    .badge.open{background:rgba(77,166,255,.1);color:var(--blue)}
+    .badge.pending{background:rgba(240,192,64,.1);color:var(--gold)}
+    .pnl-cell.up{color:var(--green)}.pnl-cell.dn{color:var(--red)}
+
+    /* Win/loss bar */
+    .wl-bar-wrap{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:6px}
+    .wl-bar-win{background:var(--green);transition:width .5s ease}
+    .wl-bar-loss{background:var(--red);transition:width .5s ease}
+
+    /* Distribution bars */
+    .dist-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:11px}
+    .dist-label{width:50px;text-align:right;color:var(--muted);flex-shrink:0}
+    .dist-bar-bg{flex:1;height:10px;background:var(--faint);border-radius:5px;overflow:hidden}
+    .dist-bar-fill{height:100%;border-radius:5px;background:var(--blue)}
+    .dist-count{width:24px;text-align:right;color:var(--text);font-family:"JetBrains Mono",monospace;flex-shrink:0}
+
+    /* Actions */
+    .actions-row{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+    .btn-action{padding:9px 18px;border-radius:7px;border:1px solid var(--border2);background:var(--panel2);color:var(--text);font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;font-family:"Inter",sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+    .btn-action:hover{border-color:var(--green);color:var(--green)}
+    .btn-action.primary{background:var(--green);color:#000;border-color:var(--green)}
+    .btn-action.primary:hover{background:var(--green2)}
+    .btn-danger{padding:9px 18px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s}
+    .btn-danger:hover{border-color:var(--red);color:var(--red)}
+
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+    .empty-state h2{font-size:20px;color:var(--text);margin-bottom:8px}
+    .loading-spinner{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--muted);gap:12px}
+    .spinner{width:24px;height:24px;border:2px solid var(--faint);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">Trade<span>·</span>Journal</a>
+  <div class="nav-links">
+    <a href="/">Dashboard</a>
+    <a href="/ideas">Trade Ideas</a>
+    <a href="/backtest">Chart Replay</a>
+    <a href="/blog">Blog</a>
+  </div>
+  <div class="nav-right">{{ username }}</div>
+</nav>
+
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="breadcrumb"><a href="/backtest">← Chart Replay</a></div>
+    <div class="page-title" id="pageTitle">Session Results</div>
+    <div class="page-sub" id="pageSub">Loading…</div>
+  </div>
+
+  <div id="mainContent">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <span>Loading session…</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const SESSION_ID = {{ session_id }};
+
+async function loadResults() {
+  try {
+    const res  = await fetch(`/api/backtest/sessions/${SESSION_ID}`);
+    const data = await res.json();
+    if (data.error) { showError(data.error); return; }
+    render(data);
+  } catch(e) {
+    showError("Could not load session data: " + e.message);
+  }
+}
+
+function render(data) {
+  document.getElementById("pageTitle").textContent = data.name || `Session #${SESSION_ID}`;
+  document.getElementById("pageSub").textContent =
+    `${data.symbol || ""} ${(data.timeframe || "").toUpperCase()} · Started ${data.created_at}`;
+
+  const trades = data.trades || [];
+  const closed = trades.filter(t => t.status === "closed");
+  const open   = trades.filter(t => t.status === "open");
+  const pending = trades.filter(t => t.status === "pending");
+
+  // Compute stats
+  const wins   = closed.filter(t => (t.pnl_usd || 0) > 0);
+  const losses = closed.filter(t => (t.pnl_usd || 0) <= 0);
+  const netPnl = closed.reduce((s, t) => s + (t.pnl_usd || 0), 0);
+  const grossWin  = wins.reduce((s, t) => s + (t.pnl_usd || 0), 0);
+  const grossLoss = Math.abs(losses.reduce((s, t) => s + (t.pnl_usd || 0), 0));
+  const winRate   = closed.length ? (wins.length / closed.length * 100) : 0;
+  const avgWin    = wins.length   ? grossWin  / wins.length   : 0;
+  const avgLoss   = losses.length ? grossLoss / losses.length : 0;
+  const profitFactor = grossLoss > 0 ? (grossWin / grossLoss) : (grossWin > 0 ? Infinity : 0);
+  const rrRatio = avgLoss > 0 ? (avgWin / avgLoss) : 0;
+
+  // Max drawdown from equity curve
+  let peak = 0, maxDD = 0, eq = 0, equityPoints = [0];
+  closed.forEach(t => {
+    eq += (t.pnl_usd || 0);
+    equityPoints.push(eq);
+    if (eq > peak) peak = eq;
+    const dd = peak - eq;
+    if (dd > maxDD) maxDD = dd;
+  });
+
+  // Consecutive wins/losses
+  let maxConWins = 0, maxConLosses = 0, curW = 0, curL = 0;
+  closed.forEach(t => {
+    if ((t.pnl_usd || 0) > 0) { curW++; curL = 0; maxConWins   = Math.max(maxConWins, curW); }
+    else                       { curL++; curW = 0; maxConLosses = Math.max(maxConLosses, curL); }
+  });
+
+  // Expectancy
+  const expectancy = closed.length
+    ? ((winRate / 100) * avgWin - (1 - winRate / 100) * avgLoss)
+    : 0;
+
+  const fmt = v => {
+    if (v == null) return "—";
+    if (Math.abs(v) >= 10000) return v.toFixed(2);
+    if (Math.abs(v) >= 10)    return v.toFixed(3);
+    return v.toFixed(5);
+  };
+  const fmtUSD = v => (v >= 0 ? "+" : "") + "$" + Math.abs(v).toFixed(2);
+  const upDn = v => v >= 0 ? "up" : "dn";
+
+  document.getElementById("mainContent").innerHTML = `
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-card highlight">
+        <div class="stat-label">Net P&amp;L</div>
+        <div class="stat-value ${upDn(netPnl)}">${fmtUSD(netPnl)}</div>
+        <div class="stat-sub">${closed.length} closed trades</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Win Rate</div>
+        <div class="stat-value neutral">${winRate.toFixed(1)}%</div>
+        <div class="wl-bar-wrap">
+          <div class="wl-bar-win"  style="width:${winRate}%"></div>
+          <div class="wl-bar-loss" style="width:${100 - winRate}%"></div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Profit Factor</div>
+        <div class="stat-value neutral">${isFinite(profitFactor) ? profitFactor.toFixed(2) : "∞"}</div>
+        <div class="stat-sub">Gross W / Gross L</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Win</div>
+        <div class="stat-value up">$${avgWin.toFixed(2)}</div>
+        <div class="stat-sub">${wins.length} winning trades</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Loss</div>
+        <div class="stat-value dn">-$${avgLoss.toFixed(2)}</div>
+        <div class="stat-sub">${losses.length} losing trades</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">R:R Ratio</div>
+        <div class="stat-value neutral">${rrRatio.toFixed(2)}</div>
+        <div class="stat-sub">Avg win / avg loss</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Max Drawdown</div>
+        <div class="stat-value dn">-$${maxDD.toFixed(2)}</div>
+        <div class="stat-sub">Peak to trough</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Expectancy</div>
+        <div class="stat-value ${upDn(expectancy)}">$${expectancy.toFixed(2)}</div>
+        <div class="stat-sub">Per trade avg</div>
+      </div>
+    </div>
+
+    <!-- Equity curve -->
+    <div class="section">
+      <div class="section-title">Equity Curve</div>
+      <div class="chart-wrap">
+        <canvas id="equityCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Two-col: distribution + streak -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
+
+      <div class="section" style="margin-bottom:0">
+        <div class="section-title">P&amp;L Distribution</div>
+        <div class="chart-wrap" style="padding:12px 16px" id="distEl">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <div class="section" style="margin-bottom:0">
+        <div class="section-title">Session Summary</div>
+        <div class="chart-wrap" style="padding:12px 16px">
+          ${[
+            ["Total Trades",  closed.length],
+            ["Wins",          wins.length],
+            ["Losses",        losses.length],
+            ["Open",          open.length],
+            ["Pending",       pending.length],
+            ["Max Con. Wins", maxConWins],
+            ["Max Con. Losses", maxConLosses],
+            ["Gross Win",     "$" + grossWin.toFixed(2)],
+            ["Gross Loss",    "-$" + grossLoss.toFixed(2)],
+          ].map(([label, val]) => `
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">
+              <span style="color:var(--muted)">${label}</span>
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:600">${val}</span>
+            </div>`).join("")}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Trade log -->
+    <div class="section">
+      <div class="section-title">Trade Log</div>
+      ${trades.length ? `
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;overflow-x:auto">
+        <table class="trade-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Dir</th><th>Type</th><th>Lots</th>
+              <th>Entry</th><th>Exit</th><th>TP</th><th>SL</th>
+              <th>Exit Reason</th><th>P&amp;L</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${trades.map((t, i) => {
+              const pnl = t.pnl_usd || 0;
+              const pnlCls = pnl >= 0 ? "up" : "dn";
+              const reasonBadge = t.exit_reason
+                ? `<span class="badge ${t.exit_reason.toLowerCase()}">${t.exit_reason}</span>` : "—";
+              const statusBadge = `<span class="badge ${t.status}">${t.status}</span>`;
+              return `<tr>
+                <td style="color:var(--muted)">${i + 1}</td>
+                <td><span class="badge ${(t.direction||"").toLowerCase()}">${t.direction || "—"}</span></td>
+                <td style="color:var(--muted)">${t.order_type || "—"}</td>
+                <td>${t.lots || "—"}</td>
+                <td>${fmt(t.entry_price)}</td>
+                <td>${fmt(t.exit_price)}</td>
+                <td style="color:var(--green)">${fmt(t.tp_price)}</td>
+                <td style="color:var(--red)">${fmt(t.sl_price)}</td>
+                <td>${reasonBadge}</td>
+                <td class="pnl-cell ${pnlCls}">${t.status === "closed" ? fmtUSD(pnl) : "—"}</td>
+                <td>${statusBadge}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>` : `<div class="empty-state"><h2>No trades yet</h2><p>Head to Chart Replay and take some trades to see results here.</p></div>`}
+    </div>
+
+    <!-- Actions -->
+    <div class="actions-row">
+      <a href="/backtest" class="btn-action primary">▶ Continue Replay</a>
+      <button class="btn-action" onclick="exportCSV(${JSON.stringify(trades).replace(/"/g, '&quot;')})">⬇ Export CSV</button>
+      <button class="btn-danger" onclick="confirmDelete()">🗑 Delete Session</button>
+    </div>
+  `;
+
+  // Draw equity curve
+  drawEquity(equityPoints);
+  // Draw P&L distribution
+  drawDistribution(closed);
+}
+
+function drawEquity(points) {
+  const canvas = document.getElementById("equityCanvas");
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  * dpr;
+  canvas.height = rect.height * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+  const W = rect.width, H = rect.height;
+  const pad = { top: 16, right: 20, bottom: 28, left: 60 };
+  const iW = W - pad.left - pad.right;
+  const iH = H - pad.top  - pad.bottom;
+
+  if (points.length < 2) {
+    ctx.fillStyle = "#5a7080";
+    ctx.font = "12px Inter";
+    ctx.textAlign = "center";
+    ctx.fillText("No closed trades yet", W / 2, H / 2);
+    return;
+  }
+
+  const minV = Math.min(0, ...points);
+  const maxV = Math.max(0, ...points);
+  const rangeV = maxV - minV || 1;
+
+  const toX = i => pad.left + (i / (points.length - 1)) * iW;
+  const toY = v => pad.top + iH - ((v - minV) / rangeV) * iH;
+
+  // Zero line
+  const zeroY = toY(0);
+  ctx.strokeStyle = "#1c2b3a";
+  ctx.lineWidth   = 1;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(pad.left + iW, zeroY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Y axis labels
+  ctx.fillStyle = "#5a7080";
+  ctx.font = "10px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  [0, 0.25, 0.5, 0.75, 1].forEach(p => {
+    const v = minV + rangeV * p;
+    const y = toY(v);
+    ctx.fillText("$" + v.toFixed(0), pad.left - 6, y + 4);
+  });
+
+  // Gradient fill
+  const last = points[points.length - 1];
+  const fillColor = last >= 0 ? "rgba(0,229,160," : "rgba(255,71,87,";
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + iH);
+  grad.addColorStop(0, fillColor + "0.25)");
+  grad.addColorStop(1, fillColor + "0.02)");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(toX(0), zeroY);
+  points.forEach((v, i) => ctx.lineTo(toX(i), toY(v)));
+  ctx.lineTo(toX(points.length - 1), zeroY);
+  ctx.closePath();
+  ctx.fill();
+
+  // Line
+  ctx.strokeStyle = last >= 0 ? "#00e5a0" : "#ff4757";
+  ctx.lineWidth = 2;
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  points.forEach((v, i) => i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)));
+  ctx.stroke();
+
+  // Current value label
+  const lastX = toX(points.length - 1);
+  const lastY = toY(last);
+  ctx.fillStyle = last >= 0 ? "#00e5a0" : "#ff4757";
+  ctx.font = "bold 11px 'JetBrains Mono', monospace";
+  ctx.textAlign = "right";
+  ctx.fillText((last >= 0 ? "+" : "") + "$" + last.toFixed(2), pad.left + iW, lastY - 6);
+}
+
+function drawDistribution(closed) {
+  const el = document.getElementById("distEl");
+  if (!el || !closed.length) return;
+  // Bucket into $50 ranges
+  const buckets = {};
+  closed.forEach(t => {
+    const pnl = t.pnl_usd || 0;
+    const key = Math.floor(pnl / 50) * 50;
+    buckets[key] = (buckets[key] || 0) + 1;
+  });
+  const keys = Object.keys(buckets).map(Number).sort((a, b) => a - b);
+  const maxCount = Math.max(...Object.values(buckets));
+  el.innerHTML = keys.map(k => {
+    const count = buckets[k];
+    const pct   = (count / maxCount * 100).toFixed(0);
+    const label = (k >= 0 ? "+" : "") + "$" + k;
+    const color = k >= 0 ? "var(--green)" : "var(--red)";
+    return `<div class="dist-row">
+      <div class="dist-label">${label}</div>
+      <div class="dist-bar-bg">
+        <div class="dist-bar-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+      <div class="dist-count">${count}</div>
+    </div>`;
+  }).join("");
+}
+
+function exportCSV(trades) {
+  const headers = ["#","Direction","Type","Lots","Entry","Exit","TP","SL","Exit Reason","P&L","Status"];
+  const rows = trades.map((t, i) => [
+    i + 1, t.direction, t.order_type, t.lots,
+    t.entry_price, t.exit_price, t.tp_price, t.sl_price,
+    t.exit_reason, t.pnl_usd, t.status,
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v ?? ""}"`).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href = url; a.download = `backtest_session_${SESSION_ID}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+}
+
+async function confirmDelete() {
+  if (!confirm("Permanently delete this session and all its trades?")) return;
+  try {
+    await fetch(`/api/backtest/sessions/${SESSION_ID}`, { method: "DELETE" });
+    window.location.href = "/backtest";
+  } catch(e) { alert("Delete failed: " + e.message); }
+}
+
+loadResults();
+</script>
+</body>
+</html>

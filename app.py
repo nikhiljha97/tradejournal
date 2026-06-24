@@ -20,7 +20,7 @@ except ImportError:
     pass
 
 from config import Config, INSTRUMENT_PIP, SESSIONS, SETUP_TAGS
-from models import db, Trade, Settings, ImportLog, User, BlogPost, TradeIdea, PostComment, PostLike, IdeaComment, IdeaLike, ChartCandle, ChartMeta
+from models import db, Trade, Settings, ImportLog, User, BlogPost, TradeIdea, PostComment, PostLike, IdeaComment, IdeaLike, ChartCandle, ChartMeta, BacktestSession, BacktestTrade
 import metrics as kpi
 import sentiment as sent
 import importer as imp
@@ -1158,7 +1158,7 @@ def _background_fetch(app_ctx, symbol_key: str, tf: str):
 @app.route("/backtest")
 @login_required
 def backtest_page():
-    return render_template("backtest.html", symbols=list(CHART_SYMBOLS.keys()))
+    return render_template("backtest.html", symbols=list(CHART_SYMBOLS.keys()), username=current_user.username)
 
 
 @app.route("/api/chart-data")
@@ -1204,3 +1204,102 @@ def chart_data():
 
     return jsonify({"symbol": symbol, "tf": tf, "candles": data,
                     "count": len(data), "stale": stale})
+
+
+# ── Backtest sessions ─────────────────────────────────────────────────────────
+
+@app.route("/api/backtest/sessions", methods=["GET"])
+@login_required
+def bt_list_sessions():
+    sessions = (BacktestSession.query
+                .filter_by(user_id=current_user.id)
+                .order_by(BacktestSession.created_at.desc())
+                .limit(20).all())
+    return jsonify([s.to_dict() for s in sessions])
+
+
+@app.route("/api/backtest/sessions", methods=["POST"])
+@login_required
+def bt_create_session():
+    data = request.json or {}
+    s = BacktestSession(
+        user_id=current_user.id,
+        name=data.get("name") or f"Session {datetime.now(timezone.utc).strftime('%b %d %H:%M')}",
+        symbol=data.get("symbol", "XAUUSD"),
+        timeframe=data.get("timeframe", "1h"),
+        start_date=data.get("start_date"),
+    )
+    db.session.add(s)
+    db.session.commit()
+    return jsonify(s.to_dict()), 201
+
+
+@app.route("/api/backtest/sessions/<int:sid>", methods=["GET"])
+@login_required
+def bt_get_session(sid):
+    s = BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
+    return jsonify(s.to_dict(include_trades=True))
+
+
+@app.route("/api/backtest/sessions/<int:sid>", methods=["DELETE"])
+@login_required
+def bt_delete_session(sid):
+    s = BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
+    db.session.delete(s)
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
+@app.route("/api/backtest/sessions/<int:sid>/trades", methods=["POST"])
+@login_required
+def bt_add_trade(sid):
+    BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
+    data = request.json or {}
+    otype = data.get("order_type", "market")
+    t = BacktestTrade(
+        session_id=sid,
+        direction=data["direction"],
+        order_type=otype,
+        lots=float(data.get("lots", 0.01)),
+        trigger_price=data.get("trigger_price"),
+        entry_price=data.get("entry_price"),
+        entry_ts=data.get("entry_ts"),
+        tp_price=data.get("tp_price"),
+        sl_price=data.get("sl_price"),
+        status="open" if otype == "market" else "pending",
+        pnl_usd=0.0,
+    )
+    db.session.add(t)
+    db.session.commit()
+    return jsonify(t.to_dict()), 201
+
+
+@app.route("/api/backtest/sessions/<int:sid>/trades/<int:tid>", methods=["PUT"])
+@login_required
+def bt_update_trade(sid, tid):
+    BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
+    t = BacktestTrade.query.filter_by(id=tid, session_id=sid).first_or_404()
+    data = request.json or {}
+    for field in ["exit_price", "exit_ts", "exit_reason", "pnl_usd",
+                  "status", "entry_price", "entry_ts"]:
+        if field in data:
+            setattr(t, field, data[field])
+    db.session.commit()
+    return jsonify(t.to_dict())
+
+
+@app.route("/api/backtest/sessions/<int:sid>/trades/<int:tid>", methods=["DELETE"])
+@login_required
+def bt_delete_trade(sid, tid):
+    BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
+    t = BacktestTrade.query.filter_by(id=tid, session_id=sid).first_or_404()
+    db.session.delete(t)
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
+@app.route("/backtest/results/<int:sid>")
+@login_required
+def backtest_results_page(sid):
+    s = BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
+    return render_template("backtest_results.html", session_id=s.id, username=current_user.username)
