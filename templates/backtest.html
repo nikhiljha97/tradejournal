@@ -224,9 +224,9 @@
   <button class="tool-btn" data-tool="horizontalStraightLine"       onclick="setTool('horizontalStraightLine',this)" title="H-Line">━</button>
   <button class="tool-btn" data-tool="segment"                      onclick="setTool('segment',this)"                title="Trendline">╱</button>
   <button class="tool-btn" data-tool="rayLine"                      onclick="setTool('rayLine',this)"                title="Ray">⇒</button>
-  <button class="tool-btn" data-tool="rect"                         onclick="setTool('rect',this)"                   title="Rectangle">▭</button>
+  <button class="tool-btn" data-tool="customRect"                   onclick="setTool('customRect',this)"             title="Rectangle (2 clicks: TL→BR)">▭</button>
   <button class="tool-btn" data-tool="parallelStraightLine"         onclick="setTool('parallelStraightLine',this)"   title="Parallel Channel">⫼</button>
-  <button class="tool-btn" data-tool="fibRetracement"               onclick="setTool('fibRetracement',this)"         title="Fibonacci">Φ</button>
+  <button class="tool-btn" data-tool="fibonacciLine"                onclick="setTool('fibonacciLine',this)"          title="Fibonacci (2 clicks: high→low)">Φ</button>
   <button class="tool-btn" data-tool="textOverlay"                  onclick="setTool('textOverlay',this)"            title="Text Label">T</button>
   <button class="tool-btn" data-tool="longPosition"                 onclick="setTool('longPosition',this)"           title="Long R:R (3 clicks: Entry→SL→TP)">🟢L</button>
   <button class="tool-btn" data-tool="shortPosition"                onclick="setTool('shortPosition',this)"          title="Short R:R (3 clicks: Entry→SL→TP)">🔴S</button>
@@ -534,10 +534,10 @@ window.addEventListener("resize", () => {
 // ── Custom overlays ───────────────────────────────────────────────────────────
 function registerCustomOverlays() {
 
-  // Trade price level line (entry/TP/SL with label)
+  // Trade price level line — 1 point, totalStep: 2 (but always created with points pre-set)
   klinecharts.registerOverlay({
     name: "tradeLine",
-    totalStep: 1,
+    totalStep: 2,
     needDefaultPointFigure: false,
     createPointFigures: ({ overlay, coordinates }) => {
       if (!coordinates.length) return [];
@@ -556,10 +556,38 @@ function registerCustomOverlays() {
     },
   });
 
+  // Custom Rectangle — 2 clicks (top-left → bottom-right), totalStep = points+1 = 3
+  klinecharts.registerOverlay({
+    name: "customRect",
+    totalStep: 3,
+    needDefaultPointFigure: true,
+    createPointFigures: ({ overlay, coordinates }) => {
+      if (!coordinates.length) return [];
+      const col = overlay.extendData?.color || "#4da6ff";
+      if (coordinates.length < 2) {
+        const [p1] = coordinates;
+        return [
+          { type: "circle", attrs: { x: p1.x, y: p1.y, r: 5 },
+            styles: { style: "fill", color: col, borderColor: col, borderSize: 1 } },
+          { type: "text", attrs: { x: p1.x + 10, y: p1.y - 4, text: "← click opposite corner" },
+            styles: { color: "#5a7080", size: 10, family: "Inter,sans-serif" } },
+        ];
+      }
+      const [p1, p2] = coordinates;
+      const x = Math.min(p1.x, p2.x), y = Math.min(p1.y, p2.y);
+      const w = Math.abs(p2.x - p1.x), h = Math.abs(p2.y - p1.y);
+      return [
+        { type: "rect", attrs: { x, y, width: w, height: h },
+          styles: { style: "stroke_fill", color: col + "20", borderColor: col, borderSize: 1 } },
+      ];
+    },
+  });
+
   // Ranged Fibonacci — shows dot at point 1 while waiting for point 2
+  // totalStep = points+1 = 3 (2 user clicks)
   klinecharts.registerOverlay({
     name: "fibRetracement",
-    totalStep: 2,
+    totalStep: 3,
     needDefaultPointFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
       if (!coordinates.length) return [];
@@ -608,10 +636,10 @@ function registerCustomOverlays() {
     },
   });
 
-  // Text label overlay
+  // Text label overlay — totalStep: 2 = 1 user click to place
   klinecharts.registerOverlay({
     name: "textOverlay",
-    totalStep: 1,
+    totalStep: 2,
     needDefaultPointFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
       if (!coordinates.length) return [];
@@ -628,10 +656,10 @@ function registerCustomOverlays() {
     },
   });
 
-  // Long Position: 3 clicks — entry → SL → TP (ALL three draggable via needDefaultPointFigure)
+  // Long Position: 3 clicks — entry → SL → TP (totalStep = points+1 = 4)
   klinecharts.registerOverlay({
     name: "longPosition",
-    totalStep: 3,
+    totalStep: 4,
     needDefaultPointFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
       if (!coordinates.length) return [];
@@ -689,10 +717,10 @@ function registerCustomOverlays() {
     },
   });
 
-  // Short Position
+  // Short Position — totalStep = points+1 = 4
   klinecharts.registerOverlay({
     name: "shortPosition",
-    totalStep: 3,
+    totalStep: 4,
     needDefaultPointFigure: true,
     createPointFigures: ({ overlay, coordinates }) => {
       if (!coordinates.length) return [];
@@ -743,10 +771,10 @@ function registerCustomOverlays() {
     },
   });
 
-  // Trade entry/exit arrow marker
+  // Trade entry/exit arrow marker — 1 point, totalStep: 2 (always created with points pre-set)
   klinecharts.registerOverlay({
     name: "tradeEntryMarker",
-    totalStep: 1,
+    totalStep: 2,
     needDefaultPointFigure: false,
     createPointFigures: ({ overlay, coordinates }) => {
       if (!coordinates.length) return [];
@@ -788,8 +816,8 @@ function setTool(tool, btn) {
         onDrawEnd: () => setTool("cursor", document.querySelector('[data-tool="cursor"]')),
       });
       if (id) overlayIds.push(id);
-    } catch(e) { showToast("Text tool: " + e.message, true); }
-    setTimeout(() => setTool("cursor", document.querySelector('[data-tool="cursor"]')), 50);
+    } catch(e) { showToast("Text tool: " + e.message, true); setTool("cursor", document.querySelector('[data-tool="cursor"]')); }
+    // Do NOT reset to cursor here — user still needs to click the chart to place the text label
     return;
   }
 
