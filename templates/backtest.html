@@ -534,23 +534,26 @@ window.addEventListener("resize", () => {
 // ── Custom overlays ───────────────────────────────────────────────────────────
 function registerCustomOverlays() {
 
-  // Trade price level line — 1 point, totalStep: 2 (but always created with points pre-set)
+  // Trade price level line — 1 point, totalStep: 2 (always created with points pre-set)
+  // Draws a full-width horizontal line at the given price level with a label on the left.
   klinecharts.registerOverlay({
     name: "tradeLine",
     totalStep: 2,
     needDefaultPointFigure: false,
-    createPointFigures: ({ overlay, coordinates }) => {
+    createPointFigures: ({ overlay, coordinates, bounding }) => {
       if (!coordinates.length) return [];
       const [p] = coordinates;
+      if (p == null || p.y == null || isNaN(p.y)) return [];
       const { color = "#f0c040", label = "", dashed = false } = overlay.extendData || {};
+      const w = bounding ? bounding.width : 3000;
       return [
         { type: "line",
-          attrs: { coordinates: [{ x: 0, y: p.y }, { x: Number.MAX_SAFE_INTEGER, y: p.y }] },
+          attrs: { coordinates: [{ x: 0, y: p.y }, { x: w, y: p.y }] },
           styles: { color, size: 1, style: dashed ? "dashed" : "solid", dashedValue: [6, 3] } },
         { type: "text",
-          attrs: { x: 4, y: p.y - 13, text: label },
+          attrs: { x: 6, y: p.y - 14, text: label },
           styles: { color, size: 11, family: "JetBrains Mono,monospace", weight: "600",
-            backgroundColor: "rgba(7,9,13,0.85)",
+            backgroundColor: "rgba(7,9,13,0.9)",
             paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2, borderRadius: 3 } },
       ];
     },
@@ -1130,35 +1133,34 @@ function processBar(candle) {
 
 // ── Live position lines ───────────────────────────────────────────────────────
 function addPositionLines(order) {
-  if (!chart || !order.entry_price || !order.entry_ts) return;
+  if (!chart || !order.entry_price || !order.entry_ts) {
+    console.warn("addPositionLines: skipped", { chart: !!chart, entry_price: order.entry_price, entry_ts: order.entry_ts });
+    return;
+  }
   const ids = {};
   const ts  = order.entry_ts;
-  try {
-    ids.entryId = chart.createOverlay({
-      name: "tradeLine", lock: true,
-      points: [{ timestamp: ts, value: order.entry_price }],
-      extendData: { color: "#f0c040", dashed: false,
-        label: `${order.direction} ${order.lots}L  P&L: $0.00` },
-    });
-  } catch(_) {}
+  ids.entryId = chart.createOverlay({
+    name: "tradeLine", lock: true,
+    points: [{ timestamp: ts, value: order.entry_price }],
+    extendData: { color: "#f0c040", dashed: false,
+      label: `${order.direction} ${order.lots}L  P&L: $0.00` },
+  });
+  if (!ids.entryId) console.warn("tradeLine entry creation returned null — is 'tradeLine' registered?");
   if (order.tp_price) {
-    try {
-      ids.tpId = chart.createOverlay({
-        name: "tradeLine", lock: true,
-        points: [{ timestamp: ts, value: order.tp_price }],
-        extendData: { color: "#00e5a0", dashed: true, label: `TP  ${fmt(order.tp_price)}` },
-      });
-    } catch(_) {}
+    ids.tpId = chart.createOverlay({
+      name: "tradeLine", lock: true,
+      points: [{ timestamp: ts, value: order.tp_price }],
+      extendData: { color: "#00e5a0", dashed: true, label: `TP  ${fmt(order.tp_price)}` },
+    });
   }
   if (order.sl_price) {
-    try {
-      ids.slId = chart.createOverlay({
-        name: "tradeLine", lock: true,
-        points: [{ timestamp: ts, value: order.sl_price }],
-        extendData: { color: "#ff4757", dashed: true, label: `SL  ${fmt(order.sl_price)}` },
-      });
-    } catch(_) {}
+    ids.slId = chart.createOverlay({
+      name: "tradeLine", lock: true,
+      points: [{ timestamp: ts, value: order.sl_price }],
+      extendData: { color: "#ff4757", dashed: true, label: `SL  ${fmt(order.sl_price)}` },
+    });
   }
+  console.log("addPositionLines ids:", ids);
   positionLines.set(order._localId, ids);
 }
 
@@ -1175,11 +1177,12 @@ function updatePositionLines() {
     const pnl    = calcPnL(order.direction, order.lots, order.entry_price, curBar.close);
     const pnlStr = (pnl >= 0 ? "+" : "") + "$" + pnl.toFixed(2);
     const col    = pnl >= 0 ? "#00e5a0" : "#ff4757";
-    try {
-      chart.modifyOverlay({ id: ids.entryId,
-        extendData: { color: col, dashed: false,
-          label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` } });
-    } catch(_) {}
+    // v9 uses overrideOverlay (not modifyOverlay)
+    chart.overrideOverlay({ id: ids.entryId,
+      extendData: { color: col, dashed: false,
+        label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` } });
+    // Also update P&L on positions panel
+    renderPositions();
   });
 }
 
@@ -1187,20 +1190,21 @@ function removePositionLines(order) {
   const ids = positionLines.get(order._localId);
   if (!ids) return;
   ["entryId", "tpId", "slId"].forEach(k => {
-    if (ids[k]) { try { chart.removeOverlay(ids[k]); } catch(_) {} }
+    if (ids[k]) {
+      try { chart.removeOverlay({ id: ids[k] }); } catch(e) { console.warn("removeOverlay:", e); }
+    }
   });
   positionLines.delete(order._localId);
 }
 
 function placeEntryMarker(order) {
-  try {
-    chart.createOverlay({
-      name: "tradeEntryMarker",
-      points: [{ timestamp: order.entry_ts, value: order.entry_price }],
-      extendData: { direction: order.direction, label: `${order.direction} ${order.lots}L` },
-      lock: true,
-    });
-  } catch(_) {}
+  const id = chart.createOverlay({
+    name: "tradeEntryMarker",
+    points: [{ timestamp: order.entry_ts, value: order.entry_price }],
+    extendData: { direction: order.direction, label: `${order.direction} ${order.lots}L` },
+    lock: true,
+  });
+  if (!id) console.warn("tradeEntryMarker creation returned null");
 }
 
 function closePosition(pos, price, ts, reason) {
