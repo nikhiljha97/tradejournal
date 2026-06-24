@@ -257,3 +257,69 @@ class ChartMeta(db.Model):
     last_fetched = db.Column(db.DateTime)
     candle_count = db.Column(db.Integer, default=0)
     __table_args__ = (db.UniqueConstraint("symbol", "timeframe", name="uq_meta"),)
+
+
+# ── Backtest sessions & simulated trades ──────────────────────────────────────
+
+class BacktestSession(db.Model):
+    __tablename__ = "backtest_sessions"
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
+    name       = db.Column(db.String(100))
+    symbol     = db.Column(db.String(20))
+    timeframe  = db.Column(db.String(10))
+    start_date = db.Column(db.String(10))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    trades     = db.relationship("BacktestTrade", backref="session", lazy=True, cascade="all,delete")
+
+    def to_dict(self, include_trades=False):
+        d = {
+            "id":          self.id,
+            "name":        self.name,
+            "symbol":      self.symbol,
+            "timeframe":   self.timeframe,
+            "start_date":  self.start_date,
+            "created_at":  self.created_at.strftime("%Y-%m-%d %H:%M"),
+            "trade_count": len(self.trades),
+        }
+        if include_trades:
+            d["trades"] = [t.to_dict() for t in self.trades]
+        return d
+
+
+class BacktestTrade(db.Model):
+    __tablename__ = "backtest_trades"
+    id            = db.Column(db.Integer, primary_key=True)
+    session_id    = db.Column(db.Integer, db.ForeignKey("backtest_sessions.id"), nullable=False)
+    direction     = db.Column(db.String(5))
+    order_type    = db.Column(db.String(10))
+    lots          = db.Column(db.Float, default=0.01)
+    trigger_price = db.Column(db.Float)
+    entry_price   = db.Column(db.Float)
+    entry_ts      = db.Column(db.BigInteger)
+    tp_price      = db.Column(db.Float)
+    sl_price      = db.Column(db.Float)
+    exit_price    = db.Column(db.Float)
+    exit_ts       = db.Column(db.BigInteger)
+    exit_reason   = db.Column(db.String(20))
+    pnl_usd       = db.Column(db.Float)
+    status        = db.Column(db.String(10), default="pending")
+    created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    def to_dict(self):
+        return {
+            "id":            self.id,
+            "direction":     self.direction,
+            "order_type":    self.order_type,
+            "lots":          self.lots,
+            "trigger_price": self.trigger_price,
+            "entry_price":   self.entry_price,
+            "entry_ts":      self.entry_ts,
+            "tp_price":      self.tp_price,
+            "sl_price":      self.sl_price,
+            "exit_price":    self.exit_price,
+            "exit_ts":       self.exit_ts,
+            "exit_reason":   self.exit_reason,
+            "pnl_usd":       self.pnl_usd,
+            "status":        self.status,
+        }
