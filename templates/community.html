@@ -51,6 +51,10 @@
     .action-btn.liked{border-color:var(--green);color:var(--green);background:var(--gdim)}
     .action-btn.disliked{border-color:var(--red);color:var(--red);background:rgba(255,71,87,.08)}
     .action-btn.comment-btn{margin-left:auto}
+    .share-btn{position:relative}
+    .share-btn .share-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1c2b3a;color:var(--text);font-size:11px;font-weight:600;white-space:nowrap;padding:4px 10px;border-radius:5px;pointer-events:none;opacity:0;transition:opacity .15s}
+    .share-btn .share-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1c2b3a}
+    .share-btn:hover .share-tip{opacity:1}
     .expand-btn{font-size:12px;color:var(--green);font-weight:600;background:none;border:none;cursor:pointer;font-family:"Inter",sans-serif;padding:0;margin-bottom:8px}
     .delete-btn{font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;float:right}
     .delete-btn:hover{color:var(--red)}
@@ -214,6 +218,7 @@ function renderPost(p){
     <div class="post-actions">
       <button class="action-btn ${p.liked?'liked':''}" onclick="react(${p.id},true)">👍 <span id="likes-${p.id}">${p.likes}</span></button>
       <button class="action-btn ${p.disliked?'disliked':''}" onclick="react(${p.id},false)">👎 <span id="dislikes-${p.id}">${p.dislikes}</span></button>
+      ${isIdea?`<button class="action-btn share-btn" id="share-${p.id}" onclick="copyLink(${p.id})"><span class="share-tip">Share idea</span>🔗</button>`:''}
       <button class="action-btn comment-btn" onclick="toggleComments(${p.id})">💬 <span id="ccount-${p.id}">${p.comment_count}</span></button>
     </div>
     <div class="comments-section" id="comments-${p.id}">
@@ -331,6 +336,38 @@ async function submitPost(){
 }
 
 document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closeModal();});
+
+function copyLink(id){
+  const url=`${window.location.origin}/ideas?idea=${id}`;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById(`share-${id}`);
+    if(!btn)return;
+    const tip=btn.querySelector('.share-tip');
+    const orig=tip.textContent;
+    tip.textContent='Copied!';
+    btn.style.borderColor='var(--green)';
+    btn.style.color='var(--green)';
+    setTimeout(()=>{tip.textContent=orig;btn.style.borderColor='';btn.style.color='';},2000);
+  });
+}
+
+function highlightIdea(id){
+  const el=document.getElementById(`post-${id}`);
+  if(!el)return;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  el.style.transition='border-color .3s';
+  el.style.borderColor='var(--green)';
+  setTimeout(()=>{el.style.borderColor='';},2500);
+}
+
+const _origLoadFeed=loadFeed;
+loadFeed=async function(){
+  await _origLoadFeed();
+  const params=new URLSearchParams(window.location.search);
+  const ideaId=params.get('idea');
+  if(ideaId&&SECTION==='ideas')setTimeout(()=>highlightIdea(parseInt(ideaId)),300);
+};
+
 checkAuth();
 
 async function loadNotifStatus() {
