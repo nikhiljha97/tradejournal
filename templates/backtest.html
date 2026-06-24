@@ -335,6 +335,15 @@ async function loadData(sym, tf) {
     visibleEnd = allCandles.length - 1;
     replayMode = false;
 
+    // Set replay date immediately after data is ready (before any chart ops that could throw)
+    if (allCandles.length > 0) {
+      try {
+        const last = new Date(allCandles[allCandles.length - 1].timestamp);
+        const def  = new Date(last); def.setDate(def.getDate() - 90);
+        document.getElementById("replayDate").value = def.toISOString().slice(0, 10);
+      } catch(dateErr) { console.warn("Date set failed:", dateErr); }
+    }
+
     chart.clearData();
     chart.applyNewData(allCandles);
 
@@ -343,13 +352,6 @@ async function loadData(sym, tf) {
     document.getElementById("sbTF").textContent     = tf.toUpperCase();
     document.getElementById("sbCount").textContent  = allCandles.length + " bars";
     updateProgress();
-
-    // Set replay date to 90 days before end
-    if (allCandles.length > 0) {
-      const last = new Date(allCandles[allCandles.length - 1].timestamp);
-      const def  = new Date(last); def.setDate(def.getDate() - 90);
-      document.getElementById("replayDate").value = def.toISOString().slice(0,10);
-    }
 
     showToast(`${sym} ${tf.toUpperCase()} loaded — ${allCandles.length} bars`);
   } catch(e) {
