@@ -18,3 +18,4 @@ flask-login>=0.6
 flask-bcrypt>=1.0
 cloudinary>=1.36
 resend
+yfinance>=0.2
