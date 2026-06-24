@@ -1093,43 +1093,57 @@ def _fetch_and_cache(symbol_key: str, tf: str):
                 .dropna(subset=["Open", "Close"]))
 
     # ── Bulk upsert ───────────────────────────────────────────────────────────
-    # One query to get ALL existing timestamps — avoids 13k individual SELECTs
-    existing_ts = {
-        row[0] for row in db.session.execute(
-            text("SELECT ts FROM chart_candles WHERE symbol=:s AND timeframe=:t"),
-            {"s": symbol_key, "t": tf}
-        ).fetchall()
-    }
-
-    new_objs = []
-    for ts_idx, row in df.iterrows():
+    # Retry once on OperationalError (stale SSL connection dropped between
+    # pool_pre_ping and actual query — common on Neon/Render cold starts).
+    from sqlalchemy.exc import OperationalError as _OpErr
+    for _db_attempt in range(2):
         try:
-            ts_ms = int(pd.Timestamp(ts_idx).timestamp() * 1000)
-        except Exception:
-            continue
-        if ts_ms in existing_ts:
-            continue
-        try:
-            new_objs.append(ChartCandle(
-                symbol=symbol_key, timeframe=tf, ts=ts_ms,
-                open=float(row["Open"]),  high=float(row["High"]),
-                low=float(row["Low"]),    close=float(row["Close"]),
-                volume=float(row.get("Volume", 0) or 0),
-            ))
-        except (KeyError, TypeError, ValueError):
-            continue
+            # One query to get ALL existing timestamps — avoids 13k individual SELECTs
+            existing_ts = {
+                row[0] for row in db.session.execute(
+                    text("SELECT ts FROM chart_candles WHERE symbol=:s AND timeframe=:t"),
+                    {"s": symbol_key, "t": tf}
+                ).fetchall()
+            }
 
-    if new_objs:
-        db.session.add_all(new_objs)   # single bulk INSERT
+            new_objs = []
+            for ts_idx, row in df.iterrows():
+                try:
+                    ts_ms = int(pd.Timestamp(ts_idx).timestamp() * 1000)
+                except Exception:
+                    continue
+                if ts_ms in existing_ts:
+                    continue
+                try:
+                    new_objs.append(ChartCandle(
+                        symbol=symbol_key, timeframe=tf, ts=ts_ms,
+                        open=float(row["Open"]),  high=float(row["High"]),
+                        low=float(row["Low"]),    close=float(row["Close"]),
+                        volume=float(row.get("Volume", 0) or 0),
+                    ))
+                except (KeyError, TypeError, ValueError):
+                    continue
 
-    # Update meta
-    meta = ChartMeta.query.filter_by(symbol=symbol_key, timeframe=tf).first()
-    if not meta:
-        meta = ChartMeta(symbol=symbol_key, timeframe=tf)
-        db.session.add(meta)
-    meta.last_fetched = datetime.utcnow()
-    db.session.commit()
-    print(f"[chart] {symbol_key}/{tf}: +{len(new_objs)} new candles")
+            if new_objs:
+                db.session.add_all(new_objs)   # single bulk INSERT
+
+            # Update meta
+            meta = ChartMeta.query.filter_by(symbol=symbol_key, timeframe=tf).first()
+            if not meta:
+                meta = ChartMeta(symbol=symbol_key, timeframe=tf)
+                db.session.add(meta)
+            meta.last_fetched = datetime.utcnow()
+            db.session.commit()
+            print(f"[chart] {symbol_key}/{tf}: +{len(new_objs)} new candles")
+            break  # success
+
+        except _OpErr as db_err:
+            db.session.remove()   # discard stale connection back to pool
+            if _db_attempt == 1:
+                print(f"[chart] DB error after retry for {symbol_key}/{tf}: {db_err}")
+                raise
+            print(f"[chart] DB connection dropped, retrying ({symbol_key}/{tf})…")
+            _time.sleep(1)
 
 
 def _background_fetch(app_ctx, symbol_key: str, tf: str):
