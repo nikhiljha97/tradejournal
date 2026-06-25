@@ -2,9 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+  <link rel="apple-touch-icon" href="/static/favicon.svg"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>{% if section=='blog' %}Chart Updates — TradeJournal{% else %}Trade Ideas — TradeJournal Community{% endif %}</title>
-  <meta name="description" content="{% if section=='blog' %}Daily chart analysis and trade setups.{% else %}Community trade ideas from SMC and ICT traders.{% endif %}"/>
+  <title>{% if section=='blog' %}Chart Updates & Trade Setups — TradeJournal{% else %}Trade Ideas — SMC & ICT Community — TradeJournal{% endif %}</title>
+  <meta name="description" content="{% if section=='blog' %}Daily chart analysis and trade setups for SMC and ICT traders. XAUUSD, EURUSD, GBPUSD and more.{% else %}Community trade ideas from real SMC and ICT traders. Share setups, discuss Order Blocks, Fair Value Gaps, and prop firm strategies.{% endif %}"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://tradejournal-n3hn.onrender.com{% if section=='blog' %}/blog-posts{% else %}/ideas{% endif %}"/>
+  <meta property="og:title" content="{% if section=='blog' %}Chart Updates — TradeJournal{% else %}Trade Ideas — TradeJournal Community{% endif %}"/>
+  <meta property="og:description" content="{% if section=='blog' %}Daily chart analysis and trade setups for SMC and ICT traders.{% else %}Community trade ideas from real SMC and ICT traders.{% endif %}"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://tradejournal-n3hn.onrender.com{% if section=='blog' %}/blog-posts{% else %}/ideas{% endif %}"/>
+  <meta property="og:image" content="https://tradejournal-n3hn.onrender.com/static/og-image.png"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:image" content="https://tradejournal-n3hn.onrender.com/static/og-image.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -213,7 +224,7 @@ function renderPost(p){
       <span>${p.created_at}</span>
     </div>
     ${p.excerpt?`<div class="post-excerpt">${p.excerpt}</div>`:''}
-    ${p.image_url?`<img class="post-image" src="${p.image_url}" alt="${p.title}" onclick="window.open('${p.image_url}','_blank')"/>`:''}
+    ${p.image_url?`<img class="post-image" src="${p.image_url}" alt="${p.title}" loading="lazy" onclick="window.open('${p.image_url}','_blank')"/>`:''}
     <div class="post-content" id="content-${p.id}">${p.content||''}</div>
     ${p.content?`<button class="expand-btn" id="expand-${p.id}" onclick="toggleContent(${p.id})">Read more ↓</button>`:''}
     <div class="post-actions">

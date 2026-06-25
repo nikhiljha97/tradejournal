@@ -12,6 +12,7 @@ from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
+from flask_compress import Compress
 
 try:
     from dotenv import load_dotenv
@@ -27,7 +28,14 @@ import importer as imp
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.config["COMPRESS_MIMETYPES"] = [
+    "text/html", "text/css", "application/javascript",
+    "application/json", "application/xml", "text/plain"
+]
+app.config["COMPRESS_LEVEL"] = 6
+app.config["COMPRESS_MIN_SIZE"] = 500
 CORS(app)
+Compress(app)
 db.init_app(app)
 bcrypt = Bcrypt(app)
 
@@ -410,36 +418,42 @@ def blog_post(slug):
     post = get_post(slug)
     if not post:
         return redirect(url_for("blog_index"))
-    return render_template("blog.html", post=post, posts=None)
+    related = [p for p in POSTS if p["slug"] != slug][:3]
+    return render_template("blog.html", post=post, posts=None, related=related)
 
 @app.route("/sitemap.xml")
 def sitemap():
-    xml = """<?xml version="1.0" encoding="UTF-8"?>
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    from blog_posts import POSTS
+    blog_urls = "\n".join(
+        f'  <url><loc>https://tradejournal-n3hn.onrender.com/blog/{p["slug"]}</loc>'
+        f'<lastmod>{p.get("date", today)}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>'
+        for p in POSTS
+    )
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://tradejournal-n3hn.onrender.com/</loc><lastmod>2026-06-18</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/register</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/login</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog</loc><lastmod>2026-06-18</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/smc-trading-journal-guide</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/prop-firm-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/xauusd-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/trading-psychology-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/free-trading-journal-app</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/what-to-write-in-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/how-to-start-trading-journal</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog/tradezella-vs-edgewonk-vs-tradersync-alternatives</loc><lastmod>2026-06-18</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/register</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/login</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/blog-posts</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tradejournal-n3hn.onrender.com/ideas</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+{blog_urls}
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
 
 @app.route("/robots.txt")
 def robots_txt():
     return """User-agent: *
-Allow: /
-Allow: /register
-Allow: /login
-Allow: /blog
-Allow: /api/prices
 Disallow: /api/
+Disallow: /backtest
+Disallow: /logout
+Disallow: /settings
+Disallow: /import
+Disallow: /reset-password/
+Disallow: /verify-email/
+Disallow: /resend-verification
+Disallow: /forgot-password
 
 Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
 

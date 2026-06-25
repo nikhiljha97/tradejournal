@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+  <link rel="apple-touch-icon" href="/static/favicon.svg"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>TradeJournal — AI Trading Journal for SMC & ICT Traders</title>
   <meta name="description" content="The AI trading journal built for SMC and ICT traders. Automatic psychology analysis, prop firm tracking, XAUUSD support. Free forever."/>
@@ -10,7 +12,11 @@
   <meta property="og:description" content="Track trades, read your psychology, beat prop firm rules. Built for serious SMC/ICT traders. Free."/>
   <meta property="og:url" content="https://tradejournal-n3hn.onrender.com/"/>
   <meta property="og:type" content="website"/>
+  <meta property="og:image" content="https://tradejournal-n3hn.onrender.com/static/og-image.png"/>
   <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="TradeJournal — Free AI Trading Journal for SMC & ICT Traders"/>
+  <meta name="twitter:description" content="Track trades, read your psychology, beat prop firm rules. Free forever."/>
+  <meta name="twitter:image" content="https://tradejournal-n3hn.onrender.com/static/og-image.png"/>
   <link rel="canonical" href="https://tradejournal-n3hn.onrender.com/"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +28,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.3.4/vue.global.prod.min.js" defer></script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TradeJournal","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"AI-powered trading journal for SMC and ICT traders.","url":"https://tradejournal-n3hn.onrender.com"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"TradeJournal","applicationCategory":"FinanceApplication","operatingSystem":"Web","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"AI-powered trading journal for SMC and ICT traders with psychology analysis, prop firm tracking, and XAUUSD support.","url":"https://tradejournal-n3hn.onrender.com","screenshot":"https://tradejournal-n3hn.onrender.com/static/og-image.png","featureList":["AI psychology analysis","MT5 trade import","Prop firm compliance monitoring","SMC and ICT setup tagging","XAUUSD support with correct contract size"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is TradeJournal really free?","acceptedAnswer":{"@type":"Answer","text":"Yes — completely. No trial, no credit card, no trade caps, no hidden tiers. All features are available to every user from day one."}},{"@type":"Question","name":"Does it work with MT5 brokers?","acceptedAnswer":{"@type":"Answer","text":"Yes. Import trades directly from MT5 HTML history exports, CSV, or XLSX. Pip math is correct for every instrument — including XAUUSD at 100 oz/lot contract size."}},{"@type":"Question","name":"What SMC and ICT concepts are supported?","acceptedAnswer":{"@type":"Answer","text":"All major ones: Order Blocks, Fair Value Gaps, BOS, CHoCH, Liquidity Sweeps, Breaker Blocks, Mitigation Blocks, Inducement, OTE, Premium/Discount, Imbalance, Equal Highs/Lows, Turtle Soup, Killzones, and Session Opens. The AI also reads your notes and extracts timeframe-aware tags automatically."}},{"@type":"Question","name":"How does the AI psychology analysis work?","acceptedAnswer":{"@type":"Answer","text":"When you write trade notes, the LLM reads your words and identifies emotions (FOMO, revenge, patience, overconfidence), scores discipline from -1 to +1, and over time surfaces patterns costing you real money."}},{"@type":"Question","name":"Can I track multiple prop firm challenges?","acceptedAnswer":{"@type":"Answer","text":"You can configure one prop firm target at a time in Settings. Multi-account support is on the roadmap."}},{"@type":"Question","name":"Is my data private?","acceptedAnswer":{"@type":"Answer","text":"Yes. Every trade, note, and chart is scoped to your user account only. No other user can see your data, and we do not sell or share it with anyone."}}]}</script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -210,7 +217,7 @@
     .flinks{display:flex;gap:24px}
     .flinks a{font-size:12px;color:var(--muted);transition:color .2s}
     .flinks a:hover{color:var(--text)}
-    .fc{font-size:11px;color:var(--faint)}
+    .fc{font-size:11px;color:var(--muted)}
 
     /* SCROLL INDICATOR */
     .scroll-ind{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;animation:float 2s ease-in-out infinite}
@@ -245,33 +252,6 @@
 </head>
 <body>
 
-<!-- STATIC SEO — crawler readable, visually hidden -->
-<div style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap" aria-hidden="true">
-  <h1>TradeJournal - Free Trading Journal App for SMC ICT and Forex Traders</h1>
-  <h2>Best Free Trading Journal Online - No Excel No Spreadsheet Required</h2>
-  <p>TradeJournal is the best free trading journal app for forex, gold and futures traders. Use it as your trading diary, trading log, or full performance analytics platform. 100% free forever, no trial, no credit card.</p>
-  <h2>Free Trading Journal Features</h2>
-  <ul>
-    <li>Free trading journal with AI psychology analysis</li>
-    <li>Trading journal app that works online with no download required</li>
-    <li>Import trades from MT5 CSV or XLSX - no manual entry</li>
-    <li>Trading journal for forex traders - EURUSD GBPUSD XAUUSD and more</li>
-    <li>Best trading journal app for prop firm traders - FTMO Funded Next Upcomers</li>
-    <li>SMC trading journal with Order Block Fair Value Gap BOS CHoCH setup tags</li>
-    <li>ICT trading journal with automatic setup detection from your notes</li>
-    <li>Trading psychology journal with AI emotion detection</li>
-    <li>Trading diary and trading log in one platform</li>
-    <li>Better than trading journal Excel templates - fully automated calculations</li>
-    <li>Better than Notion trading journal templates - real analytics and AI</li>
-    <li>Free alternative to TradeZella Edgewonk and TraderSync</li>
-  </ul>
-  <h2>How to Start a Trading Journal</h2>
-  <p>Starting a trading journal is easy with TradeJournal. Create a free account, import your trade history from MT5, and start logging trades with psychology notes. AI analyses your notes and finds patterns costing you money.</p>
-  <h2>What to Write in a Trading Journal</h2>
-  <p>Write your setup reason, entry trigger, stop loss level, and psychology notes for each trade. The best trading journal entries include what you were thinking at entry not just what price did.</p>
-  <h2>XAUUSD Trading Journal for Gold Traders</h2>
-  <p>TradeJournal uses correct XAUUSD contract size of 100 oz per lot for accurate P&L and R multiple calculations. Import your gold trades from MetaTrader 5 and get instant analysis.</p>
-</div>
 
 <noscript>
 <style>
@@ -367,7 +347,7 @@
 <section class="s" id="how" style="background:var(--bg2);border-top:1px solid var(--border)">
   <div class="ed-wrap">
     <div class="fade-left">
-      <div class="ed-num">01</div>
+      <div class="ed-num" aria-hidden="true">01</div>
       <div class="ed-label">AI Psychology</div>
       <h2 class="ed-h">Write notes.<br>AI reads your <em>mindset.</em></h2>
       <p class="ed-p">When you describe your trade, Groq's LLM reads your words for emotions, discipline, and psychological patterns — not market predictions, just your behaviour.</p>
@@ -398,7 +378,7 @@
       </div>
     </div>
     <div class="fade-right">
-      <div class="ed-num">02</div>
+      <div class="ed-num" aria-hidden="true">02</div>
       <div class="ed-label">Prop Firm Tracker</div>
       <h2 class="ed-h">Know your status<br>before your <em>broker</em> does.</h2>
       <p class="ed-p">Track profit target, max drawdown, daily loss limits, and consistency score in real-time. Know exactly where you stand before you place the next trade.</p>
@@ -416,7 +396,7 @@
 <section class="s" style="background:var(--bg2);border-top:1px solid var(--border)">
   <div class="ed-wrap">
     <div class="fade-left">
-      <div class="ed-num">03</div>
+      <div class="ed-num" aria-hidden="true">03</div>
       <div class="ed-label">Adaptive Patterns</div>
       <h2 class="ed-h">Patterns you fix<br><em>drop off</em> automatically.</h2>
       <p class="ed-p">The Psychology tab shows up to 5 AI patterns, sorted by dollar damage. As you improve, old patterns disappear and new ones take their place. No stale advice.</p>
@@ -493,6 +473,7 @@
   <div class="flinks">
     <a href="/login">Sign In</a>
     <a href="/register">Register</a>
+    <a href="/blog">Blog</a>
     <a href="#features">Features</a>
     <a href="#faq">FAQ</a>
   </div>
