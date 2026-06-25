@@ -113,24 +113,24 @@ graph TB
     subgraph FE["Frontend - Client Browser"]
         KC["KLineChart v9 Candlestick Engine"]
         RE["Replay Engine - Bar-by-Bar Simulation"]
-        OL["Overlay System - 10+ Drawing Tools"]
-        PM["Position Manager - TP / SL / Partials"]
+        OL["Overlay System - Drawing Tools"]
+        PM["Position Manager - TP, SL, Partials"]
         US["Undo Stack - Snapshot Based"]
         LP["localStorage - Session Persistence"]
     end
 
     subgraph BE["Backend - Flask on Render"]
-        Auth["Auth Layer - login_required"]
-        API["REST API - /api/backtest/* /api/chart-data /api/trades/*"]
-        RET["Retry Wrapper - _bt_db 3x backoff"]
-        ORM["SQLAlchemy ORM - Models + Migrations"]
+        Auth["Auth Layer - login required"]
+        API["REST API - backtest, chart-data, trades"]
+        RET["Retry Wrapper - 3x backoff on cold-start"]
+        ORM["SQLAlchemy ORM - Models and Migrations"]
     end
 
     subgraph DB["Database - Neon PostgreSQL"]
         USR["Users"]
         SES["BacktestSessions"]
-        TRD["BacktestTrades - entry / exit / TP / SL / pnl / lots"]
-        CHT["ChartCandles - OHLCV cache by symbol + timeframe"]
+        TRD["BacktestTrades - entry, exit, TP, SL, pnl, lots"]
+        CHT["ChartCandles - OHLCV cache by symbol and timeframe"]
     end
 
     FE <-->|JSON REST| BE
@@ -157,23 +157,23 @@ sequenceDiagram
     participant Neon
     participant Yahoo
 
-    User->>Browser: Select instrument + timeframe
-    Browser->>Flask: GET /api/chart-data?symbol=XAUUSD&tf=1h
-    Flask->>Neon: Query ChartCandle WHERE symbol+tf+date
-    alt Cache hit (data exists)
-        Neon-->>Flask: Return OHLCV rows
-    else Cache miss (first load)
-        Flask->>Yahoo: yfinance.download(symbol, period, interval)
+    User->>Browser: Select instrument and timeframe
+    Browser->>Flask: GET chart-data symbol and tf
+    Flask->>Neon: Query ChartCandle by symbol, tf, date
+    alt Cache hit
+        Neon-->>Flask: Return cached OHLCV rows
+    else Cache miss
+        Flask->>Yahoo: Fetch OHLCV via yfinance
         Yahoo-->>Flask: Raw OHLCV DataFrame
-        Flask->>Neon: INSERT INTO chart_candles (bulk)
+        Flask->>Neon: Bulk insert chart candles
     end
     Flask-->>Browser: JSON candle array
-    Browser->>Browser: KLineChart.applyNewData()
-    User->>Browser: Place order / advance replay
-    Browser->>Flask: POST /api/backtest/sessions/:id/trades
-    Flask->>Neon: INSERT BacktestTrade
-    Neon-->>Flask: trade.to_dict()
-    Flask-->>Browser: Trade object with _dbId
+    Browser->>Browser: KLineChart applyNewData
+    User->>Browser: Place order or advance replay
+    Browser->>Flask: POST backtest session trade
+    Flask->>Neon: Insert BacktestTrade record
+    Neon-->>Flask: Saved trade dict
+    Flask-->>Browser: Trade object with db ID
 ```
 
 ---
@@ -186,7 +186,7 @@ graph TB
 
     subgraph Render["Render - Free Tier Hosting"]
         GUN["Gunicorn - 2 workers, 120s timeout"]
-        APP["Flask App - Python 3.11+"]
+        APP["Flask App - Python 3.11"]
         GUN --> APP
     end
 
@@ -195,7 +195,7 @@ graph TB
     end
 
     USR -->|HTTPS| GUN
-    APP -->|SSL/TLS + retry on cold-start| PG
+    APP -->|SSL with retry on cold-start| PG
 ```
 
 **Why Render over AWS/GCP.** For a single-user or early-stage product, Render eliminates DevOps overhead entirely: zero server provisioning, automatic HTTPS, GitHub-integrated deploys, and a free tier that covers proof-of-concept workloads. The tradeoff is cold-start latency after periods of inactivity — mitigated in the application layer by the `_bt_db()` retry wrapper with exponential backoff.
