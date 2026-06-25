@@ -1816,7 +1816,7 @@ function renderPositions() {
       </div>
       ${canPartial ? `
       <div class="partial-row">
-        <button class="partial-toggle" onclick="togglePartialUI('${o._localId}')">⊟ Partial</button>
+        <button class="partial-toggle" onclick="this.closest('.pos-card').querySelector('.partial-ui').classList.toggle('hidden')">⊟ Partial</button>
       </div>
       <div class="partial-ui hidden" id="${uiId}">
         <input class="partial-lots-inp" id="${inputId}" type="number"
