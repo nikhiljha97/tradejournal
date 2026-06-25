@@ -422,7 +422,65 @@ let tradeDir = "BUY";
 let panelOpen = true;
 let lastCrosshairPrice = null;
 let _orderSeq = 0;
-const positionLines = new Map(); // _localId → {entryId, tpId, slId}
+const positionLines  = new Map(); // _localId → {entryId, tpId, slId}
+const entryMarkerIds = new Map(); // _localId → overlay ID (entry arrow on chart)
+
+// ── Undo system ───────────────────────────────────────────────────────────────
+const undoStack  = [];
+const MAX_UNDO   = 60;
+let _processingBar    = false; // true inside processBar — suppresses individual close undos
+let _stepNewOverlays  = null;  // array collecting overlay IDs created during a processBar call
+let _playStartSnap    = null;  // snapshot taken when auto-play starts
+
+function _snapState() {
+  return {
+    visibleEnd,
+    orders:   JSON.parse(JSON.stringify(openOrders)),
+    partials: new Map(partialPnL),
+  };
+}
+function pushUndo(label, undoFn) {
+  undoStack.push({ label, undo: undoFn });
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+}
+function performUndo() {
+  if (!undoStack.length) { showToast("Nothing to undo"); return; }
+  const { label, undo } = undoStack.pop();
+  try { undo(); } catch(e) { console.warn("Undo error:", e); showToast("Undo failed: " + e.message, true); return; }
+  showToast(`↩ Undid: ${label}`);
+}
+// Remove overlays by ID list (used to strip markers placed during a step we're undoing)
+function _removeOverlays(ids) {
+  (ids || []).forEach(id => { try { chart.removeOverlay({ id }); } catch(_) {} });
+}
+// Rebuild all position lines from current openOrders state
+function rebuildPositionLines() {
+  positionLines.forEach(ids => {
+    ["entryId","tpId","slId"].forEach(k => {
+      if (ids[k]) try { chart.removeOverlay({ id: ids[k] }); } catch(_) {}
+    });
+  });
+  positionLines.clear();
+  openOrders.filter(o => o.status === "open").forEach(addPositionLines);
+  updatePositionLines();
+}
+// Full restore from a _snapState snapshot (for replay step / play undo)
+function restoreSnap(snap, extraOverlaysToRemove) {
+  stopPlay();
+  openOrders = snap.orders;
+  partialPnL.clear();
+  snap.partials.forEach((v,k) => partialPnL.set(k,v));
+  _removeOverlays(extraOverlaysToRemove);
+  chart.clearData();
+  chart.applyNewData(allCandles.slice(0, snap.visibleEnd));
+  visibleEnd = snap.visibleEnd;
+  replayMode = true;
+  rebuildPositionLines();
+  renderPositions();
+  updateSessionStats();
+  updateProgress();
+  setTimeout(fitChart, 80);
+}
 
 // Countdown
 let cdHandle = null, cdMs = 0;
@@ -482,6 +540,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.addEventListener("keydown", (e) => {
   const tag = document.activeElement.tagName;
   if (["INPUT","SELECT","TEXTAREA"].includes(tag)) return;
+  if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") { e.preventDefault(); performUndo(); return; }
   if (e.code === "Space")      { e.preventDefault(); togglePlay(); }
   if (e.code === "ArrowRight") { e.preventDefault(); replayStep(1); }
   if (e.code === "ArrowLeft")  { e.preventDefault(); replayStep(-1); }
@@ -928,6 +987,10 @@ function setTool(tool, btn) {
       onDrawEnd: () => {
         hideStepHint();
         setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+        if (id) pushUndo(`draw ${tool}`, () => {
+          try { chart.removeOverlay({ id }); } catch(_) {}
+          overlayIds = overlayIds.filter(x => x !== id);
+        });
       },
     });
     if (id) overlayIds.push(id);
@@ -994,6 +1057,10 @@ function activateTextOverlay() {
         document.getElementById("textPanel").classList.add("hidden");
         document.getElementById("textPanelInput").value = "";
         setTool("cursor", document.querySelector('[data-tool="cursor"]'));
+        if (id) pushUndo("draw text", () => {
+          try { chart.removeOverlay({ id }); } catch(_) {}
+          overlayIds = overlayIds.filter(x => x !== id);
+        });
       },
     });
     if (id) overlayIds.push(id);
@@ -1172,26 +1239,38 @@ function replayStep(delta) {
   if (!replayMode) replayReset();
   const next = Math.max(1, Math.min(allCandles.length, visibleEnd + delta));
   if (next === visibleEnd) return;
+
   if (delta > 0) {
+    // Snapshot BEFORE stepping — used to restore on Ctrl+Z
+    const snap     = _snapState();
+    const newMarkers = [];
+    _stepNewOverlays = newMarkers; // collect IDs of all overlays created during this step
+
     for (let i = visibleEnd; i < next; i++) {
-      processBar(allCandles[i]);       // also calls updatePositionLines
+      processBar(allCandles[i]);
       chart.updateData(allCandles[i]);
     }
+    _stepNewOverlays = null;
+    visibleEnd = next;
+    updateProgress();
+
+    pushUndo(`step +${next - snap.visibleEnd}`, () => restoreSnap(snap, newMarkers));
   } else {
+    // Backward step — no undo needed (it IS the undo)
     chart.clearData();
     chart.applyNewData(allCandles.slice(0, next));
     visibleEnd = next;
-    updatePositionLines();             // refresh P&L after stepping back
+    updatePositionLines();
     updateProgress();
-    return;
   }
-  visibleEnd = next;
-  updateProgress();
 }
 
 function togglePlay() {
   if (playInterval) { stopPlay(); return; }
   if (!replayMode) replayReset();
+  // Snapshot state at play-start so entire play session can be undone at once
+  _playStartSnap    = _snapState();
+  _stepNewOverlays  = [];            // collect ALL overlay IDs created during this session
   const btn = document.getElementById("btnPlay");
   btn.textContent = "⏸"; btn.classList.add("playing");
   startCountdown();
@@ -1201,7 +1280,7 @@ function togglePlay() {
     chart.updateData(allCandles[visibleEnd]);
     visibleEnd++;
     updateProgress();
-    cdMs = playSpeed; // reset countdown each bar
+    cdMs = playSpeed;
   }, playSpeed);
 }
 
@@ -1210,6 +1289,15 @@ function stopPlay() {
   const btn = document.getElementById("btnPlay");
   btn.textContent = "▶"; btn.classList.remove("playing");
   stopCountdown();
+
+  // Push undo for the whole play session (if anything actually advanced)
+  if (_playStartSnap && _playStartSnap.visibleEnd !== visibleEnd) {
+    const snap    = _playStartSnap;
+    const markers = _stepNewOverlays || [];
+    pushUndo(`play session (+${visibleEnd - snap.visibleEnd} bars)`, () => restoreSnap(snap, markers));
+  }
+  _playStartSnap   = null;
+  _stepNewOverlays = null;
 }
 
 function setSpeed(ms, btn) {
@@ -1254,6 +1342,8 @@ function renderCountdown() {
 function processBar(candle) {
   const { timestamp, high, low } = candle;
   let needRender = false;
+  _processingBar   = true;
+  _stepNewOverlays = _stepNewOverlays ?? []; // accumulate if already set by replayStep
 
   // Trigger pending orders
   openOrders.filter(o => o.status === "pending").forEach(order => {
@@ -1290,6 +1380,7 @@ function processBar(candle) {
     if (hit) { closePosition(pos, hitPrice, timestamp, hit); needRender = true; }
   });
 
+  _processingBar = false;
   updatePositionLines();
   if (needRender) renderPositions();
 }
@@ -1392,7 +1483,12 @@ function placeEntryMarker(order) {
     extendData: { direction: order.direction, label: `${order.direction} ${order.lots}L` },
     lock: true,
   });
-  if (!id) console.warn("tradeEntryMarker creation returned null");
+  if (id) {
+    entryMarkerIds.set(order._localId, id);
+    if (_stepNewOverlays !== null) _stepNewOverlays.push(id);
+  } else {
+    console.warn("tradeEntryMarker creation returned null");
+  }
 }
 
 // Tracks realized P&L from partial closes per position (_localId → $)
@@ -1418,15 +1514,20 @@ function closePartial(localId, inputId) {
   const pnlStr   = (pnl >= 0 ? "+" : "") + "$" + pnl.toFixed(2);
   const icon     = pnl >= 0 ? "✅" : "❌";
 
+  // Snapshot state BEFORE mutation (for undo)
+  const prevLots       = order.lots;
+  const prevPartialPnL = partialPnL.get(localId) || 0;
+
   // Accumulate realized partial P&L on this position
-  partialPnL.set(localId, (partialPnL.get(localId) || 0) + pnl);
+  partialPnL.set(localId, prevPartialPnL + pnl);
 
   // Reduce open lots
   order.lots = Math.round((order.lots - partialLots) * 100) / 100;
 
-  // Place an exit marker on the chart at the partial close price
+  // Place exit marker and track its ID for undo
+  let partialMarkerId = null;
   try {
-    chart.createOverlay({
+    partialMarkerId = chart.createOverlay({
       name: "tradeEntryMarker",
       points: [{ timestamp: curBar.timestamp, value: curBar.close }],
       extendData: {
@@ -1450,6 +1551,25 @@ function closePartial(localId, inputId) {
   renderPositions();
   updateSessionStats();
   showToast(`${icon} Partial ${partialLots}L @ ${fmt(curBar.close)}  ${pnlStr}`);
+
+  // Push undo
+  pushUndo(`partial ${partialLots}L`, () => {
+    const o = openOrders.find(x => x._localId === localId);
+    if (o) {
+      o.lots = prevLots;
+      partialPnL.set(localId, prevPartialPnL);
+    }
+    if (partialMarkerId) { try { chart.removeOverlay({ id: partialMarkerId }); } catch(_) {} }
+    if (o?._dbId && currentSessionId) {
+      fetch(`/api/backtest/sessions/${currentSessionId}/trades/${o._dbId}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lots: prevLots }),
+      }).catch(() => {});
+    }
+    updatePositionLines();
+    renderPositions();
+    updateSessionStats();
+  });
 }
 
 function togglePartialUI(localId) {
@@ -1458,19 +1578,26 @@ function togglePartialUI(localId) {
 }
 
 function closePosition(pos, price, ts, reason) {
+  // Snapshot state BEFORE close (for undo when not inside processBar)
+  const snapForUndo = !_processingBar ? {
+    order:        JSON.parse(JSON.stringify(pos)),
+    partialAtClose: partialPnL.get(pos._localId) || 0,
+  } : null;
+
   pos.exit_price  = price;
   pos.exit_ts     = ts;
   pos.exit_reason = reason;
-  // Include any realized partial P&L in the final total
   const realized  = partialPnL.get(pos._localId) || 0;
   pos.pnl_usd     = calcPnL(pos.direction, pos.lots, pos.entry_price, price) + realized;
   partialPnL.delete(pos._localId);
   pos.status      = "closed";
   removePositionLines(pos);
   updateTradeOnServer(pos, { exit_price: price, exit_ts: ts, exit_reason: reason, pnl_usd: pos.pnl_usd, status: "closed" });
-  // Exit marker
+
+  // Exit marker — track ID for potential undo removal
+  let exitMarkerId = null;
   try {
-    chart.createOverlay({
+    exitMarkerId = chart.createOverlay({
       name: "tradeEntryMarker",
       points: [{ timestamp: ts, value: price }],
       extendData: {
@@ -1479,10 +1606,39 @@ function closePosition(pos, price, ts, reason) {
       },
       lock: true,
     });
+    if (_stepNewOverlays !== null && exitMarkerId) _stepNewOverlays.push(exitMarkerId);
   } catch(_) {}
+
   const icon = pos.pnl_usd >= 0 ? "✅" : "❌";
   showToast(`${icon} ${pos.direction} ${reason} @ ${fmt(price)}  ${pos.pnl_usd >= 0 ? "+" : ""}$${pos.pnl_usd.toFixed(2)}`);
   updateSessionStats();
+
+  // Push undo only for manual closes (not SL/TP hits during processBar)
+  if (snapForUndo) {
+    const entryMkId = entryMarkerIds.get(pos._localId);
+    pushUndo(`close ${pos.direction} ${pos.lots}L`, () => {
+      // Restore position to open
+      const target = openOrders.find(o => o._localId === snapForUndo.order._localId);
+      if (target) {
+        Object.assign(target, { status: "open", exit_price: null, exit_ts: null, exit_reason: null, pnl_usd: null });
+      } else {
+        openOrders.push({ ...snapForUndo.order, status: "open" });
+      }
+      partialPnL.set(snapForUndo.order._localId, snapForUndo.partialAtClose);
+      // Remove the exit marker from chart
+      if (exitMarkerId) { try { chart.removeOverlay({ id: exitMarkerId }); } catch(_) {} }
+      // Update server
+      if (snapForUndo.order._dbId && currentSessionId) {
+        fetch(`/api/backtest/sessions/${currentSessionId}/trades/${snapForUndo.order._dbId}`, {
+          method: "PUT", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "open", exit_price: null, exit_ts: null, pnl_usd: null }),
+        }).catch(() => {});
+      }
+      rebuildPositionLines();
+      renderPositions();
+      updateSessionStats();
+    });
+  }
 }
 
 function calcPnL(direction, lots, entry, exit) {
@@ -1553,6 +1709,21 @@ function placeOrder() {
   updateSessionStats();
   saveTradeToServer(order);
   showToast(`${otype === "market" ? "Opened" : "Placed"} ${tradeDir} ${lots}L`);
+
+  // Undo: remove the order and all its chart elements
+  const placedLocalId = order._localId;
+  pushUndo(`place ${tradeDir} ${lots}L`, () => {
+    const o = openOrders.find(x => x._localId === placedLocalId);
+    removePositionLines(o || order);
+    const mkId = entryMarkerIds.get(placedLocalId);
+    if (mkId) { try { chart.removeOverlay({ id: mkId }); } catch(_) {} entryMarkerIds.delete(placedLocalId); }
+    openOrders = openOrders.filter(x => x._localId !== placedLocalId);
+    if ((o?._dbId || order._dbId) && currentSessionId) {
+      fetch(`/api/backtest/sessions/${currentSessionId}/trades/${o?._dbId || order._dbId}`, { method: "DELETE" }).catch(() => {});
+    }
+    renderPositions();
+    updateSessionStats();
+  });
 }
 
 async function saveTradeToServer(order) {
@@ -1730,6 +1901,8 @@ async function deleteSessionFromModal(id) {
       openOrders = [];
       positionLines.clear();
       partialPnL.clear();
+      entryMarkerIds.clear();
+      undoStack.length = 0;
       document.getElementById("navSessionName").textContent = "No session";
       updateSessionStats();
       renderPositions();
