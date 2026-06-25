@@ -1058,7 +1058,8 @@ function fitChart() {
 }
 
 // ── Data loading ──────────────────────────────────────────────────────────────
-async function loadData(sym, tf) {
+// resumeAtTimestamp: if set, replay mode is restored at the nearest candle to that timestamp
+async function loadData(sym, tf, resumeAtTimestamp = null) {
   showLoading(`Loading ${sym} ${tf.toUpperCase()}…`);
   stopPlay();
   try {
@@ -1066,18 +1067,35 @@ async function loadData(sym, tf) {
     const json = await res.json();
     if (json.error) { showToast("Error: " + json.error, true); return; }
     allCandles = json.candles.map(c => ({ timestamp: c.t, open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v }));
-    visibleEnd = allCandles.length - 1;
-    replayMode = false;
-    // Set replay date (90 days before end)
-    if (allCandles.length) {
+
+    if (resumeAtTimestamp && allCandles.length) {
+      // Find index of first candle at or after the target timestamp
+      let idx = allCandles.findIndex(c => c.timestamp >= resumeAtTimestamp);
+      if (idx === -1) idx = allCandles.length - 1;   // target beyond all data → jump to end
+      if (idx === 0)  idx = 1;                        // need at least 1 visible bar
+      visibleEnd = Math.min(idx + 1, allCandles.length);
+      replayMode = true;
       try {
-        const last = new Date(allCandles[allCandles.length - 1].timestamp);
-        const def  = new Date(last); def.setDate(def.getDate() - 90);
-        document.getElementById("replayDate").value = def.toISOString().slice(0, 10);
+        const d = new Date(allCandles[visibleEnd - 1].timestamp);
+        document.getElementById("replayDate").value = d.toISOString().slice(0, 10);
       } catch(_) {}
+      chart.clearData();
+      chart.applyNewData(allCandles.slice(0, visibleEnd));
+    } else {
+      visibleEnd = allCandles.length - 1;
+      replayMode = false;
+      // Default date picker: 90 days before end of data
+      if (allCandles.length) {
+        try {
+          const last = new Date(allCandles[allCandles.length - 1].timestamp);
+          const def  = new Date(last); def.setDate(def.getDate() - 90);
+          document.getElementById("replayDate").value = def.toISOString().slice(0, 10);
+        } catch(_) {}
+      }
+      chart.clearData();
+      chart.applyNewData(allCandles);
     }
-    chart.clearData();
-    chart.applyNewData(allCandles);
+
     document.getElementById("sbSymbol").textContent = sym;
     document.getElementById("sbTF").textContent     = tf.toUpperCase();
     document.getElementById("sbCount").textContent  = allCandles.length + " bars";
@@ -1094,6 +1112,7 @@ function selectSymbol(sym, btn) {
   currentSymbol = sym;
   document.querySelectorAll(".sym-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
+  // Symbol switch always resets — different instruments, timestamps don't carry meaning
   loadData(sym, currentTF);
 }
 function selectTF(tf, btn) {
@@ -1101,7 +1120,11 @@ function selectTF(tf, btn) {
   currentTF = tf;
   document.querySelectorAll(".tf-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
-  loadData(currentSymbol, tf);
+  // If mid-replay, capture current timestamp and resume there on the new TF
+  const resumeTs = (replayMode && visibleEnd > 0 && allCandles.length)
+    ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)].timestamp
+    : null;
+  loadData(currentSymbol, tf, resumeTs);
 }
 
 // ── Replay ────────────────────────────────────────────────────────────────────
