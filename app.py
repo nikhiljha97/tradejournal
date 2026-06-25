@@ -1210,6 +1210,7 @@ def chart_data():
 
 def _bt_db(fn):
     """Run fn() with up to 3 retries + exponential backoff on Neon cold-start SSL drops."""
+    import time as _time
     from sqlalchemy.exc import OperationalError as _SqlOpErr
     for attempt in range(3):
         try:
