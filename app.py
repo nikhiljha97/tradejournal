@@ -1,7 +1,7 @@
 """
 TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 """
-import os, json, uuid
+import os, json, uuid, re
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from sqlalchemy import text
 from blog_posts import POSTS, get_post
@@ -40,6 +40,45 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+# ── Email validation helpers ──────────────────────────────────────────────────
+_EMAIL_RE = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
+_DISPOSABLE_DOMAINS = {
+    "mailinator.com","guerrillamail.com","tempmail.com","throwam.com","yopmail.com",
+    "sharklasers.com","guerrillamailblock.com","grr.la","guerrillamail.info",
+    "spam4.me","trashmail.com","trashmail.me","trashmail.net","dispostable.com",
+    "maildrop.cc","mailnull.com","spamgourmet.com","spamgourmet.net",
+    "getairmail.com","filzmail.com","throwam.com","fakeinbox.com","mailnesia.com",
+    "mailnull.com","spamevader.com","spamevader.net","discard.email",
+    "crazymailing.com","discardmail.com","discardmail.de","spamfree24.org",
+    "tempr.email","tempm.com","zzrgg.com","mt2015.com","mt2016.com","mt2017.com",
+    "emkei.cz","spamwc.de","spamwc.ga","spamwc.gq","spamwc.ml","spamwc.cf",
+}
+
+def _validate_email(email: str):
+    """Returns (ok: bool, error: str|None)."""
+    if not _EMAIL_RE.match(email):
+        return False, "Invalid email address format"
+    domain = email.split("@")[-1].lower()
+    if domain in _DISPOSABLE_DOMAINS:
+        return False, "Disposable email addresses are not allowed"
+    return True, None
+
+def _send_verification_email(user_email: str, token: str):
+    verify_url = f"https://tradejournal-n3hn.onrender.com/verify-email/{token}"
+    resend.api_key = os.environ.get("RESEND_API_KEY", "")
+    resend.Emails.send({
+        "from": "TradeJournal <onboarding@resend.dev>",
+        "to": [user_email],
+        "subject": "Verify your TradeJournal email",
+        "html": f"""
+        <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+          <h2 style="color:#00e5a0;margin-bottom:16px">Confirm your email</h2>
+          <p style="color:#5a7080;margin-bottom:24px">Click the button below to verify your TradeJournal account. This link expires in 24 hours.</p>
+          <a href="{verify_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Verify Email</a>
+          <p style="color:#5a7080;margin-top:24px;font-size:12px">If you did not create a TradeJournal account, you can ignore this email.</p>
+        </div>"""
+    })
+
 # ── Security headers ──────────────────────────────────────────────────────────
 @app.after_request
 def add_security_headers(response):
@@ -68,6 +107,17 @@ with app.app_context():
             conn.commit()
     except Exception as e:
         print(f"Migration note: {e}")
+    # Add email verification columns if they don't exist
+    try:
+        with db.engine.connect() as conn:
+            # Add columns (IF NOT EXISTS is safe to run multiple times)
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE"))
+            conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(100) UNIQUE"))
+            # Mark all pre-existing users as verified so they aren't locked out
+            conn.execute(text("UPDATE users SET email_verified = TRUE WHERE email_verified = FALSE AND created_at < NOW() - INTERVAL '1 minute'"))
+            conn.commit()
+    except Exception as e:
+        print(f"Migration note (email_verified): {e}")
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -248,6 +298,9 @@ def register():
         password = data.get("password","")
         if not email or not username or not password:
             return jsonify({"error":"All fields required"}), 400
+        ok, err = _validate_email(email)
+        if not ok:
+            return jsonify({"error": err}), 400
         if len(password) < 8:
             return jsonify({"error":"Password must be at least 8 characters"}), 400
         if User.query.filter_by(email=email).first():
@@ -255,15 +308,20 @@ def register():
         if User.query.filter_by(username=username).first():
             return jsonify({"error":"Username taken"}), 400
         pw_hash = bcrypt.generate_password_hash(password).decode("utf-8")
-        user = User(email=email, username=username, password_hash=pw_hash)
+        token = secrets.token_urlsafe(32)
+        user = User(email=email, username=username, password_hash=pw_hash,
+                    email_verified=False, verification_token=token)
         db.session.add(user)
         db.session.flush()
         # Create default settings for new user (guard against duplicate)
         if not Settings.query.filter_by(user_id=user.id).first():
             db.session.add(Settings(user_id=user.id))
         db.session.commit()
-        login_user(user, remember=True)
-        return jsonify({"ok":True, "username": user.username})
+        try:
+            _send_verification_email(email, token)
+        except Exception as e:
+            print(f"Verification email error: {e}")
+        return jsonify({"ok": True, "verify": True})
     return render_template("auth.html", mode="register")
 
 @app.route("/login", methods=["GET","POST"])
@@ -277,9 +335,39 @@ def login():
         user = User.query.filter_by(email=email).first()
         if not user or not bcrypt.check_password_hash(user.password_hash, password):
             return jsonify({"error":"Invalid email or password"}), 401
+        if not user.email_verified:
+            return jsonify({"error":"Please verify your email before signing in.", "unverified": True}), 403
         login_user(user, remember=True)
         return jsonify({"ok":True, "username": user.username})
     return render_template("auth.html", mode="login")
+
+@app.route("/verify-email/<token>")
+def verify_email(token):
+    user = User.query.filter_by(verification_token=token).first()
+    if not user:
+        return render_template("auth.html", mode="login",
+                               flash_error="Verification link is invalid or has already been used.")
+    user.email_verified = True
+    user.verification_token = None
+    db.session.commit()
+    login_user(user, remember=True)
+    return redirect(url_for("index"))
+
+@app.route("/resend-verification", methods=["POST"])
+def resend_verification():
+    data  = request.get_json(force=True)
+    email = (data.get("email", "")).strip().lower()
+    user  = User.query.filter_by(email=email).first()
+    if user and not user.email_verified:
+        token = secrets.token_urlsafe(32)
+        user.verification_token = token
+        db.session.commit()
+        try:
+            _send_verification_email(email, token)
+        except Exception as e:
+            print(f"Resend verification error: {e}")
+    # Always return ok to avoid email enumeration
+    return jsonify({"ok": True})
 
 @app.route("/api/prices")
 def public_prices():

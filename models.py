@@ -144,8 +144,10 @@ class User(db.Model):
     is_active     = db.Column(db.Boolean, default=True)
     reset_token        = db.Column(db.String(100), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
-    idea_notifications = db.Column(db.Boolean, default=True)
-    notif_token        = db.Column(db.String(100), nullable=True)
+    idea_notifications  = db.Column(db.Boolean, default=True)
+    notif_token         = db.Column(db.String(100), nullable=True)
+    email_verified      = db.Column(db.Boolean, default=False, nullable=False)
+    verification_token  = db.Column(db.String(100), nullable=True, unique=True)
     created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Flask-Login required

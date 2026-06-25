@@ -85,6 +85,22 @@
     .feat-sub { font-size: 10px; color: var(--faint); margin-top: 2px; }
 
     .password-hint { font-size: 11px; color: var(--faint); margin-top: 4px; }
+
+    .verify-panel { display: none; text-align: center; padding: 8px 0 4px; }
+    .verify-panel.show { display: block; }
+    .verify-icon { font-size: 40px; margin-bottom: 12px; }
+    .verify-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .verify-sub { color: var(--muted); font-size: 13px; line-height: 1.5; margin-bottom: 20px; }
+    .verify-email-addr { color: var(--green); font-weight: 600; }
+    .resend-btn { background: none; border: 1px solid var(--border2); color: var(--muted);
+      border-radius: 7px; padding: 8px 18px; font-size: 13px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s; }
+    .resend-btn:hover { border-color: var(--green); color: var(--green); }
+    .resend-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .success-msg { background: rgba(0,229,160,0.1); border: 1px solid rgba(0,229,160,0.3);
+      color: var(--green); border-radius: 7px; padding: 10px 12px;
+      font-size: 13px; margin-bottom: 14px; display: none; }
+    .success-msg.show { display: block; }
   </style>
 </head>
 <body>
@@ -101,8 +117,27 @@
       {% else %}Create your account{% endif %}
     </div>
 
+    {% if flash_error is defined and flash_error %}
+    <div class="error-msg show">{{ flash_error }}</div>
+    {% else %}
     <div class="error-msg" id="errorMsg"></div>
+    {% endif %}
+    <div class="success-msg" id="successMsg"></div>
 
+    <div class="verify-panel" id="verifyPanel">
+      <div class="verify-icon">📬</div>
+      <div class="verify-title">Check your inbox</div>
+      <div class="verify-sub">
+        We sent a verification link to<br>
+        <span class="verify-email-addr" id="verifyEmailAddr"></span><br><br>
+        Click the link in that email to activate your account.
+      </div>
+      <button class="resend-btn" id="resendBtn" onclick="resendVerification()">
+        Resend verification email
+      </button>
+    </div>
+
+    <div id="formFields">
     {% if mode == 'register' %}
     <div class="field">
       <label>Username</label>
@@ -126,6 +161,7 @@
     <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
       {{ 'Sign in' if mode == 'login' else 'Create account' }}
     </button>
+    </div><!-- /formFields -->
 
     <div class="switch">
       {% if mode == 'login' %}
@@ -157,21 +193,67 @@
 <script>
   const MODE = "{{ mode }}";
 
+  // ── Client-side disposable domain list (mirrors server) ─────────────────────
+  const DISPOSABLE = new Set([
+    "mailinator.com","guerrillamail.com","tempmail.com","throwam.com","yopmail.com",
+    "sharklasers.com","guerrillamailblock.com","grr.la","guerrillamail.info",
+    "spam4.me","trashmail.com","trashmail.me","trashmail.net","dispostable.com",
+    "maildrop.cc","mailnull.com","spamgourmet.com","spamgourmet.net",
+    "getairmail.com","filzmail.com","fakeinbox.com","mailnesia.com",
+    "spamevader.com","spamevader.net","discard.email","crazymailing.com",
+    "discardmail.com","discardmail.de","spamfree24.org","tempr.email","tempm.com",
+  ]);
+  const EMAIL_RE = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+
+  function validateEmailClient(email) {
+    if (!EMAIL_RE.test(email)) return "Invalid email address format";
+    const domain = email.split("@")[1].toLowerCase();
+    if (DISPOSABLE.has(domain)) return "Disposable email addresses are not allowed";
+    return null;
+  }
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') handleSubmit();
   });
 
+  let _pendingEmail = '';
+
+  function showError(msg) {
+    const err = document.getElementById('errorMsg');
+    if (!err) return;
+    err.textContent = msg;
+    err.classList.add('show');
+  }
+
+  function showSuccess(msg) {
+    const el = document.getElementById('successMsg');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 4000);
+  }
+
   async function handleSubmit() {
     const btn = document.getElementById('submitBtn');
     const err = document.getElementById('errorMsg');
-    err.classList.remove('show');
+    if (err) err.classList.remove('show');
     btn.disabled = true;
     btn.textContent = MODE === 'login' ? 'Signing in…' : 'Creating account…';
 
-    const body = {
-      email:    document.getElementById('f_email').value.trim(),
-      password: document.getElementById('f_password').value,
-    };
+    const email = document.getElementById('f_email').value.trim().toLowerCase();
+    const password = document.getElementById('f_password').value;
+
+    if (MODE === 'register') {
+      const clientErr = validateEmailClient(email);
+      if (clientErr) {
+        showError(clientErr);
+        btn.disabled = false;
+        btn.textContent = 'Create account';
+        return;
+      }
+    }
+
+    const body = { email, password };
     if (MODE === 'register') {
       body.username = document.getElementById('f_username').value.trim();
     }
@@ -183,20 +265,64 @@
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (data.ok) {
+      if (data.ok && data.verify) {
+        // Registration success — show verify-pending panel
+        _pendingEmail = email;
+        document.getElementById('verifyEmailAddr').textContent = email;
+        document.getElementById('formFields').style.display = 'none';
+        document.getElementById('verifyPanel').classList.add('show');
+        btn.style.display = 'none';
+        document.querySelector('.switch').style.display = 'none';
+      } else if (data.ok) {
         window.location.href = '/';
       } else {
-        err.textContent = data.error || 'Something went wrong';
-        err.classList.add('show');
+        const errMsg = data.error || 'Something went wrong';
+        showError(errMsg);
+        // If unverified on login, offer resend inline
+        if (data.unverified) {
+          const err2 = document.getElementById('errorMsg');
+          if (err2) {
+            err2.innerHTML = errMsg + ' <a href="#" onclick="triggerResendFromLogin(event)" style="color:var(--green);font-weight:600;">Resend link</a>';
+            err2.classList.add('show');
+          }
+        }
         btn.disabled = false;
         btn.textContent = MODE === 'login' ? 'Sign in' : 'Create account';
       }
     } catch(e) {
-      err.textContent = 'Network error — please try again';
-      err.classList.add('show');
+      showError('Network error — please try again');
       btn.disabled = false;
       btn.textContent = MODE === 'login' ? 'Sign in' : 'Create account';
     }
+  }
+
+  async function resendVerification() {
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    try {
+      await fetch('/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: _pendingEmail }),
+      });
+    } catch(e) {}
+    btn.textContent = 'Email sent!';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Resend verification email'; }, 30000);
+  }
+
+  async function triggerResendFromLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('f_email').value.trim().toLowerCase();
+    if (!email) return;
+    try {
+      await fetch('/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+    } catch(e) {}
+    showSuccess('Verification email sent — check your inbox.');
   }
 </script>
 </body>
