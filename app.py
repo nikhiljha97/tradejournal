@@ -325,10 +325,19 @@ def register():
         if not Settings.query.filter_by(user_id=user.id).first():
             db.session.add(Settings(user_id=user.id))
         db.session.commit()
+        email_sent = True
         try:
             _send_verification_email(email, token)
         except Exception as e:
             print(f"Verification email error: {e}")
+            email_sent = False
+        if not email_sent:
+            # Resend domain not yet verified — auto-verify user so they can log in
+            user.email_verified = True
+            user.verification_token = None
+            db.session.commit()
+            login_user(user)
+            return jsonify({"ok": True, "verify": False})
         return jsonify({"ok": True, "verify": True})
     return render_template("auth.html", mode="register")
 
@@ -456,6 +465,10 @@ Disallow: /resend-verification
 Disallow: /forgot-password
 
 Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
+
+@app.route("/favicon.ico")
+def favicon_ico():
+    return redirect("/static/favicon.svg", 301)
 
 @app.route("/forgot-password", methods=["GET","POST"])
 def forgot_password():
