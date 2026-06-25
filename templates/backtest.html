@@ -1567,6 +1567,20 @@ function placeEntryMarker(order) {
 // Tracks realized P&L from partial closes per position (_localId → $)
 const partialPnL = new Map();
 
+// Tracks which positions have their partial UI panel open — survives renderPositions() rebuilds
+const partialUIOpen = new Set();
+
+function togglePartialPanel(localId) {
+  if (partialUIOpen.has(localId)) {
+    partialUIOpen.delete(localId);
+  } else {
+    partialUIOpen.add(localId);
+  }
+  // renderPositions will restore the correct state; call it directly for instant feedback
+  const el = document.getElementById(`partial-ui-${localId}`);
+  if (el) el.classList.toggle("hidden", !partialUIOpen.has(localId));
+}
+
 function closePartial(localId, inputId) {
   const order = openOrders.find(o => o._localId === localId);
   if (!order || order.status !== "open") return;
@@ -1663,6 +1677,7 @@ function closePosition(pos, price, ts, reason) {
   const realized  = partialPnL.get(pos._localId) || 0;
   pos.pnl_usd     = calcPnL(pos.direction, pos.lots, pos.entry_price, price) + realized;
   partialPnL.delete(pos._localId);
+  partialUIOpen.delete(pos._localId);
   pos.status      = "closed";
   removePositionLines(pos);
   updateTradeOnServer(pos, { exit_price: price, exit_ts: ts, exit_reason: reason, pnl_usd: pos.pnl_usd, status: "closed" });
@@ -1889,7 +1904,7 @@ function renderPositions() {
       </div>
       ${canPartial ? `
       <div class="partial-row">
-        <button class="partial-toggle" onclick="this.closest('.pos-card').querySelector('.partial-ui').classList.toggle('hidden')">⊟ Partial</button>
+        <button class="partial-toggle" onclick="togglePartialPanel('${o._localId}')">⊟ Partial</button>
       </div>
       <div class="partial-ui hidden" id="${uiId}">
         <input class="partial-lots-inp" id="${inputId}" type="number"
@@ -1902,6 +1917,12 @@ function renderPositions() {
     </div>`;
   });
   el.innerHTML = html;
+
+  // Restore partial panels that were open before the rebuild
+  partialUIOpen.forEach(localId => {
+    const panel = document.getElementById(`partial-ui-${localId}`);
+    if (panel) panel.classList.remove("hidden");
+  });
 }
 
 function updateSessionStats() {
