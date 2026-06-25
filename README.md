@@ -80,20 +80,20 @@ TradeJournal solves all three with a single integrated platform.
 ```mermaid
 graph TB
     subgraph Client["Client Browser"]
-        UI["TradeJournal UI\n(Vanilla JS + KLineChart v9)"]
+        UI["TradeJournal UI (Vanilla JS + KLineChart v9)"]
     end
 
-    subgraph Platform["Application Platform — Render"]
-        App["Flask Application\n(Gunicorn WSGI)"]
-        Cache["Chart Data Cache\n(ChartCandle model)"]
+    subgraph Platform["Application Platform - Render"]
+        App["Flask Application (Gunicorn WSGI)"]
+        Cache["Chart Data Cache (ChartCandle model)"]
     end
 
-    subgraph Data["Data Layer — Neon Serverless"]
-        DB[("PostgreSQL\nUser / Trade / Session\nBacktestTrade / ChartCandle")]
+    subgraph Data["Data Layer - Neon Serverless PostgreSQL"]
+        DB[("PostgreSQL: User / Trade / Session / BacktestTrade / ChartCandle")]
     end
 
     subgraph External["External Data Sources"]
-        YF["yfinance\n(Yahoo Finance OHLCV)"]
+        YF["yfinance - Yahoo Finance OHLCV"]
     end
 
     UI -->|REST API calls| App
@@ -109,35 +109,32 @@ The system follows a clean three-tier architecture. The client never touches the
 ### Application Architecture
 
 ```mermaid
-graph LR
-    subgraph Frontend["Frontend (Client-Side)"]
-        direction TB
-        KC["KLineChart v9\nCandlestick Engine"]
-        RE["Replay Engine\nBar-by-Bar Simulation"]
-        OL["Overlay System\n10+ Drawing Tools"]
-        PM["Position Manager\nTP / SL / Partials"]
-        US["Undo Stack\nSnapshot-Based"]
-        LP["localStorage\nSession Persistence"]
+graph TB
+    subgraph FE["Frontend - Client Browser"]
+        KC["KLineChart v9 Candlestick Engine"]
+        RE["Replay Engine - Bar-by-Bar Simulation"]
+        OL["Overlay System - 10+ Drawing Tools"]
+        PM["Position Manager - TP / SL / Partials"]
+        US["Undo Stack - Snapshot Based"]
+        LP["localStorage - Session Persistence"]
     end
 
-    subgraph Backend["Backend (Flask)"]
-        direction TB
-        Auth["Auth Layer\nSession + login_required"]
-        API["REST API\n/api/backtest/*\n/api/chart-data\n/api/trades/*"]
-        RET["Retry Wrapper\n_bt_db() — 3x backoff\nNeon cold-start resilience"]
-        ORM["SQLAlchemy ORM\nModels + Migrations"]
+    subgraph BE["Backend - Flask on Render"]
+        Auth["Auth Layer - login_required"]
+        API["REST API - /api/backtest/* /api/chart-data /api/trades/*"]
+        RET["Retry Wrapper - _bt_db 3x backoff"]
+        ORM["SQLAlchemy ORM - Models + Migrations"]
     end
 
-    subgraph DB["Database (Neon PostgreSQL)"]
-        direction TB
+    subgraph DB["Database - Neon PostgreSQL"]
         USR["Users"]
         SES["BacktestSessions"]
-        TRD["BacktestTrades\nentry / exit / TP / SL\npnl_usd / lots / status"]
-        CHT["ChartCandles\nOHLCV cache by symbol+tf"]
+        TRD["BacktestTrades - entry / exit / TP / SL / pnl / lots"]
+        CHT["ChartCandles - OHLCV cache by symbol + timeframe"]
     end
 
-    Frontend <-->|JSON REST| Backend
-    Backend <-->|SQLAlchemy| DB
+    FE <-->|JSON REST| BE
+    BE <-->|SQLAlchemy| DB
 ```
 
 **Key design decisions explained:**
@@ -185,22 +182,20 @@ sequenceDiagram
 
 ```mermaid
 graph TB
-    subgraph Internet
-        USR["End User\n(Browser)"]
-    end
+    USR["End User - Browser"]
 
-    subgraph Render["Render — Free Tier"]
-        GUN["Gunicorn\n2 workers, 120s timeout"]
-        APP["Flask App\n(Python 3.11+)"]
+    subgraph Render["Render - Free Tier Hosting"]
+        GUN["Gunicorn - 2 workers, 120s timeout"]
+        APP["Flask App - Python 3.11+"]
         GUN --> APP
     end
 
-    subgraph Neon["Neon — Serverless PostgreSQL"]
-        PG["PostgreSQL 15\nAuto-suspend + wake"]
+    subgraph Neon["Neon - Serverless PostgreSQL"]
+        PG["PostgreSQL 15 - Auto-suspend and wake"]
     end
 
     USR -->|HTTPS| GUN
-    APP -->|SSL/TLS Connection Pool\nRetry on cold-start| PG
+    APP -->|SSL/TLS + retry on cold-start| PG
 ```
 
 **Why Render over AWS/GCP.** For a single-user or early-stage product, Render eliminates DevOps overhead entirely: zero server provisioning, automatic HTTPS, GitHub-integrated deploys, and a free tier that covers proof-of-concept workloads. The tradeoff is cold-start latency after periods of inactivity — mitigated in the application layer by the `_bt_db()` retry wrapper with exponential backoff.
