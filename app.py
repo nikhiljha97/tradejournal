@@ -1307,7 +1307,7 @@ def bt_update_trade(sid, tid):
         BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
         t = BacktestTrade.query.filter_by(id=tid, session_id=sid).first_or_404()
         for field in ["exit_price", "exit_ts", "exit_reason", "pnl_usd",
-                      "status", "entry_price", "entry_ts"]:
+                      "status", "entry_price", "entry_ts", "tp_price", "sl_price"]:
             if field in data:
                 setattr(t, field, data[field])
         db.session.commit()

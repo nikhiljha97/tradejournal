@@ -415,6 +415,7 @@ const textSettings = { text: "", color: "#f0c040", font: "Inter,sans-serif", siz
 // Convenience getter so legacy refs still work
 function drawColor() { return toolColors[activeTool] || "#4da6ff"; }
 let overlayIds = [];
+let selectedDrawingId = null;   // ID of the currently-selected user drawing (for Delete key)
 let volVisible = true, volIndicatorId = null;
 let currentSessionId = null;
 let openOrders = [];
@@ -431,6 +432,22 @@ const MAX_UNDO   = 60;
 let _processingBar    = false; // true inside processBar — suppresses individual close undos
 let _stepNewOverlays  = null;  // array collecting overlay IDs created during a processBar call
 let _playStartSnap    = null;  // snapshot taken when auto-play starts
+
+// ── Replay-state persistence (survives reload/tab-close) ─────────────────────
+function saveReplayState() {
+  try {
+    const ts = (replayMode && visibleEnd > 0 && allCandles.length)
+      ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)].timestamp
+      : null;
+    localStorage.setItem("tj_bt_state", JSON.stringify({
+      symbol: currentSymbol, tf: currentTF, replayTimestamp: ts,
+    }));
+  } catch(_) {}
+}
+function _loadReplayState() {
+  try { return JSON.parse(localStorage.getItem("tj_bt_state") || "null"); }
+  catch(_) { return null; }
+}
 
 function _snapState() {
   return {
@@ -494,7 +511,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("colorSwatch").style.background = drawColor();
   registerCustomOverlays();
   initChart();
-  loadData(currentSymbol, currentTF);
+
+  // Restore previous symbol/TF/replay position (survives reload/tab-close)
+  const _saved = _loadReplayState();
+  if (_saved?.symbol) {
+    currentSymbol = _saved.symbol;
+    document.querySelectorAll(".sym-btn").forEach(b =>
+      b.classList.toggle("active", b.dataset.sym === currentSymbol));
+  }
+  if (_saved?.tf) {
+    currentTF = _saved.tf;
+    document.querySelectorAll(".tf-btn").forEach(b =>
+      b.classList.toggle("active", b.dataset.tf === currentTF));
+  }
+  loadData(currentSymbol, currentTF, _saved?.replayTimestamp ?? null);
   await loadSessions();
 
   // Hide context menu on outside click
@@ -541,6 +571,15 @@ document.addEventListener("keydown", (e) => {
   const tag = document.activeElement.tagName;
   if (["INPUT","SELECT","TEXTAREA"].includes(tag)) return;
   if ((e.ctrlKey || e.metaKey) && e.code === "KeyZ") { e.preventDefault(); performUndo(); return; }
+  if ((e.code === "Delete" || e.code === "Backspace") && selectedDrawingId) {
+    e.preventDefault();
+    const id = selectedDrawingId;
+    try { chart.removeOverlay({ id }); } catch(_) {}
+    overlayIds = overlayIds.filter(x => x !== id);
+    selectedDrawingId = null;
+    showToast("Drawing deleted");
+    return;
+  }
   if (e.code === "Space")      { e.preventDefault(); togglePlay(); }
   if (e.code === "ArrowRight") { e.preventDefault(); replayStep(1); }
   if (e.code === "ArrowLeft")  { e.preventDefault(); replayStep(-1); }
@@ -990,8 +1029,11 @@ function setTool(tool, btn) {
         if (id) pushUndo(`draw ${tool}`, () => {
           try { chart.removeOverlay({ id }); } catch(_) {}
           overlayIds = overlayIds.filter(x => x !== id);
+          if (selectedDrawingId === id) selectedDrawingId = null;
         });
       },
+      onSelected:   ({ overlay }) => { selectedDrawingId = overlay.id; },
+      onDeselected: ({ overlay }) => { if (selectedDrawingId === overlay.id) selectedDrawingId = null; },
     });
     if (id) overlayIds.push(id);
   } catch(e) {
@@ -1060,8 +1102,11 @@ function activateTextOverlay() {
         if (id) pushUndo("draw text", () => {
           try { chart.removeOverlay({ id }); } catch(_) {}
           overlayIds = overlayIds.filter(x => x !== id);
+          if (selectedDrawingId === id) selectedDrawingId = null;
         });
       },
+      onSelected:   ({ overlay }) => { selectedDrawingId = overlay.id; },
+      onDeselected: ({ overlay }) => { if (selectedDrawingId === overlay.id) selectedDrawingId = null; },
     });
     if (id) overlayIds.push(id);
   } catch(e) { showToast("Text: " + e.message, true); }
@@ -1074,8 +1119,10 @@ function cancelTextPanel() {
 }
 
 function clearDrawings() {
-  try { chart.removeOverlay(); } catch(_) {}
+  // Only remove user drawing overlays — NOT position lines (entry/TP/SL)
+  overlayIds.forEach(id => { try { chart.removeOverlay({ id }); } catch(_) {} });
   overlayIds = [];
+  selectedDrawingId = null;
   hideStepHint();
   setTool("cursor", document.querySelector('[data-tool="cursor"]'));
   showToast("Drawings cleared");
@@ -1311,6 +1358,7 @@ function updateProgress() {
   const total = allCandles.length;
   const cur   = replayMode ? visibleEnd : total;
   document.getElementById("replayProgress").textContent = `Bar ${cur.toLocaleString()} / ${total.toLocaleString()}`;
+  saveReplayState();
 }
 
 // ── Countdown ─────────────────────────────────────────────────────────────────
@@ -1386,35 +1434,68 @@ function processBar(candle) {
 }
 
 // ── Live position lines ───────────────────────────────────────────────────────
+// Helper — fire-and-forget server update for TP/SL drag
+function _saveTPSL(order, field, price) {
+  if (!order._dbId || !currentSessionId) return;
+  fetch(`/api/backtest/sessions/${currentSessionId}/trades/${order._dbId}`, {
+    method: "PUT", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ [field]: price }),
+  }).catch(() => {});
+}
+
 function addPositionLines(order) {
-  if (!chart || !order.entry_price || !order.entry_ts) {
-    console.warn("addPositionLines: skipped", { chart: !!chart, entry_price: order.entry_price, entry_ts: order.entry_ts });
-    return;
-  }
+  if (!chart || !order.entry_price || !order.entry_ts) return;
   const ids = {};
   const ts  = order.entry_ts;
+
+  // Entry — locked (P&L label updated via recreate every tick)
   ids.entryId = chart.createOverlay({
     name: "tradeLine", lock: true,
     points: [{ timestamp: ts, value: order.entry_price }],
     extendData: { color: "#f0c040", dashed: false,
       label: `${order.direction} ${order.lots}L  P&L: $0.00` },
   });
-  if (!ids.entryId) console.warn("tradeLine entry creation returned null — is 'tradeLine' registered?");
+
+  // TP — draggable; onPressedMoveEnd updates order + server + rebuilds line
   if (order.tp_price) {
-    ids.tpId = chart.createOverlay({
-      name: "tradeLine", lock: true,
+    const makeTP = () => chart.createOverlay({
+      name: "tradeLine", lock: false,
       points: [{ timestamp: ts, value: order.tp_price }],
       extendData: { color: "#00e5a0", dashed: true, label: `TP  ${fmt(order.tp_price)}` },
+      onPressedMoveEnd: ({ overlay }) => {
+        const newP = overlay.points[0]?.value;
+        if (newP == null) return;
+        order.tp_price = parseFloat(newP.toFixed(5));
+        if (ids.tpId) try { chart.removeOverlay({ id: ids.tpId }); } catch(_) {}
+        ids.tpId = makeTP();
+        positionLines.set(order._localId, ids);
+        _saveTPSL(order, "tp_price", order.tp_price);
+        showToast(`TP moved to ${fmt(order.tp_price)}`);
+      },
     });
+    ids.tpId = makeTP();
   }
+
+  // SL — draggable; same pattern as TP
   if (order.sl_price) {
-    ids.slId = chart.createOverlay({
-      name: "tradeLine", lock: true,
+    const makeSL = () => chart.createOverlay({
+      name: "tradeLine", lock: false,
       points: [{ timestamp: ts, value: order.sl_price }],
       extendData: { color: "#ff4757", dashed: true, label: `SL  ${fmt(order.sl_price)}` },
+      onPressedMoveEnd: ({ overlay }) => {
+        const newP = overlay.points[0]?.value;
+        if (newP == null) return;
+        order.sl_price = parseFloat(newP.toFixed(5));
+        if (ids.slId) try { chart.removeOverlay({ id: ids.slId }); } catch(_) {}
+        ids.slId = makeSL();
+        positionLines.set(order._localId, ids);
+        _saveTPSL(order, "sl_price", order.sl_price);
+        showToast(`SL moved to ${fmt(order.sl_price)}`);
+      },
     });
+    ids.slId = makeSL();
   }
-  console.log("addPositionLines ids:", ids);
+
   positionLines.set(order._localId, ids);
 }
 
@@ -1424,42 +1505,34 @@ function updatePositionLines() {
     ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)]
     : null;
   if (!curBar) return;
-
-  // overrideOverlay does NOT force createPointFigures to re-run on a completed overlay
-  // (totalStep already reached). Solution: remove + recreate each line every tick so
-  // extendData is always fresh, and the anchor stays on the current bar (preventing culling).
   const ts = curBar.timestamp;
 
   openOrders.filter(o => o.status === "open").forEach(order => {
+    const ids    = positionLines.get(order._localId) || {};
     const pnl    = calcPnL(order.direction, order.lots, order.entry_price, curBar.close);
     const pnlStr = (pnl >= 0 ? "+" : "") + "$" + pnl.toFixed(2);
     const col    = pnl >= 0 ? "#00e5a0" : "#ff4757";
 
-    // Remove old overlay IDs
-    removePositionLines(order);
-
-    // Recreate with live P&L + current bar as anchor (always in view)
-    const ids = {};
+    // Entry line — always remove+recreate (label must reflect live P&L every tick)
+    if (ids.entryId) try { chart.removeOverlay({ id: ids.entryId }); } catch(_) {}
     ids.entryId = chart.createOverlay({
       name: "tradeLine", lock: true,
       points: [{ timestamp: ts, value: order.entry_price }],
       extendData: { color: col, dashed: false,
         label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` },
     });
-    if (order.tp_price) {
-      ids.tpId = chart.createOverlay({
-        name: "tradeLine", lock: true,
-        points: [{ timestamp: ts, value: order.tp_price }],
-        extendData: { color: "#00e5a0", dashed: true, label: `TP  ${fmt(order.tp_price)}` },
-      });
+
+    // TP/SL — slide anchor only via overrideOverlay so overlays stay in the visible
+    // window without being recreated (recreation would cancel any in-progress drag).
+    if (ids.tpId && order.tp_price) {
+      try { chart.overrideOverlay({ id: ids.tpId, points: [{ timestamp: ts, value: order.tp_price }] }); }
+      catch(_) {}
     }
-    if (order.sl_price) {
-      ids.slId = chart.createOverlay({
-        name: "tradeLine", lock: true,
-        points: [{ timestamp: ts, value: order.sl_price }],
-        extendData: { color: "#ff4757", dashed: true, label: `SL  ${fmt(order.sl_price)}` },
-      });
+    if (ids.slId && order.sl_price) {
+      try { chart.overrideOverlay({ id: ids.slId, points: [{ timestamp: ts, value: order.sl_price }] }); }
+      catch(_) {}
     }
+
     positionLines.set(order._localId, ids);
   });
   renderPositions();
