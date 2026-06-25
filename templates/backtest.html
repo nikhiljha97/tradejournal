@@ -1570,6 +1570,9 @@ const partialPnL = new Map();
 // Tracks which positions have their partial UI panel open — survives renderPositions() rebuilds
 const partialUIOpen = new Set();
 
+// Tracks the user's typed partial lot value — survives renderPositions() rebuilds
+const partialInputValues = new Map();
+
 function togglePartialPanel(localId) {
   if (partialUIOpen.has(localId)) {
     partialUIOpen.delete(localId);
@@ -1586,7 +1589,8 @@ function closePartial(localId, inputId) {
   if (!order || order.status !== "open") return;
 
   const inp         = document.getElementById(inputId);
-  const partialLots = Math.round(parseFloat(inp?.value || 0) * 100) / 100;
+  const rawVal      = inp?.value ?? partialInputValues.get(localId) ?? "0.01";
+  const partialLots = Math.round(parseFloat(rawVal) * 100) / 100;
   const maxLots     = Math.round((order.lots - 0.01) * 100) / 100;
 
   if (isNaN(partialLots) || partialLots < 0.01) { showToast("Min partial: 0.01 lots", true); return; }
@@ -1608,8 +1612,9 @@ function closePartial(localId, inputId) {
   // Accumulate realized partial P&L on this position
   partialPnL.set(localId, prevPartialPnL + pnl);
 
-  // Reduce open lots
+  // Reduce open lots and reset the stored input value so next partial starts at 0.01
   order.lots = Math.round((order.lots - partialLots) * 100) / 100;
+  partialInputValues.delete(localId);
 
   // Place exit marker and track its ID for undo
   let partialMarkerId = null;
@@ -1645,6 +1650,7 @@ function closePartial(localId, inputId) {
     if (o) {
       o.lots = prevLots;
       partialPnL.set(localId, prevPartialPnL);
+      partialInputValues.delete(localId);
     }
     if (partialMarkerId) { try { chart.removeOverlay({ id: partialMarkerId }); } catch(_) {} }
     if (o?._dbId && currentSessionId) {
@@ -1678,6 +1684,7 @@ function closePosition(pos, price, ts, reason) {
   pos.pnl_usd     = calcPnL(pos.direction, pos.lots, pos.entry_price, price) + realized;
   partialPnL.delete(pos._localId);
   partialUIOpen.delete(pos._localId);
+  partialInputValues.delete(pos._localId);
   pos.status      = "closed";
   removePositionLines(pos);
   updateTradeOnServer(pos, { exit_price: price, exit_ts: ts, exit_reason: reason, pnl_usd: pos.pnl_usd, status: "closed" });
@@ -1904,24 +1911,33 @@ function renderPositions() {
       </div>
       ${canPartial ? `
       <div class="partial-row">
-        <button class="partial-toggle" onclick="togglePartialPanel('${o._localId}')">⊟ Partial</button>
+        <button class="partial-toggle" onclick="togglePartialPanel(${o._localId})">⊟ Partial</button>
       </div>
       <div class="partial-ui hidden" id="${uiId}">
         <input class="partial-lots-inp" id="${inputId}" type="number"
           min="0.01" max="${maxPartial}" step="0.01" value="0.01"
-          onkeydown="if(event.key==='Enter')closePartial('${o._localId}','${inputId}')">
+          onkeydown="if(event.key==='Enter')closePartial(${o._localId},'${inputId}')">
         <span class="partial-of">/ ${o.lots}L</span>
         <button class="partial-half" onclick="document.getElementById('${inputId}').value='${halfLots}'">½</button>
-        <button class="partial-close-btn" onclick="closePartial('${o._localId}','${inputId}')">Close</button>
+        <button class="partial-close-btn" onclick="closePartial(${o._localId},'${inputId}')">Close</button>
       </div>` : ""}
     </div>`;
   });
+  // Save current partial input values before blowing away the DOM
+  openOrders.filter(o => o.status === "open").forEach(o => {
+    const inp = document.getElementById(`partial-lots-${o._localId}`);
+    if (inp) partialInputValues.set(o._localId, inp.value);
+  });
+
   el.innerHTML = html;
 
-  // Restore partial panels that were open before the rebuild
+  // Restore partial panels and input values that survived the rebuild
   partialUIOpen.forEach(localId => {
     const panel = document.getElementById(`partial-ui-${localId}`);
     if (panel) panel.classList.remove("hidden");
+    const inp   = document.getElementById(`partial-lots-${localId}`);
+    const saved = partialInputValues.get(localId);
+    if (inp && saved !== undefined) inp.value = saved;
   });
 }
 
