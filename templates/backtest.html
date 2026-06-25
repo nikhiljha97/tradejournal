@@ -90,6 +90,20 @@
     .pos-detail{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:10px;font-family:"JetBrains Mono",monospace}
     .pos-pnl{font-size:11px;font-weight:700;margin-top:3px;font-family:"JetBrains Mono",monospace}
     .pos-pnl.up{color:var(--green)}.pos-pnl.dn{color:var(--red)}.pos-pnl.zero{color:var(--muted)}
+    /* Partial close UI */
+    .partial-row{display:flex;align-items:center;gap:4px;margin-top:5px;padding-top:5px;border-top:1px solid var(--border)}
+    .partial-toggle{font-size:10px;padding:2px 6px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-family:Inter,sans-serif}
+    .partial-toggle:hover{color:var(--text);border-color:var(--gold)}
+    .partial-ui{display:flex;align-items:center;gap:4px;margin-top:4px;animation:slideDown .1s ease}
+    .partial-ui.hidden{display:none}
+    .partial-lots-inp{width:56px;background:var(--panel);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:3px 5px;font-size:11px;font-family:"JetBrains Mono",monospace;outline:none}
+    .partial-lots-inp:focus{border-color:var(--gold)}
+    .partial-of{font-size:10px;color:var(--muted);white-space:nowrap}
+    .partial-half{font-size:10px;padding:2px 5px;border-radius:4px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer}
+    .partial-half:hover{color:var(--gold);border-color:var(--gold)}
+    .partial-close-btn{font-size:10px;padding:2px 7px;border-radius:4px;border:1px solid var(--gold);background:rgba(240,192,64,.1);color:var(--gold);cursor:pointer;font-weight:600;white-space:nowrap}
+    .partial-close-btn:hover{background:rgba(240,192,64,.2)}
+    .partial-realized{font-size:10px;color:var(--muted);margin-top:3px;font-family:"JetBrains Mono",monospace}
     .empty-msg{font-size:11px;color:var(--muted);text-align:center;padding:12px 0;font-style:italic}
     .pnl-bar{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:6px 9px;display:flex;justify-content:space-between;align-items:center;font-size:11px}
     .pnl-bar span:first-child{color:var(--muted)}
@@ -1381,11 +1395,76 @@ function placeEntryMarker(order) {
   if (!id) console.warn("tradeEntryMarker creation returned null");
 }
 
+// Tracks realized P&L from partial closes per position (_localId → $)
+const partialPnL = new Map();
+
+function closePartial(localId, inputId) {
+  const order = openOrders.find(o => o._localId === localId);
+  if (!order || order.status !== "open") return;
+
+  const inp         = document.getElementById(inputId);
+  const partialLots = Math.round(parseFloat(inp?.value || 0) * 100) / 100;
+  const maxLots     = Math.round((order.lots - 0.01) * 100) / 100;
+
+  if (isNaN(partialLots) || partialLots < 0.01) { showToast("Min partial: 0.01 lots", true); return; }
+  if (partialLots > maxLots)                     { showToast(`Max partial: ${maxLots}L (keep ≥0.01 open)`, true); return; }
+
+  const curBar = replayMode && visibleEnd > 0
+    ? allCandles[Math.min(visibleEnd - 1, allCandles.length - 1)]
+    : null;
+  if (!curBar) { showToast("No active bar — start replay first", true); return; }
+
+  const pnl      = calcPnL(order.direction, partialLots, order.entry_price, curBar.close);
+  const pnlStr   = (pnl >= 0 ? "+" : "") + "$" + pnl.toFixed(2);
+  const icon     = pnl >= 0 ? "✅" : "❌";
+
+  // Accumulate realized partial P&L on this position
+  partialPnL.set(localId, (partialPnL.get(localId) || 0) + pnl);
+
+  // Reduce open lots
+  order.lots = Math.round((order.lots - partialLots) * 100) / 100;
+
+  // Place an exit marker on the chart at the partial close price
+  try {
+    chart.createOverlay({
+      name: "tradeEntryMarker",
+      points: [{ timestamp: curBar.timestamp, value: curBar.close }],
+      extendData: {
+        direction: order.direction === "BUY" ? "SELL" : "BUY",
+        label: `PARTIAL ${partialLots}L  ${pnlStr}`,
+      },
+      lock: true,
+    });
+  } catch(_) {}
+
+  // Save updated lots to backend
+  if (order._dbId && currentSessionId) {
+    fetch(`/api/backtest/sessions/${currentSessionId}/trades/${order._dbId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lots: order.lots }),
+    }).catch(e => console.warn("Partial save:", e));
+  }
+
+  updatePositionLines();
+  renderPositions();
+  updateSessionStats();
+  showToast(`${icon} Partial ${partialLots}L @ ${fmt(curBar.close)}  ${pnlStr}`);
+}
+
+function togglePartialUI(localId) {
+  const el = document.getElementById(`partial-ui-${localId}`);
+  if (el) el.classList.toggle("hidden");
+}
+
 function closePosition(pos, price, ts, reason) {
   pos.exit_price  = price;
   pos.exit_ts     = ts;
   pos.exit_reason = reason;
-  pos.pnl_usd     = calcPnL(pos.direction, pos.lots, pos.entry_price, price);
+  // Include any realized partial P&L in the final total
+  const realized  = partialPnL.get(pos._localId) || 0;
+  pos.pnl_usd     = calcPnL(pos.direction, pos.lots, pos.entry_price, price) + realized;
+  partialPnL.delete(pos._localId);
   pos.status      = "closed";
   removePositionLines(pos);
   updateTradeOnServer(pos, { exit_price: price, exit_ts: ts, exit_reason: reason, pnl_usd: pos.pnl_usd, status: "closed" });
@@ -1541,20 +1620,41 @@ function renderPositions() {
       </div></div>`;
   });
   open.forEach((o, i) => {
-    const livePnl = curPrice ? calcPnL(o.direction, o.lots, o.entry_price, curPrice) : 0;
-    const cls = livePnl >= 0 ? "up" : "dn";
+    const livePnl    = curPrice ? calcPnL(o.direction, o.lots, o.entry_price, curPrice) : 0;
+    const cls        = livePnl >= 0 ? "up" : "dn";
+    const realized   = partialPnL.get(o._localId) || 0;
+    const canPartial = o.lots > 0.01;
+    const maxPartial = Math.round((o.lots - 0.01) * 100) / 100;
+    const halfLots   = Math.round((o.lots / 2) * 100) / 100;
+    const inputId    = `partial-lots-${o._localId}`;
+    const uiId       = `partial-ui-${o._localId}`;
+
     html += `<div class="pos-card ${o.direction.toLowerCase()}">
       <div class="pos-header">
         <span class="pos-dir ${o.direction.toLowerCase()}">${o.direction === "BUY" ? "▲" : "▼"} ${o.direction}</span>
         <span class="pos-type-badge">${o.lots}L</span>
-        <button class="pos-close-btn" onclick="manualClose(${i})" title="Close">✕</button>
+        <button class="pos-close-btn" onclick="manualClose(${i})" title="Close all">✕</button>
       </div>
       <div class="pos-detail">
         <span>In:${fmt(o.entry_price)}</span>
         ${o.tp_price ? `<span>TP:${fmt(o.tp_price)}</span>` : ""}
         ${o.sl_price ? `<span>SL:${fmt(o.sl_price)}</span>` : ""}
       </div>
-      <div class="pos-pnl ${cls}">${livePnl >= 0 ? "+" : ""}$${livePnl.toFixed(2)}</div>
+      <div class="pos-pnl ${cls}">${livePnl >= 0 ? "+" : ""}$${livePnl.toFixed(2)}
+        ${realized !== 0 ? `<span style="font-size:9px;font-weight:400;color:var(--muted);margin-left:4px">+${realized >= 0 ? "+" : ""}$${realized.toFixed(2)} realized</span>` : ""}
+      </div>
+      ${canPartial ? `
+      <div class="partial-row">
+        <button class="partial-toggle" onclick="togglePartialUI('${o._localId}')">⊟ Partial</button>
+      </div>
+      <div class="partial-ui hidden" id="${uiId}">
+        <input class="partial-lots-inp" id="${inputId}" type="number"
+          min="0.01" max="${maxPartial}" step="0.01" value="0.01"
+          onkeydown="if(event.key==='Enter')closePartial('${o._localId}','${inputId}')">
+        <span class="partial-of">/ ${o.lots}L</span>
+        <button class="partial-half" onclick="document.getElementById('${inputId}').value='${halfLots}'">½</button>
+        <button class="partial-close-btn" onclick="closePartial('${o._localId}','${inputId}')">Close</button>
+      </div>` : ""}
     </div>`;
   });
   el.innerHTML = html;
@@ -1629,6 +1729,7 @@ async function deleteSessionFromModal(id) {
       currentSessionId = null;
       openOrders = [];
       positionLines.clear();
+      partialPnL.clear();
       document.getElementById("navSessionName").textContent = "No session";
       updateSessionStats();
       renderPositions();
