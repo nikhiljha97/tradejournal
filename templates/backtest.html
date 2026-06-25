@@ -1137,12 +1137,16 @@ function replayStep(delta) {
   if (next === visibleEnd) return;
   if (delta > 0) {
     for (let i = visibleEnd; i < next; i++) {
-      processBar(allCandles[i]);
+      processBar(allCandles[i]);       // also calls updatePositionLines
       chart.updateData(allCandles[i]);
     }
   } else {
     chart.clearData();
     chart.applyNewData(allCandles.slice(0, next));
+    visibleEnd = next;
+    updatePositionLines();             // refresh P&L after stepping back
+    updateProgress();
+    return;
   }
   visibleEnd = next;
   updateProgress();
@@ -1293,42 +1297,44 @@ function updatePositionLines() {
     : null;
   if (!curBar) return;
 
-  // KLineChart stops calling createPointFigures once the anchor timestamp scrolls off the
-  // left edge of the visible window. Fix: slide every line's anchor to the current bar so
-  // the point is always on-screen and the full-width horizontal line keeps rendering.
+  // overrideOverlay does NOT force createPointFigures to re-run on a completed overlay
+  // (totalStep already reached). Solution: remove + recreate each line every tick so
+  // extendData is always fresh, and the anchor stays on the current bar (preventing culling).
   const ts = curBar.timestamp;
 
   openOrders.filter(o => o.status === "open").forEach(order => {
-    const ids = positionLines.get(order._localId);
-    if (!ids) return;
     const pnl    = calcPnL(order.direction, order.lots, order.entry_price, curBar.close);
     const pnlStr = (pnl >= 0 ? "+" : "") + "$" + pnl.toFixed(2);
     const col    = pnl >= 0 ? "#00e5a0" : "#ff4757";
 
-    if (ids.entryId) {
-      chart.overrideOverlay({
-        id: ids.entryId,
-        points: [{ timestamp: ts, value: order.entry_price }],
-        extendData: { color: col, dashed: false,
-          label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` },
-      });
-    }
-    if (ids.tpId && order.tp_price) {
-      chart.overrideOverlay({
-        id: ids.tpId,
+    // Remove old overlay IDs
+    removePositionLines(order);
+
+    // Recreate with live P&L + current bar as anchor (always in view)
+    const ids = {};
+    ids.entryId = chart.createOverlay({
+      name: "tradeLine", lock: true,
+      points: [{ timestamp: ts, value: order.entry_price }],
+      extendData: { color: col, dashed: false,
+        label: `${order.direction} ${order.lots}L  P&L: ${pnlStr}` },
+    });
+    if (order.tp_price) {
+      ids.tpId = chart.createOverlay({
+        name: "tradeLine", lock: true,
         points: [{ timestamp: ts, value: order.tp_price }],
         extendData: { color: "#00e5a0", dashed: true, label: `TP  ${fmt(order.tp_price)}` },
       });
     }
-    if (ids.slId && order.sl_price) {
-      chart.overrideOverlay({
-        id: ids.slId,
+    if (order.sl_price) {
+      ids.slId = chart.createOverlay({
+        name: "tradeLine", lock: true,
         points: [{ timestamp: ts, value: order.sl_price }],
         extendData: { color: "#ff4757", dashed: true, label: `SL  ${fmt(order.sl_price)}` },
       });
     }
+    positionLines.set(order._localId, ids);
   });
-  renderPositions(); // refresh live P&L in panel
+  renderPositions();
 }
 
 function removePositionLines(order) {
