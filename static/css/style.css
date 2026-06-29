@@ -720,6 +720,56 @@ tbody tr:hover { background: var(--panel2); }
   .header-right { gap: 6px; }
   .btn-primary { font-size: 12px; padding: 6px 12px; }
   .btn-ghost { font-size: 12px; padding: 6px 10px; }
+
+  /* ── TOPBAR mobile overhaul ── */
+  .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 12px;
+    gap: 0;
+  }
+  /* Row 1: brand on left, log trade on right */
+  .brand { order: 1; flex: 1; }
+  .brand-sub { display: none; }
+  .topbar .btn-gold { order: 2; font-size: 12px; padding: 7px 12px; }
+  /* Row 2: tab nav full width */
+  .tab-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-top: 1px solid var(--border);
+    margin: 6px -12px 0;
+    padding: 4px 12px;
+    gap: 2px;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab { padding: 6px 12px; font-size: 12px; white-space: nowrap; }
+  /* Row 3: topbar-right items — collapse into scrollable strip */
+  .topbar-right {
+    order: 4;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-top: 1px solid var(--border);
+    margin: 4px -12px 0;
+    padding: 6px 12px;
+    gap: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .topbar-right::-webkit-scrollbar { display: none; }
+  .topbar-right .ai-badge { display: none; }
+  /* hide username text on mobile */
+  .topbar-right > span[style*="color:var(--muted)"] { display: none; }
+  /* Community dropdown and backtest link: compact */
+  .topbar-right .btn-ghost { font-size: 11px; padding: 5px 10px; white-space: nowrap; flex-shrink: 0; }
+  .nav-drop-menu { right: auto; left: 0; }
+  /* Discipline strip */
+  .discipline-strip { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .rule-chip { flex-shrink: 0; }
   .tab-nav { gap: 2px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .tab-nav .tab { padding: 8px 10px; font-size: 11px; min-width: 44px; }
   .tab-nav .tab span { display: none; }

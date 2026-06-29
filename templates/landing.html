@@ -56,23 +56,83 @@
     .nav-cta:hover{background:var(--green2);box-shadow:0 4px 24px rgba(0,229,160,.3)}
 
     /* HERO */
-    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 6% 80px;position:relative;overflow:hidden}
-    .hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,black 20%,transparent 100%);opacity:.5}
-    .hero-glow{position:absolute;top:30%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(0,229,160,.12) 0%,transparent 70%);pointer-events:none}
-    .hero-label{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(0,229,160,.3);background:rgba(0,229,160,.06);color:var(--green);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:32px}
+    .hero{padding:100px 6% 60px;position:relative;overflow:hidden}
+    .hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 60% 90% at 30% 50%,black 20%,transparent 100%);opacity:.5}
+    .hero-glow{position:absolute;top:40%;left:25%;transform:translate(-50%,-50%);width:500px;height:400px;background:radial-gradient(ellipse,rgba(0,229,160,.1) 0%,transparent 70%);pointer-events:none}
+    .hero-cols{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;max-width:1200px;margin:0 auto}
+    .hero-left{display:flex;flex-direction:column;align-items:flex-start}
+    .hero-label{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(0,229,160,.3);background:rgba(0,229,160,.06);color:var(--green);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;border-radius:100px;margin-bottom:28px}
     .hero-label::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-    .hero-h1{font-size:clamp(52px,8vw,100px);font-weight:900;line-height:.95;letter-spacing:-.04em;margin-bottom:28px}
+    .hero-h1{font-size:clamp(44px,6vw,84px);font-weight:900;line-height:.95;letter-spacing:-.04em;margin-bottom:22px;text-align:left}
     .hero-h1 em{font-style:italic;color:var(--green);font-weight:300}
     .hero-h1 .dim{color:var(--muted)}
-    .hero-sub{font-size:clamp(15px,1.8vw,19px);color:var(--muted);line-height:1.7;max-width:520px;margin:0 auto 40px}
-    .hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .hero-sub{font-size:clamp(14px,1.5vw,17px);color:var(--muted);line-height:1.7;max-width:440px;margin-bottom:32px;text-align:left}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
     .btn-p{background:var(--green);color:#000;font-weight:800;font-size:15px;padding:14px 32px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;transition:all .2s}
     .btn-p:hover{background:var(--green2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,229,160,.35)}
     .btn-g{border:1px solid var(--border2);color:var(--text);font-weight:600;font-size:15px;padding:14px 32px;border-radius:10px;display:inline-flex;align-items:center;gap:8px;transition:all .2s;background:var(--panel)}
     .btn-g:hover{border-color:var(--green);color:var(--green);transform:translateY(-2px)}
     .hero-note{margin-top:14px;font-size:12px;color:var(--muted)}
     .hero-note b{color:var(--green)}
+    /* App preview window */
+    .app-win{background:#0a0e14;border:1px solid var(--border2);border-radius:14px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.6)}
+    .app-win-bar{background:var(--panel2);padding:10px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border)}
+    .app-win-dot{width:10px;height:10px;border-radius:50%}
+    .app-win-title{font-size:10px;color:var(--muted);margin:0 auto;font-family:"JetBrains Mono",monospace}
+    .app-win-viewport{height:340px;overflow:hidden;position:relative}
+    .app-win-inner{transition:transform 1s cubic-bezier(.4,0,.2,1)}
+    .app-screen{padding:16px;height:340px;overflow:hidden}
+    .screen-label{font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;font-family:"JetBrains Mono",monospace}
+    .win-dots{display:flex;justify-content:center;gap:5px;padding:7px 0;background:#0a0e14;border-top:1px solid var(--border)}
+    .win-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);transition:all .4s;cursor:pointer}
+    .win-dot.active{width:14px;border-radius:3px;background:var(--green)}
+    /* KPI mini */
+    .ap-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+    .ap-kpi{background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:9px 10px}
+    .ap-kpi-l{font-size:8px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+    .ap-kpi-v{font-size:16px;font-weight:700;font-family:"JetBrains Mono",monospace}
+    /* Equity bars */
+    .ap-chart{background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:10px;margin-bottom:10px}
+    .ap-bars{display:flex;align-items:flex-end;gap:3px;height:50px}
+    .ap-bar{border-radius:2px 2px 0 0;flex:1}
+    /* Trade rows */
+    .ap-trade{display:flex;justify-content:space-between;align-items:center;padding:6px 9px;background:var(--panel2);border:1px solid var(--border);border-radius:5px;margin-bottom:5px;font-size:10px}
+    .ap-dir{padding:1px 7px;border-radius:3px;font-size:9px;font-weight:700}
+    .ap-long{background:rgba(0,229,160,.15);color:var(--green)}
+    .ap-short{background:rgba(255,71,87,.15);color:var(--red)}
+    /* Emotion bars */
+    .em-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+    .em-lbl{font-size:9px;color:var(--muted);width:75px;flex-shrink:0}
+    .em-bar-wrap{flex:1;height:5px;background:var(--faint);border-radius:3px;overflow:hidden}
+    .em-fill{height:100%;border-radius:3px}
+    .em-val{font-size:9px;font-family:"JetBrains Mono",monospace;color:var(--muted);width:30px;text-align:right}
+    /* Pattern card */
+    .pat-card{border-left:2px solid var(--red);border-radius:0 7px 7px 0;padding:9px 12px;margin-bottom:7px;background:var(--panel2)}
+    .pat-card.warn{border-left-color:var(--gold)}
+    .pat-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .pat-meta{display:flex;gap:7px;align-items:center;margin-bottom:4px}
+    .pat-badge{font-size:8px;padding:1px 6px;border-radius:3px;border:1px solid var(--red);color:var(--red)}
+    .pat-badge.warn{border-color:var(--gold);color:var(--gold)}
+    .pat-cost{font-size:10px;font-family:"JetBrains Mono",monospace;color:var(--red)}
+    .pat-cost.warn{color:var(--gold)}
+    .pat-rule{font-size:10px;color:var(--green);font-weight:600}
+    /* Terminal */
+    .ap-term{padding:12px;font-family:"JetBrains Mono",monospace;font-size:10px;line-height:2;height:300px;overflow:hidden}
+    .tl{display:flex;gap:8px}.tp{color:var(--green)}.tc{color:var(--text)}.to{color:var(--muted);padding-left:14px}
+    .tv{color:var(--green);font-weight:700}.tr2{color:var(--red)}.tg{color:var(--gold)}.tb{color:var(--blue)}
+    .tcursor{display:inline-block;width:6px;height:11px;background:var(--green);animation:blink 1s infinite;vertical-align:middle}
+    /* Mobile hero */
+    @media(max-width:860px){
+      .hero{padding:80px 6% 40px}
+      .hero-cols{grid-template-columns:1fr;gap:32px}
+      .hero-left{align-items:center;text-align:center}
+      .hero-h1,.hero-sub{text-align:center}
+      .hero-sub{max-width:100%}
+      .app-win-viewport{height:280px}
+      .app-screen{height:280px}
+      .app-win-inner .app-screen{height:280px}
+    }
 
     /* TICKER */
     .ticker{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);overflow:hidden;padding:11px 0}
@@ -278,17 +338,112 @@
 <section class="hero" id="hero">
   <div class="hero-bg-grid"></div>
   <div class="hero-glow"></div>
-  <div class="hero-label" style="color:#00e5a0;border-color:rgba(0,229,160,.3);background:rgba(0,229,160,.06)">Built for SMC · ICT · Prop Traders</div>
-  <h1 class="hero-h1" id="heroH1" style="color:#d4dde8">
-    Your trades<br>have <em style="color:#00e5a0;font-style:italic;font-weight:300">patterns.</em><br><span style="color:#5a7080">AI finds them.</span>
-  </h1>
-  <p class="hero-sub" style="color:#5a7080">The free trading journal app that reads your psychology, tracks your prop firm rules, and auto-tags your SMC setups. No Excel. No spreadsheet. No credit card.</p>
-  <div class="hero-actions">
-    <a href="/register" class="btn-p" style="background:#00e5a0;color:#000;font-weight:800">Start Journaling Free →</a>
-    <a href="#features" class="btn-g" style="color:#d4dde8;border:1px solid #243447">See Features ↓</a>
+  <div class="hero-cols">
+    <!-- LEFT: text + CTA -->
+    <div class="hero-left">
+      <div class="hero-label">Built for SMC · ICT · Prop Traders</div>
+      <h1 class="hero-h1" id="heroH1">
+        Your trades<br>have <em>patterns.</em><br><span class="dim">AI finds them.</span>
+      </h1>
+      <p class="hero-sub">Free trading journal with AI psychology analysis, prop firm tracking, and SMC auto-tagging. No Excel. No credit card.</p>
+      <div class="hero-actions">
+        <a href="/register" class="btn-p">Start Journaling Free →</a>
+        <a href="#features" class="btn-g">See Features ↓</a>
+      </div>
+      <p class="hero-note">No credit card · No trial · <b>100% Free</b> · Works with MT5, CSV &amp; XLSX</p>
+    </div>
+
+    <!-- RIGHT: auto-scrolling app preview -->
+    <div class="app-win">
+      <div class="app-win-bar">
+        <div class="app-win-dot" style="background:#ff5f57"></div>
+        <div class="app-win-dot" style="background:#ffbd2e"></div>
+        <div class="app-win-dot" style="background:#28c941"></div>
+        <span class="app-win-title" id="appWinTitle">analytics · dashboard</span>
+      </div>
+      <div class="app-win-viewport">
+        <div class="app-win-inner" id="appWinInner">
+
+          <!-- SCREEN 1: Analytics -->
+          <div class="app-screen">
+            <div class="screen-label">Dashboard · Analytics</div>
+            <div class="ap-kpi-row">
+              <div class="ap-kpi"><div class="ap-kpi-l">Win rate</div><div class="ap-kpi-v" style="color:var(--green)">66.7%</div></div>
+              <div class="ap-kpi"><div class="ap-kpi-l">Net P&amp;L</div><div class="ap-kpi-v" style="color:var(--green)">+$1,240</div></div>
+              <div class="ap-kpi"><div class="ap-kpi-l">Max DD</div><div class="ap-kpi-v" style="color:var(--red)">-2.1%</div></div>
+              <div class="ap-kpi"><div class="ap-kpi-l">Avg RR</div><div class="ap-kpi-v" style="color:var(--text)">2.4R</div></div>
+            </div>
+            <div class="ap-chart">
+              <div style="font-size:9px;color:var(--muted);margin-bottom:6px">Equity curve</div>
+              <div class="ap-bars">
+                <div class="ap-bar" style="height:30%;background:var(--green)"></div>
+                <div class="ap-bar" style="height:50%;background:var(--green)"></div>
+                <div class="ap-bar" style="height:35%;background:var(--red)"></div>
+                <div class="ap-bar" style="height:70%;background:var(--green)"></div>
+                <div class="ap-bar" style="height:55%;background:var(--green)"></div>
+                <div class="ap-bar" style="height:20%;background:var(--red)"></div>
+                <div class="ap-bar" style="height:90%;background:var(--green)"></div>
+                <div class="ap-bar" style="height:75%;background:var(--green)"></div>
+                <div class="ap-bar" style="height:80%;background:var(--green)"></div>
+                <div class="ap-bar" style="height:95%;background:var(--green)"></div>
+              </div>
+            </div>
+            <div class="ap-trade"><span style="font-weight:700;font-family:monospace">XAUUSD</span><span class="ap-dir ap-long">Long</span><span style="color:var(--green);font-family:monospace;font-weight:700">+$340</span></div>
+            <div class="ap-trade"><span style="font-weight:700;font-family:monospace">EURUSD</span><span class="ap-dir ap-short">Short</span><span style="color:var(--red);font-family:monospace;font-weight:700">-$80</span></div>
+            <div class="ap-trade"><span style="font-weight:700;font-family:monospace">NQ</span><span class="ap-dir ap-long">Long</span><span style="color:var(--green);font-family:monospace;font-weight:700">+$220</span></div>
+          </div>
+
+          <!-- SCREEN 2: Psychology -->
+          <div class="app-screen">
+            <div class="screen-label">Psychology · AI patterns</div>
+            <div style="margin-bottom:12px">
+              <div class="em-row"><span class="em-lbl">Patience</span><div class="em-bar-wrap"><div class="em-fill" style="width:72%;background:var(--green)"></div></div><span class="em-val">72%</span></div>
+              <div class="em-row"><span class="em-lbl">FOMO</span><div class="em-bar-wrap"><div class="em-fill" style="width:45%;background:var(--gold)"></div></div><span class="em-val">45%</span></div>
+              <div class="em-row"><span class="em-lbl">Revenge</span><div class="em-bar-wrap"><div class="em-fill" style="width:28%;background:var(--red)"></div></div><span class="em-val">28%</span></div>
+              <div class="em-row"><span class="em-lbl">Discipline</span><div class="em-bar-wrap"><div class="em-fill" style="width:81%;background:var(--green)"></div></div><span class="em-val">81%</span></div>
+            </div>
+            <div class="pat-card">
+              <div class="pat-title">Revenge trading after loss</div>
+              <div class="pat-meta"><span class="pat-badge">HIGH IMPACT</span><span class="pat-cost">-$47.20 avg</span></div>
+              <div class="pat-rule">→ 60 min cooldown after any loss</div>
+            </div>
+            <div class="pat-card warn">
+              <div class="pat-title">Overtrading Asia session</div>
+              <div class="pat-meta"><span class="pat-badge warn">MED IMPACT</span><span class="pat-cost warn">-$23.50 avg</span></div>
+              <div class="pat-rule">→ Max 2 trades before NY open</div>
+            </div>
+          </div>
+
+          <!-- SCREEN 3: AI Terminal -->
+          <div class="app-screen" style="padding:0">
+            <div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-family:'JetBrains Mono',monospace">AI analysis · live</div>
+            <div class="ap-term">
+              <div class="tl"><span class="tp">▶</span><span class="tc"> Analyzing trade notes…</span></div>
+              <div class="tl"><span class="to">Emotions detected: <span class="tr2">frustration · greed</span></span></div>
+              <div class="tl"><span class="to">Discipline score: <span class="tr2">-0.6</span></span></div>
+              <div class="tl"><span class="to">Label: <span class="tc">"Chasing after loss"</span></span></div>
+              <div class="tl"><span class="to">&nbsp;</span></div>
+              <div class="tl"><span class="tp">▶</span><span class="tc"> Extracting SMC setup tags…</span></div>
+              <div class="tl"><span class="to">Found: <span class="tg">FVG · Order Block · BOS</span></span></div>
+              <div class="tl"><span class="to">Timeframe: <span class="tb">4H FVG tap · 15min OB</span></span></div>
+              <div class="tl"><span class="to">&nbsp;</span></div>
+              <div class="tl"><span class="tp">▶</span><span class="tc"> Pattern (90% confidence):</span></div>
+              <div class="tl"><span class="to">⚠ <span class="tc">Revenge trading after Asia loss</span></span></div>
+              <div class="tl"><span class="to">Cost: <span class="tr2">-$47.20 per occurrence</span></span></div>
+              <div class="tl"><span class="to">→ Rule: <span class="tv">60min cooldown after loss</span></span></div>
+              <div class="tl"><span class="tp">▶</span><span class="tcursor"></span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="win-dots" id="winDots">
+        <div class="win-dot active" onclick="heroGoTo(0)"></div>
+        <div class="win-dot" onclick="heroGoTo(1)"></div>
+        <div class="win-dot" onclick="heroGoTo(2)"></div>
+      </div>
+    </div>
   </div>
-  <p class="hero-note" style="color:#5a7080">No credit card · No trial · <b style="color:#00e5a0">100% Free</b> · Works with MT5, CSV &amp; XLSX</p>
-  <div class="scroll-ind" style="color:#5a7080"><div class="scroll-arrow"></div>scroll</div>
 </section>
 
 <!-- TICKER — TradingView real-time (lazy loaded) -->
@@ -510,13 +665,28 @@ window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
 });
 
-// HERO — no opacity animations, content visible immediately for crawlers
-// Only subtle transform animation, no hiding
+// HERO — subtle entrance animations
 if (window.gsap) {
-  gsap.from('#heroH1', {y:20, duration:.8, ease:'power3.out', delay:.1});
-  gsap.from('.hero-sub', {y:10, duration:.7, ease:'power2.out', delay:.3});
+  gsap.from('#heroH1',       {y:20, duration:.8, ease:'power3.out', delay:.1});
+  gsap.from('.hero-sub',     {y:10, duration:.7, ease:'power2.out', delay:.3});
   gsap.from('.hero-actions', {y:10, duration:.6, ease:'power2.out', delay:.5});
+  gsap.from('.app-win',      {y:30, opacity:0, duration:1, ease:'power2.out', delay:.4});
 }
+
+// HERO APP WINDOW — auto-scroll through 3 screens
+const _heroScreens  = ['analytics · dashboard', 'psychology · ai patterns', 'ai analysis · live'];
+const _heroInner    = document.getElementById('appWinInner');
+const _heroTitle    = document.getElementById('appWinTitle');
+const _heroDots     = document.getElementById('winDots') ? document.getElementById('winDots').querySelectorAll('.win-dot') : [];
+let   _heroCur      = 0;
+const _heroH        = 340;
+function heroGoTo(i) {
+  _heroCur = i;
+  _heroInner.style.transform = 'translateY(-' + (i * _heroH) + 'px)';
+  _heroTitle.textContent = _heroScreens[i];
+  _heroDots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+}
+setInterval(() => heroGoTo((_heroCur + 1) % 3), 3200);
 
 // Ticker handled by TradingView widget above
 
