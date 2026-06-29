@@ -461,6 +461,27 @@ def blog_post(slug):
     related = [p for p in POSTS if p["slug"] != slug][:3]
     return render_template("blog.html", post=post, posts=None, related=related)
 
+@app.route("/test-email")
+@login_required
+def test_email():
+    """Admin-only: send a test email to the logged-in user to verify SMTP."""
+    if current_user.email not in ("nikhil.jha97@outlook.com", "jhanjla54@gmail.com"):
+        return jsonify({"ok": False, "error": "Not authorized"}), 403
+    try:
+        _send_email(
+            current_user.email,
+            "TradeJournal SMTP test",
+            f"""<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+              <div style="font-size:18px;font-weight:900;margin-bottom:24px">Trade<span style="color:#00e5a0">·</span>Journal</div>
+              <h2 style="color:#00e5a0;margin-bottom:16px">SMTP is working!</h2>
+              <p style="color:#5a7080">This test email was sent from <strong style="color:#d4dde8">noreply@backtesting-journalmytrades.com</strong> via cPanel SMTP.</p>
+              <p style="color:#5a7080;margin-top:16px;font-size:12px">You can delete this route once confirmed.</p>
+            </div>"""
+        )
+        return jsonify({"ok": True, "sent_to": current_user.email})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 @app.route("/sitemap.xml")
 def sitemap():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
