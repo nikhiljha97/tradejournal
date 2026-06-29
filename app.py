@@ -1136,17 +1136,37 @@ Focus on: streak effects, session timing, emotion-to-loss correlation, RR discip
 
 # ── Chart Replay / Backtest ───────────────────────────────────────────────────
 
-# Display name → yfinance ticker
+# Internal key → yfinance ticker
 CHART_SYMBOLS = {
+    "EURUSD":  "EURUSD=X",
     "XAUUSD":  "GC=F",
     "USOIL":   "CL=F",
-    "BTCUSD":  "BTC-USD",
-    "ETHUSD":  "ETH-USD",
-    "EURUSD":  "EURUSD=X",
     "NQ":      "NQ=F",
     "ES":      "ES=F",
     "YM":      "YM=F",
+    "BTCUSD":  "BTC-USD",
+    "ETHUSD":  "ETH-USD",
+    "XRP":     "XRP-USD",
 }
+
+# Category structure for the UI dropdown selector
+CHART_CATEGORIES = [
+    {"cat": "Forex", "items": [
+        {"key": "EURUSD", "abbr": "EUR/USD", "name": "Euro / US Dollar"},
+    ]},
+    {"cat": "Futures", "items": [
+        {"key": "XAUUSD", "abbr": "GC", "name": "Gold Futures"},
+        {"key": "USOIL",  "abbr": "CL", "name": "Crude Oil Futures"},
+        {"key": "NQ",     "abbr": "NQ", "name": "Nasdaq Futures"},
+        {"key": "ES",     "abbr": "ES", "name": "S&P 500 Futures"},
+        {"key": "YM",     "abbr": "YM", "name": "Dow Jones Futures"},
+    ]},
+    {"cat": "Crypto", "items": [
+        {"key": "BTCUSD", "abbr": "BTC", "name": "Bitcoin"},
+        {"key": "ETHUSD", "abbr": "ETH", "name": "Ethereum"},
+        {"key": "XRP",    "abbr": "XRP", "name": "XRP"},
+    ]},
+]
 
 # How far back to fetch per timeframe
 _YF_PARAMS = {
@@ -1282,7 +1302,7 @@ def _background_fetch(app_ctx, symbol_key: str, tf: str):
 @app.route("/backtest")
 @login_required
 def backtest_page():
-    return render_template("backtest.html", symbols=list(CHART_SYMBOLS.keys()), username=current_user.username)
+    return render_template("backtest.html", categories=CHART_CATEGORIES, username=current_user.username)
 
 
 @app.route("/api/chart-data")

@@ -28,10 +28,27 @@
     .nav-right{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
 
     .toolbar{display:flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap}
-    .sym-btn,.tf-btn,.tool-btn{font-size:11px;font-weight:600;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif;white-space:nowrap}
-    .sym-btn:hover,.tf-btn:hover,.tool-btn:hover{border-color:var(--border2);color:var(--text)}
-    .sym-btn.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
+    .tf-btn,.tool-btn{font-size:11px;font-weight:600;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif;white-space:nowrap}
+    .tf-btn:hover,.tool-btn:hover{border-color:var(--border2);color:var(--text)}
     .tf-btn.active{background:var(--panel2);border-color:var(--border2);color:var(--text)}
+    /* Category dropdown */
+    .cat-dropdown{position:relative;display:inline-block}
+    .cat-btn{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif;white-space:nowrap;transition:all .15s}
+    .cat-btn:hover{border-color:var(--border2);color:var(--text)}
+    .cat-btn.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
+    .cat-sel{color:var(--muted);font-weight:400;font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+    .cat-btn.active .cat-sel{color:var(--green);opacity:.8}
+    .cat-chevron{font-size:9px;opacity:.6;transition:transform .15s}
+    .cat-btn.open .cat-chevron{transform:rotate(180deg)}
+    .cat-menu{position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:var(--panel2);border:1px solid var(--border2);border-radius:8px;padding:4px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+    .cat-menu.open{display:block}
+    .cat-menu-header{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:5px 9px 3px}
+    .cat-item{display:flex;align-items:center;gap:10px;padding:7px 9px;border-radius:5px;cursor:pointer;transition:background .1s}
+    .cat-item:hover{background:var(--faint)}
+    .cat-item.active{background:var(--gdim)}
+    .cat-abbr{font-size:11px;font-weight:700;color:var(--green);min-width:44px}
+    .cat-item:not(.active) .cat-abbr{color:var(--muted)}
+    .cat-name{font-size:11px;color:var(--text)}
     .tool-btn.active{background:rgba(0,229,160,.12);border-color:var(--green);color:var(--green)}
     .toolbar-sep{width:1px;height:20px;background:var(--border);flex-shrink:0;margin:0 2px}
     .toolbar-label{font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap}
@@ -234,9 +251,26 @@
 
 <!-- TOOLBAR -->
 <div class="toolbar">
-  <span class="toolbar-label">Symbol:</span>
-  {% for sym in symbols %}
-  <button class="sym-btn{% if loop.first %} active{% endif %}" data-sym="{{ sym }}" onclick="selectSymbol('{{ sym }}',this)">{{ sym }}</button>
+  {% for cat in categories %}
+  <div class="cat-dropdown" id="catDrop_{{ cat.cat }}">
+    <button class="cat-btn{% if loop.first %} active{% endif %}" id="catBtn_{{ cat.cat }}"
+            onclick="toggleCatDrop('{{ cat.cat }}')">
+      {{ cat.cat }}
+      <span class="cat-sel" id="catSel_{{ cat.cat }}">{% if loop.first %}· {{ cat.items[0].abbr }} – {{ cat.items[0].name }}{% endif %}</span>
+      <span class="cat-chevron">▾</span>
+    </button>
+    <div class="cat-menu" id="catMenu_{{ cat.cat }}">
+      <div class="cat-menu-header">{{ cat.cat }}</div>
+      {% for item in cat.items %}
+      <div class="cat-item{% if loop.first and loop.parent.loop.first %} active{% endif %}"
+           id="catItem_{{ item.key }}"
+           onclick="selectSymbolCat('{{ item.key }}','{{ item.abbr }}','{{ item.name }}','{{ cat.cat }}')">
+        <span class="cat-abbr">{{ item.abbr }}</span>
+        <span class="cat-name">{{ item.name }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
   {% endfor %}
 
   <div class="toolbar-sep"></div>
@@ -399,7 +433,13 @@
 let chart;
 let allCandles = [], visibleEnd = 0, replayMode = false;
 let playInterval = null, playSpeed = 250;
-let currentSymbol = "{{ symbols[0] }}", currentTF = "1h";
+// Build flat lookup: key → {abbr, name, cat}
+const SYMBOL_META = {};
+{% for cat in categories %}{% for item in cat.items %}
+SYMBOL_META["{{ item.key }}"] = {abbr:"{{ item.abbr }}",name:"{{ item.name }}",cat:"{{ cat.cat }}"};
+{% endfor %}{% endfor %}
+
+let currentSymbol = "{{ categories[0].items[0].key }}", currentTF = "1h";
 let activeTool = "cursor";
 const toolColors = {
   cursor:               "#4da6ff",
@@ -517,10 +557,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Restore previous symbol/TF/replay position (survives reload/tab-close)
   const _saved = _loadReplayState();
-  if (_saved?.symbol) {
+  if (_saved?.symbol && SYMBOL_META[_saved.symbol]) {
     currentSymbol = _saved.symbol;
-    document.querySelectorAll(".sym-btn").forEach(b =>
-      b.classList.toggle("active", b.dataset.sym === currentSymbol));
+    _activateSymbolUI(currentSymbol);
   }
   if (_saved?.tf) {
     currentTF = _saved.tf;
@@ -530,8 +569,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadData(currentSymbol, currentTF, _saved?.replayTimestamp ?? null);
   await loadSessions();
 
-  // Hide context menu on outside click
-  document.addEventListener("click", hideCtxMenu);
+  // Hide context menu and category dropdowns on outside click
+  document.addEventListener("click", (e) => {
+    hideCtxMenu(e);
+    if (!e.target.closest(".cat-dropdown")) closeAllCatDrops();
+  });
   // Right-click on chart — use convertFromPixel to get the exact Y-axis price at cursor,
   // NOT the candle close (which stays constant when moving vertically within the same candle).
   document.getElementById("chartWrap").addEventListener("contextmenu", (e) => {
@@ -1238,13 +1280,52 @@ async function loadData(sym, tf, resumeAtTimestamp = null) {
   } finally { hideLoading(); }
 }
 
-function selectSymbol(sym, btn) {
+// ── Category dropdown helpers ─────────────────────────────────────────────────
+function toggleCatDrop(cat) {
+  const menu = document.getElementById("catMenu_" + cat);
+  const btn  = document.getElementById("catBtn_"  + cat);
+  const isOpen = menu.classList.contains("open");
+  closeAllCatDrops();
+  if (!isOpen) {
+    menu.classList.add("open");
+    btn.classList.add("open");
+  }
+}
+function closeAllCatDrops() {
+  document.querySelectorAll(".cat-menu").forEach(m => m.classList.remove("open"));
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("open"));
+}
+function selectSymbolCat(sym, abbr, name, cat) {
+  closeAllCatDrops();
   if (sym === currentSymbol) return;
   currentSymbol = sym;
-  document.querySelectorAll(".sym-btn").forEach(b => b.classList.remove("active"));
-  btn.classList.add("active");
-  // Symbol switch always resets — different instruments, timestamps don't carry meaning
+
+  // Update all category buttons — deactivate all, activate the chosen one
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".cat-sel").forEach(s => { s.textContent = ""; });
+  const activeBtn = document.getElementById("catBtn_" + cat);
+  activeBtn.classList.add("active");
+  document.getElementById("catSel_" + cat).textContent = "· " + abbr + " – " + name;
+
+  // Update item highlight
+  document.querySelectorAll(".cat-item").forEach(i => i.classList.remove("active"));
+  const activeItem = document.getElementById("catItem_" + sym);
+  if (activeItem) activeItem.classList.add("active");
+
   loadData(sym, currentTF);
+}
+function _activateSymbolUI(sym) {
+  const meta = SYMBOL_META[sym];
+  if (!meta) return;
+  document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".cat-sel").forEach(s => { s.textContent = ""; });
+  const btn = document.getElementById("catBtn_" + meta.cat);
+  if (btn) btn.classList.add("active");
+  const sel = document.getElementById("catSel_" + meta.cat);
+  if (sel) sel.textContent = "· " + meta.abbr + " – " + meta.name;
+  document.querySelectorAll(".cat-item").forEach(i => i.classList.remove("active"));
+  const item = document.getElementById("catItem_" + sym);
+  if (item) item.classList.add("active");
 }
 function selectTF(tf, btn) {
   if (tf === currentTF) return;
