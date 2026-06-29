@@ -5,7 +5,9 @@ import os, json, uuid, re
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from sqlalchemy import text
 from blog_posts import POSTS, get_post
-import resend
+import smtplib, ssl as _ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import secrets
 from datetime import datetime, timedelta, timezone
 from flask_cors import CORS
@@ -80,21 +82,41 @@ def _validate_email(email: str):
         return False, "Disposable email addresses are not allowed"
     return True, None
 
+# ── Mail config ───────────────────────────────────────────────────────────────
+_MAIL_HOST = "mail.backtesting-journalmytrades.com"
+_MAIL_PORT = 465
+_MAIL_USER = "noreply@backtesting-journalmytrades.com"
+_MAIL_FROM = "TradeJournal <noreply@backtesting-journalmytrades.com>"
+_SITE_URL  = "https://backtesting-journalmytrades.com"
+
+def _send_email(to: str, subject: str, html: str):
+    """Send an HTML email via cPanel SMTP (SSL port 465)."""
+    password = os.environ.get("MAIL_PASSWORD", "")
+    if not password:
+        raise RuntimeError("MAIL_PASSWORD env var not set")
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = _MAIL_FROM
+    msg["To"]      = to
+    msg.attach(MIMEText(html, "html"))
+    ctx = _ssl.create_default_context()
+    with smtplib.SMTP_SSL(_MAIL_HOST, _MAIL_PORT, context=ctx) as srv:
+        srv.login(_MAIL_USER, password)
+        srv.sendmail(_MAIL_USER, [to], msg.as_string())
+
 def _send_verification_email(user_email: str, token: str):
-    verify_url = f"https://tradejournal-n3hn.onrender.com/verify-email/{token}"
-    resend.api_key = os.environ.get("RESEND_API_KEY", "")
-    resend.Emails.send({
-        "from": "TradeJournal <onboarding@resend.dev>",
-        "to": [user_email],
-        "subject": "Verify your TradeJournal email",
-        "html": f"""
-        <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+    verify_url = f"{_SITE_URL}/verify-email/{token}"
+    _send_email(
+        user_email,
+        "Verify your TradeJournal email",
+        f"""<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+          <div style="font-size:18px;font-weight:900;margin-bottom:24px">Trade<span style="color:#00e5a0">·</span>Journal</div>
           <h2 style="color:#00e5a0;margin-bottom:16px">Confirm your email</h2>
           <p style="color:#5a7080;margin-bottom:24px">Click the button below to verify your TradeJournal account. This link expires in 24 hours.</p>
-          <a href="{verify_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Verify Email</a>
-          <p style="color:#5a7080;margin-top:24px;font-size:12px">If you did not create a TradeJournal account, you can ignore this email.</p>
+          <a href="{verify_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Verify Email →</a>
+          <p style="color:#5a7080;margin-top:24px;font-size:12px">If you did not create a TradeJournal account, you can safely ignore this email.</p>
         </div>"""
-    })
+    )
 
 # ── Security headers ──────────────────────────────────────────────────────────
 @app.after_request
@@ -444,18 +466,18 @@ def sitemap():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     from blog_posts import POSTS
     blog_urls = "\n".join(
-        f'  <url><loc>https://tradejournal-n3hn.onrender.com/blog/{p["slug"]}</loc>'
+        f'  <url><loc>https://backtesting-journalmytrades.com/blog/{p["slug"]}</loc>'
         f'<lastmod>{p.get("date", today)}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>'
         for p in POSTS
     )
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://tradejournal-n3hn.onrender.com/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/register</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/login</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/blog-posts</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tradejournal-n3hn.onrender.com/ideas</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/register</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/login</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/blog</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/blog-posts</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/ideas</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 {blog_urls}
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
@@ -473,7 +495,7 @@ Disallow: /verify-email/
 Disallow: /resend-verification
 Disallow: /forgot-password
 
-Sitemap: https://tradejournal-n3hn.onrender.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
+Sitemap: https://backtesting-journalmytrades.com/sitemap.xml""", 200, {"Content-Type": "text/plain"}
 
 @app.route("/favicon.ico")
 def favicon_ico():
@@ -490,21 +512,19 @@ def forgot_password():
         user.reset_token = token
         user.reset_token_expiry = datetime.now(timezone.utc) + timedelta(hours=1)
         db.session.commit()
-        reset_url = f"https://tradejournal-n3hn.onrender.com/reset-password/{token}"
+        reset_url = f"{_SITE_URL}/reset-password/{token}"
         try:
-            resend.api_key = os.environ.get("RESEND_API_KEY","")
-            resend.Emails.send({
-                "from": "TradeJournal <onboarding@resend.dev>",
-                "to": [email],
-                "subject": "Reset your TradeJournal password",
-                "html": f"""
-                <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+            _send_email(
+                email,
+                "Reset your TradeJournal password",
+                f"""<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+                  <div style="font-size:18px;font-weight:900;margin-bottom:24px">Trade<span style="color:#00e5a0">·</span>Journal</div>
                   <h2 style="color:#00e5a0;margin-bottom:16px">Reset your password</h2>
                   <p style="color:#5a7080;margin-bottom:24px">Click the button below to reset your TradeJournal password. This link expires in 1 hour.</p>
-                  <a href="{reset_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Reset Password</a>
-                  <p style="color:#5a7080;margin-top:24px;font-size:12px">If you didnt request this, ignore this email.</p>
+                  <a href="{reset_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Reset Password →</a>
+                  <p style="color:#5a7080;margin-top:24px;font-size:12px">If you didn't request this, you can safely ignore this email.</p>
                 </div>"""
-            })
+            )
         except Exception as e:
             print(f"Email error: {e}")
     return jsonify({"ok": True})
@@ -643,10 +663,9 @@ def _send_idea_notifications(idea, author):
     import threading
     def send():
         try:
-            resend.api_key = os.environ.get("RESEND_API_KEY","")
             dir_emoji = "Bullish" if idea.direction=="Long" else "Bearish" if idea.direction=="Short" else "Neutral"
-            dir_icon = "📈" if idea.direction=="Long" else "📉" if idea.direction=="Short" else "↔"
-            bg_color = "rgba(0,229,160,.1)" if idea.direction=="Long" else "rgba(255,71,87,.1)" if idea.direction=="Short" else "rgba(90,112,128,.15)"
+            dir_icon  = "📈" if idea.direction=="Long" else "📉" if idea.direction=="Short" else "↔"
+            bg_color  = "rgba(0,229,160,.1)" if idea.direction=="Long" else "rgba(255,71,87,.1)" if idea.direction=="Short" else "rgba(90,112,128,.15)"
             txt_color = "#00e5a0" if idea.direction=="Long" else "#ff4757" if idea.direction=="Short" else "#5a7080"
             subscribers = User.query.filter_by(idea_notifications=True).all()
             for user in subscribers:
@@ -655,8 +674,8 @@ def _send_idea_notifications(idea, author):
                 if not user.notif_token:
                     user.notif_token = secrets.token_urlsafe(32)
                     db.session.commit()
-                unsub_url = f"https://tradejournal-n3hn.onrender.com/unsubscribe-ideas/{user.notif_token}"
-                preview = (idea.content or "")[:200] + ("..." if len(idea.content or "") > 200 else "")
+                unsub_url = f"{_SITE_URL}/unsubscribe-ideas/{user.notif_token}"
+                preview   = (idea.content or "")[:200] + ("..." if len(idea.content or "") > 200 else "")
                 html_body = (
                     "<div style=\"font-family:Inter,sans-serif;max-width:520px;margin:0 auto;background:#07090d;border-radius:12px;overflow:hidden\">"
                     "<div style=\"background:#111820;padding:24px;border-bottom:1px solid #1c2b3a\">"
@@ -668,7 +687,7 @@ def _send_idea_notifications(idea, author):
                     f"<span style=\"background:#003d2b;color:#00e5a0;font-size:12px;font-weight:700;padding:4px 12px;border-radius:4px;margin-right:8px\">{idea.instrument}</span>"
                     f"<span style=\"background:{bg_color};color:{txt_color};font-size:12px;font-weight:700;padding:4px 12px;border-radius:4px\">{dir_icon} {dir_emoji}</span></div>"
                     f"<p style=\"color:#5a7080;font-size:14px;line-height:1.7;margin:0 0 24px\">{preview}</p>"
-                    "<a href=\"https://tradejournal-n3hn.onrender.com/ideas\" style=\"display:inline-block;background:#00e5a0;color:#000;font-weight:800;font-size:15px;padding:12px 28px;border-radius:8px;text-decoration:none\">View Idea →</a>"
+                    f"<a href=\"{_SITE_URL}/ideas\" style=\"display:inline-block;background:#00e5a0;color:#000;font-weight:800;font-size:15px;padding:12px 28px;border-radius:8px;text-decoration:none\">View Idea →</a>"
                     "</div>"
                     f"<div style=\"padding:20px 32px;border-top:1px solid #1c2b3a;text-align:center\">"
                     f"<p style=\"color:#5a7080;font-size:11px;margin:0\">Posted by <strong style=\"color:#d4dde8\">{author.username}</strong> on TradeJournal</p>"
@@ -676,7 +695,7 @@ def _send_idea_notifications(idea, author):
                     "</div></div>"
                 )
                 try:
-                    resend.Emails.send({"from":"TradeJournal <onboarding@resend.dev>","to":[user.email],"subject":f"New Trade Idea: {idea.instrument} — {dir_icon} {dir_emoji}","html":html_body})
+                    _send_email(user.email, f"New Trade Idea: {idea.instrument} — {dir_icon} {dir_emoji}", html_body)
                 except Exception as e:
                     print(f"Email to {user.email} failed: {e}")
         except Exception as e:
