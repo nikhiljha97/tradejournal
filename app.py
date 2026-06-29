@@ -1151,17 +1151,17 @@ CHART_SYMBOLS = {
 
 # Category structure for the UI dropdown selector
 CHART_CATEGORIES = [
-    {"cat": "Forex", "items": [
+    {"cat": "Forex", "syms": [
         {"key": "EURUSD", "abbr": "EUR/USD", "name": "Euro / US Dollar"},
     ]},
-    {"cat": "Futures", "items": [
+    {"cat": "Futures", "syms": [
         {"key": "XAUUSD", "abbr": "GC", "name": "Gold Futures"},
         {"key": "USOIL",  "abbr": "CL", "name": "Crude Oil Futures"},
         {"key": "NQ",     "abbr": "NQ", "name": "Nasdaq Futures"},
         {"key": "ES",     "abbr": "ES", "name": "S&P 500 Futures"},
         {"key": "YM",     "abbr": "YM", "name": "Dow Jones Futures"},
     ]},
-    {"cat": "Crypto", "items": [
+    {"cat": "Crypto", "syms": [
         {"key": "BTCUSD", "abbr": "BTC", "name": "Bitcoin"},
         {"key": "ETHUSD", "abbr": "ETH", "name": "Ethereum"},
         {"key": "XRP",    "abbr": "XRP", "name": "XRP"},

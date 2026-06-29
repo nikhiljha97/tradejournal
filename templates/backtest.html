@@ -275,17 +275,18 @@
 <!-- TOOLBAR -->
 <div class="toolbar">
   {% for cat in categories %}
+  {% set cat_is_first = loop.first %}
   <div class="cat-dropdown" id="catDrop_{{ cat.cat }}">
-    <button class="cat-btn{% if loop.first %} active{% endif %}" id="catBtn_{{ cat.cat }}"
+    <button class="cat-btn{% if cat_is_first %} active{% endif %}" id="catBtn_{{ cat.cat }}"
             onclick="toggleCatDrop('{{ cat.cat }}')">
       {{ cat.cat }}
-      <span class="cat-sel" id="catSel_{{ cat.cat }}">{% if loop.first %}· {{ cat.items[0].abbr }} – {{ cat.items[0].name }}{% endif %}</span>
+      <span class="cat-sel" id="catSel_{{ cat.cat }}">{% if cat_is_first %}· {{ cat.syms[0].abbr }} – {{ cat.syms[0].name }}{% endif %}</span>
       <span class="cat-chevron">▾</span>
     </button>
     <div class="cat-menu" id="catMenu_{{ cat.cat }}">
       <div class="cat-menu-header">{{ cat.cat }}</div>
-      {% for item in cat.items %}
-      <div class="cat-item{% if loop.first and loop.parent.loop.first %} active{% endif %}"
+      {% for item in cat.syms %}
+      <div class="cat-item{% if loop.first and cat_is_first %} active{% endif %}"
            id="catItem_{{ item.key }}"
            onclick="selectSymbolCat('{{ item.key }}','{{ item.abbr }}','{{ item.name }}','{{ cat.cat }}')">
         <span class="cat-abbr">{{ item.abbr }}</span>
@@ -458,11 +459,11 @@ let allCandles = [], visibleEnd = 0, replayMode = false;
 let playInterval = null, playSpeed = 250;
 // Build flat lookup: key → {abbr, name, cat}
 const SYMBOL_META = {};
-{% for cat in categories %}{% for item in cat.items %}
+{% for cat in categories %}{% for item in cat.syms %}
 SYMBOL_META["{{ item.key }}"] = {abbr:"{{ item.abbr }}",name:"{{ item.name }}",cat:"{{ cat.cat }}"};
 {% endfor %}{% endfor %}
 
-let currentSymbol = "{{ categories[0].items[0].key }}", currentTF = "1h";
+let currentSymbol = "{{ categories[0].syms[0].key }}", currentTF = "1h";
 let activeTool = "cursor";
 const toolColors = {
   cursor:               "#4da6ff",
