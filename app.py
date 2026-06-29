@@ -47,6 +47,15 @@ login_manager.login_message = ""
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# ── Canonical domain redirect ─────────────────────────────────────────────────
+_CANONICAL = "https://backtesting-journalmytrades.com"
+_OLD_HOST  = "tradejournal-n3hn.onrender.com"
+
+@app.before_request
+def redirect_to_canonical():
+    if request.host == _OLD_HOST:
+        return redirect(_CANONICAL + request.full_path.rstrip("?"), 301)
+
 
 # ── Email validation helpers ──────────────────────────────────────────────────
 _EMAIL_RE = re.compile(r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$')
