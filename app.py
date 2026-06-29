@@ -5,9 +5,7 @@ import os, json, uuid, re
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from sqlalchemy import text
 from blog_posts import POSTS, get_post
-import smtplib, ssl as _ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 import secrets
 from datetime import datetime, timedelta, timezone
 from flask_cors import CORS
@@ -83,26 +81,18 @@ def _validate_email(email: str):
     return True, None
 
 # ── Mail config ───────────────────────────────────────────────────────────────
-_MAIL_HOST = "mail.backtesting-journalmytrades.com"
-_MAIL_PORT = 465
-_MAIL_USER = "noreply@backtesting-journalmytrades.com"
 _MAIL_FROM = "TradeJournal <noreply@backtesting-journalmytrades.com>"
 _SITE_URL  = "https://backtesting-journalmytrades.com"
 
 def _send_email(to: str, subject: str, html: str):
-    """Send an HTML email via cPanel SMTP (SSL port 465)."""
-    password = os.environ.get("MAIL_PASSWORD", "")
-    if not password:
-        raise RuntimeError("MAIL_PASSWORD env var not set")
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"]    = _MAIL_FROM
-    msg["To"]      = to
-    msg.attach(MIMEText(html, "html"))
-    ctx = _ssl.create_default_context()
-    with smtplib.SMTP_SSL(_MAIL_HOST, _MAIL_PORT, context=ctx) as srv:
-        srv.login(_MAIL_USER, password)
-        srv.sendmail(_MAIL_USER, [to], msg.as_string())
+    """Send an HTML email via Resend API."""
+    resend.api_key = os.environ.get("RESEND_API_KEY", "")
+    resend.Emails.send({
+        "from": _MAIL_FROM,
+        "to": [to],
+        "subject": subject,
+        "html": html,
+    })
 
 def _send_verification_email(user_email: str, token: str):
     verify_url = f"{_SITE_URL}/verify-email/{token}"
@@ -464,19 +454,19 @@ def blog_post(slug):
 @app.route("/test-email")
 @login_required
 def test_email():
-    """Admin-only: send a test email to the logged-in user to verify SMTP."""
+    """Admin: send a test email to verify Resend is working."""
     try:
         _send_email(
-            current_user.email,
-            "TradeJournal SMTP test",
-            f"""<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
+            "nikhiljha97@yahoo.com",
+            "TradeJournal email test ✓",
+            """<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
               <div style="font-size:18px;font-weight:900;margin-bottom:24px">Trade<span style="color:#00e5a0">·</span>Journal</div>
-              <h2 style="color:#00e5a0;margin-bottom:16px">SMTP is working!</h2>
-              <p style="color:#5a7080">This test email was sent from <strong style="color:#d4dde8">noreply@backtesting-journalmytrades.com</strong> via cPanel SMTP.</p>
+              <h2 style="color:#00e5a0;margin-bottom:16px">Email is working!</h2>
+              <p style="color:#5a7080">Sent from <strong style="color:#d4dde8">noreply@backtesting-journalmytrades.com</strong> via Resend. All email flows are live.</p>
               <p style="color:#5a7080;margin-top:16px;font-size:12px">You can delete this route once confirmed.</p>
             </div>"""
         )
-        return jsonify({"ok": True, "sent_to": current_user.email})
+        return jsonify({"ok": True, "sent_to": "nikhiljha97@yahoo.com"})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
