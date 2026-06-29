@@ -101,6 +101,19 @@
     .fl{font-size:14px;font-weight:900}.fl span{color:var(--green)}
     .fc{font-size:11px;color:var(--faint)}
     @media(max-width:768px){nav .nav-links{display:none}.hero{padding:40px 4% 28px}.feed{padding:24px 4%}.field-row{grid-template-columns:1fr}}
+    .nav-dropdown{position:relative;display:inline-block}
+    .nav-drop-btn{background:none;border:none;font-size:13px;color:var(--muted);font-weight:500;cursor:pointer;font-family:"Inter",sans-serif;padding:0;display:flex;align-items:center;gap:4px;transition:color .2s}
+    .nav-drop-btn:hover,.nav-drop-btn.active{color:var(--green)}
+    .nav-chevron{font-size:9px;opacity:.5;transition:transform .15s}
+    .nav-drop-btn.open .nav-chevron{transform:rotate(180deg)}
+    .nav-drop-menu{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);z-index:500;background:#161f2a;border:1px solid var(--border2);border-radius:10px;padding:4px;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+    .nav-drop-menu.open{display:block}
+    .nav-drop-hdr{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:5px 10px 3px}
+    .nav-drop-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;text-decoration:none;transition:background .1s}
+    .nav-drop-item:hover{background:var(--faint)}
+    .nav-drop-icon{font-size:15px;flex-shrink:0}
+    .nav-drop-label{font-size:12px;font-weight:600;color:var(--text)}
+    .nav-drop-sub{font-size:10px;color:var(--muted);margin-top:1px}
   </style>
 </head>
 <body>
@@ -109,9 +122,23 @@
   <div class="nav-links">
     <a href="/">Home</a>
     <a href="/blog">Blog</a>
-    <a href="/blog-posts" class="{% if section=='blog' %}active{% endif %}">Chart Updates</a>
-    <a href="/ideas" class="{% if section=='ideas' %}active{% endif %}">Trade Ideas</a>
-    <a href="/backtest">Chart Replay</a>
+    <div class="nav-dropdown" id="communityDrop">
+      <button class="nav-drop-btn {% if section=='blog' or section=='ideas' %}active{% endif %}" onclick="toggleNavDrop('communityDrop')">
+        Trade Ideas / Market Analysis <span class="nav-chevron">▾</span>
+      </button>
+      <div class="nav-drop-menu" id="communityDropMenu">
+        <div class="nav-drop-hdr">Community</div>
+        <a href="/ideas" class="nav-drop-item">
+          <span class="nav-drop-icon">💡</span>
+          <div><div class="nav-drop-label">Trade Ideas</div><div class="nav-drop-sub">Community trade setups</div></div>
+        </a>
+        <a href="/blog-posts" class="nav-drop-item">
+          <span class="nav-drop-icon">📊</span>
+          <div><div class="nav-drop-label">Market Analysis</div><div class="nav-drop-sub">Admin chart updates</div></div>
+        </a>
+      </div>
+    </div>
+    <a href="/backtest">Backtest</a>
   </div>
   <a href="/register" class="nav-cta" id="navCta">Start Free</a>
 </nav>
@@ -410,6 +437,20 @@ async function toggleNotif(subscribe) {
   });
   loadNotifStatus();
 }
+function toggleNavDrop(id) {
+  const menu = document.getElementById(id + 'Menu');
+  const btn  = document.querySelector('#' + id + ' .nav-drop-btn');
+  const isOpen = menu.classList.contains('open');
+  document.querySelectorAll('.nav-drop-menu').forEach(m => m.classList.remove('open'));
+  document.querySelectorAll('.nav-drop-btn').forEach(b => b.classList.remove('open'));
+  if (!isOpen) { menu.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-dropdown')) {
+    document.querySelectorAll('.nav-drop-menu').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.nav-drop-btn').forEach(b => b.classList.remove('open'));
+  }
+});
 </script>
 </body>
 </html>

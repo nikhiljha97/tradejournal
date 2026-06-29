@@ -95,7 +95,7 @@
   <div class="nav-links">
     <a href="/">Dashboard</a>
     <a href="/ideas">Trade Ideas</a>
-    <a href="/backtest">Chart Replay</a>
+    <a href="/backtest">Backtest</a>
     <a href="/blog">Blog</a>
   </div>
   <div class="nav-right">{{ username }}</div>
@@ -103,7 +103,7 @@
 
 <div class="page-wrap">
   <div class="page-header">
-    <div class="breadcrumb"><a href="/backtest">← Chart Replay</a></div>
+    <div class="breadcrumb"><a href="/backtest">← Backtest</a></div>
     <div class="page-title" id="pageTitle">Session Results</div>
     <div class="page-sub" id="pageSub">Loading…</div>
   </div>
@@ -309,12 +309,12 @@ function render(data) {
             }).join("")}
           </tbody>
         </table>
-      </div>` : `<div class="empty-state"><h2>No trades yet</h2><p>Head to Chart Replay and take some trades to see results here.</p></div>`}
+      </div>` : `<div class="empty-state"><h2>No trades yet</h2><p>Head to Backtest and take some trades to see results here.</p></div>`}
     </div>
 
     <!-- Actions -->
     <div class="actions-row">
-      <a href="/backtest" class="btn-action primary">▶ Continue Replay</a>
+      <a href="/backtest" class="btn-action primary">▶ Continue Backtest</a>
       <button class="btn-action" onclick="exportCSV(${JSON.stringify(trades).replace(/"/g, '&quot;')})">⬇ Export CSV</button>
       <button class="btn-danger" onclick="confirmDelete()">🗑 Delete Session</button>
     </div>
