@@ -1143,6 +1143,9 @@ CHART_SYMBOLS = {
     "BTCUSD":  "BTC-USD",
     "ETHUSD":  "ETH-USD",
     "EURUSD":  "EURUSD=X",
+    "NQ":      "NQ=F",
+    "ES":      "ES=F",
+    "YM":      "YM=F",
 }
 
 # How far back to fetch per timeframe
@@ -1206,6 +1209,12 @@ def _fetch_and_cache(symbol_key: str, tf: str):
                 .agg({"Open": "first", "High": "max", "Low": "min",
                       "Close": "last", "Volume": "sum"})
                 .dropna(subset=["Open", "Close"]))
+
+    # Clamp OHLC: yfinance daily futures data occasionally has Close/Open
+    # slightly outside the reported High/Low (data quality artifact).
+    # Ensure High >= max(O,C) and Low <= min(O,C) for all bars.
+    df["High"]  = df[["High",  "Open", "Close"]].max(axis=1)
+    df["Low"]   = df[["Low",   "Open", "Close"]].min(axis=1)
 
     # ── Bulk upsert ───────────────────────────────────────────────────────────
     # Retry once on OperationalError (stale SSL connection dropped between
