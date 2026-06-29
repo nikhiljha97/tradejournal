@@ -47,8 +47,10 @@
     /* NAV */
     nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:66px;transition:all .3s}
     nav.scrolled{background:rgba(7,9,13,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
-    .nav-logo{font-size:17px;font-weight:900;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
-    .nav-logo .dot{color:var(--green)}
+    .nav-logo{font-size:15px;font-weight:900;letter-spacing:-.01em;display:flex;align-items:center;gap:5px;white-space:nowrap}
+    .nav-logo .dot{color:var(--border2);font-size:12px;margin:0 1px}
+    .nav-word{color:var(--muted);transition:color .5s,text-shadow .5s}
+    .nav-word.lit{color:var(--green);text-shadow:0 0 12px rgba(0,229,160,.5)}
     .nav-links{display:flex;gap:32px}
     .nav-links a{font-size:13px;color:var(--muted);font-weight:500;transition:color .2s}
     .nav-links a:hover{color:var(--text)}
@@ -56,7 +58,7 @@
     .nav-cta:hover{background:var(--green2);box-shadow:0 4px 24px rgba(0,229,160,.3)}
 
     /* HERO */
-    .hero{padding:100px 6% 60px;position:relative;overflow:hidden}
+    .hero{padding:126px 6% 52px;position:relative;overflow:hidden}
     .hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 60% 90% at 30% 50%,black 20%,transparent 100%);opacity:.5}
     .hero-glow{position:absolute;top:40%;left:25%;transform:translate(-50%,-50%);width:500px;height:400px;background:radial-gradient(ellipse,rgba(0,229,160,.1) 0%,transparent 70%);pointer-events:none}
     .hero-cols{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;max-width:1200px;margin:0 auto}
@@ -134,28 +136,75 @@
       .app-win-inner .app-screen{height:280px}
     }
 
-    /* TICKER */
-    .ticker{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);overflow:hidden;padding:11px 0}
+    /* TICKER — fixed below nav */
+    .ticker-wrap{position:fixed;top:66px;left:0;right:0;z-index:190;border-bottom:1px solid var(--border);background:rgba(7,9,13,.95);backdrop-filter:blur(12px);overflow:hidden}
+    .ticker{overflow:hidden;padding:8px 0}
     .ticker-inner{display:flex;gap:56px;white-space:nowrap;animation:scroll-left 35s linear infinite}
     .ticker-inner:hover{animation-play-state:paused}
     @keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-    .tick{display:inline-flex;align-items:center;gap:10px;font-family:"JetBrains Mono",monospace;font-size:12px}
+    .tick{display:inline-flex;align-items:center;gap:10px;font-family:"JetBrains Mono",monospace;font-size:11px}
     .tick-s{color:var(--text);font-weight:700}
     .tick-v{color:var(--green)}
-    .tick-c{font-size:11px}
+    .tick-c{font-size:10px}
     .tick-c.up{color:var(--green)}
     .tick-c.dn{color:var(--red)}
 
-    /* SOCIAL PROOF NUMBERS */
-    .proof{padding:48px 6%;border-bottom:1px solid var(--border)}
-    .proof-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;max-width:900px;margin:0 auto;border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .proof-item{background:var(--panel);padding:32px 24px;text-align:center;border-right:1px solid var(--border)}
-    .proof-item:last-child{border-right:none}
-    .proof-num{font-size:40px;font-weight:900;color:var(--green);font-family:"JetBrains Mono",monospace;letter-spacing:-.03em;line-height:1}
-    .proof-label{font-size:12px;color:var(--muted);margin-top:6px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+    /* INTERACTIVE FILTER CHIPS (hero screen 1) */
+    .fil-row{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+    .fil-chip{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:100px;border:1px solid var(--border2);color:var(--muted);cursor:pointer;transition:all .3s;background:transparent;font-family:inherit}
+    .fil-chip.active{background:rgba(0,229,160,.12);border-color:var(--green);color:var(--green)}
+    /* Edge score big display */
+    .edge-display{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+    .edge-score-big{font-size:36px;font-weight:900;font-family:"JetBrains Mono",monospace;line-height:1}
+    .edge-bar-wrap{flex:1;display:flex;flex-direction:column;gap:4px}
+    .edge-bar-bg{height:6px;background:var(--faint);border-radius:3px;overflow:hidden}
+    .edge-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .6s ease}
+    .edge-label{font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+    .edge-grade{font-size:10px;font-weight:700;color:var(--green);font-family:"JetBrains Mono",monospace}
+    /* Animated KPI number */
+    .ap-kpi-v{font-size:15px;font-weight:700;font-family:"JetBrains Mono",monospace;transition:all .4s}
+
+    /* COMBINED PROOF + BENTO section */
+    .feat-section{padding:56px 6% 56px;border-top:1px solid var(--border)}
+    .feat-cols{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:380px 1fr;gap:56px;align-items:start}
+    .feat-left{}
+    .feat-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:28px 0 0}
+    .feat-stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 18px;text-align:center}
+    .feat-stat-num{font-size:36px;font-weight:900;color:var(--green);font-family:"JetBrains Mono",monospace;letter-spacing:-.02em;line-height:1}
+    .feat-stat-lbl{font-size:11px;color:var(--muted);margin-top:5px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+    .feat-marquee{overflow:hidden;margin-top:20px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .feat-marquee .marquee-inner{animation-duration:22s}
+    .feat-right .bento{grid-template-columns:repeat(2,1fr);gap:14px}
+    .feat-right .bento-card{padding:20px}
+    .feat-right .bento-title{font-size:14px}
+    .feat-right .bento-desc{font-size:12px}
+    @media(max-width:900px){
+      .feat-cols{grid-template-columns:1fr;gap:32px}
+      .feat-right .bento{grid-template-columns:1fr}
+    }
+
+    /* HOW-IT-WORKS TABS (replaces 01/02/03 sections) */
+    .how-section{padding:56px 6%;border-top:1px solid var(--border);background:var(--bg2)}
+    .how-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:48px;max-width:1100px;margin:0 auto 40px}
+    .how-tab{flex:1;padding:14px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;text-align:center;transition:all .3s;user-select:none}
+    .how-tab:hover{color:var(--text)}
+    .how-tab.active{color:var(--green);border-bottom-color:var(--green)}
+    .how-tab-num{font-family:"JetBrains Mono",monospace;font-size:11px;opacity:.5;margin-right:6px}
+    .how-panels{max-width:1100px;margin:0 auto;position:relative}
+    .how-panel{display:none;animation:fadeInPanel .4s ease}
+    .how-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+    @keyframes fadeInPanel{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:900px){
+      .how-panel.active{grid-template-columns:1fr;gap:32px}
+      .how-tab{font-size:11px;padding:10px 8px}
+      .how-tab-num{display:none}
+    }
+
+    /* SOCIAL PROOF NUMBERS — kept for JS compat but hidden (merged into feat-stats) */
+    .proof{display:none}
 
     /* SECTION SHARED */
-    .s{padding:80px 6%}
+    .s{padding:60px 6%}
     .s-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;display:block}
     .s-h{font-size:clamp(36px,5vw,64px);font-weight:900;line-height:1.0;letter-spacing:-.03em;margin-bottom:16px}
     .s-h em{font-style:italic;color:var(--green);font-weight:300}
@@ -323,7 +372,9 @@
 </noscript>
 <!-- NAV -->
 <nav id="nav">
-  <div class="nav-logo">Trade<span class="dot">·</span>Journal</div>
+  <div class="nav-logo" id="navLogo">
+    <span class="nav-word lit" id="nw0">Trade</span><span class="dot">·</span><span class="nav-word" id="nw1">Journal</span><span class="dot">·</span><span class="nav-word" id="nw2">Backtest</span><span class="dot">·</span><span class="nav-word" id="nw3">Analyse</span>
+  </div>
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#how">How it works</a>
@@ -333,6 +384,45 @@
   </div>
   <a href="/register" class="nav-cta">Start Free →</a>
 </nav>
+
+<!-- TICKER — fixed below nav -->
+<div class="ticker-wrap" id="tvTickerContainer">
+  <div class="ticker">
+    <div class="tradingview-widget-container__widget"></div>
+  </div>
+  <script id="tvTickerScript" type="application/json">
+  {
+    "symbols": [
+      {"proName":"OANDA:XAUUSD","title":"Gold"},
+      {"proName":"OANDA:EURUSD","title":"EUR/USD"},
+      {"proName":"OANDA:GBPUSD","title":"GBP/USD"},
+      {"proName":"OANDA:USDJPY","title":"USD/JPY"},
+      {"proName":"OANDA:XAGUSD","title":"Silver"},
+      {"proName":"BINANCE:BTCUSDT","title":"Bitcoin"},
+      {"proName":"BINANCE:ETHUSDT","title":"Ethereum"},
+      {"proName":"OANDA:US30USD","title":"Dow Jones"},
+      {"proName":"OANDA:NAS100USD","title":"Nasdaq"},
+      {"proName":"TVC:DXY","title":"DXY"}
+    ],
+    "showSymbolLogo": false,
+    "isTransparent": true,
+    "displayMode": "adaptive",
+    "colorTheme": "dark",
+    "locale": "en"
+  }
+  </script>
+</div>
+<script>
+  (function(){
+    var cfg = JSON.parse(document.getElementById('tvTickerScript').textContent);
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
+    s.async = true;
+    s.textContent = JSON.stringify(cfg);
+    document.getElementById('tvTickerContainer').appendChild(s);
+  })();
+</script>
 
 <!-- HERO -->
 <section class="hero" id="hero">
@@ -364,33 +454,51 @@
       <div class="app-win-viewport">
         <div class="app-win-inner" id="appWinInner">
 
-          <!-- SCREEN 1: Analytics -->
-          <div class="app-screen">
+          <!-- SCREEN 1: Interactive Analytics -->
+          <div class="app-screen" id="heroAnalyticsScreen">
             <div class="screen-label">Dashboard · Analytics</div>
-            <div class="ap-kpi-row">
-              <div class="ap-kpi"><div class="ap-kpi-l">Win rate</div><div class="ap-kpi-v" style="color:var(--green)">66.7%</div></div>
-              <div class="ap-kpi"><div class="ap-kpi-l">Net P&amp;L</div><div class="ap-kpi-v" style="color:var(--green)">+$1,240</div></div>
-              <div class="ap-kpi"><div class="ap-kpi-l">Max DD</div><div class="ap-kpi-v" style="color:var(--red)">-2.1%</div></div>
-              <div class="ap-kpi"><div class="ap-kpi-l">Avg RR</div><div class="ap-kpi-v" style="color:var(--text)">2.4R</div></div>
+            <!-- Filter chips — auto-cycle -->
+            <div class="fil-row" id="heroFilRow">
+              <button class="fil-chip active" onclick="heroFilter(0)">All Trades</button>
+              <button class="fil-chip" onclick="heroFilter(1)">XAUUSD</button>
+              <button class="fil-chip" onclick="heroFilter(2)">This Week</button>
+              <button class="fil-chip" onclick="heroFilter(3)">Long Only</button>
             </div>
-            <div class="ap-chart">
-              <div style="font-size:9px;color:var(--muted);margin-bottom:6px">Equity curve</div>
-              <div class="ap-bars">
-                <div class="ap-bar" style="height:30%;background:var(--green)"></div>
-                <div class="ap-bar" style="height:50%;background:var(--green)"></div>
-                <div class="ap-bar" style="height:35%;background:var(--red)"></div>
-                <div class="ap-bar" style="height:70%;background:var(--green)"></div>
-                <div class="ap-bar" style="height:55%;background:var(--green)"></div>
-                <div class="ap-bar" style="height:20%;background:var(--red)"></div>
-                <div class="ap-bar" style="height:90%;background:var(--green)"></div>
-                <div class="ap-bar" style="height:75%;background:var(--green)"></div>
-                <div class="ap-bar" style="height:80%;background:var(--green)"></div>
-                <div class="ap-bar" style="height:95%;background:var(--green)"></div>
+            <!-- Edge Score -->
+            <div class="edge-display">
+              <div>
+                <div class="edge-label">Edge Score</div>
+                <div class="edge-score-big" id="heroEdge" style="color:var(--green)">72</div>
+                <div class="edge-grade" id="heroGrade">Good ↑</div>
+              </div>
+              <div class="edge-bar-wrap">
+                <div class="edge-label">vs last 30 days</div>
+                <div class="edge-bar-bg"><div class="edge-bar-fill" id="heroEdgeBar" style="width:72%"></div></div>
+                <div style="display:flex;justify-content:space-between;margin-top:4px">
+                  <span style="font-size:8px;color:var(--muted)">0</span>
+                  <span style="font-size:8px;color:var(--muted)">100</span>
+                </div>
               </div>
             </div>
-            <div class="ap-trade"><span style="font-weight:700;font-family:monospace">XAUUSD</span><span class="ap-dir ap-long">Long</span><span style="color:var(--green);font-family:monospace;font-weight:700">+$340</span></div>
-            <div class="ap-trade"><span style="font-weight:700;font-family:monospace">EURUSD</span><span class="ap-dir ap-short">Short</span><span style="color:var(--red);font-family:monospace;font-weight:700">-$80</span></div>
-            <div class="ap-trade"><span style="font-weight:700;font-family:monospace">NQ</span><span class="ap-dir ap-long">Long</span><span style="color:var(--green);font-family:monospace;font-weight:700">+$220</span></div>
+            <!-- 4 KPI cards -->
+            <div class="ap-kpi-row">
+              <div class="ap-kpi"><div class="ap-kpi-l">Win Rate</div><div class="ap-kpi-v" id="heroWin" style="color:var(--green)">66.7%</div></div>
+              <div class="ap-kpi"><div class="ap-kpi-l">Profit Factor</div><div class="ap-kpi-v" id="heroPF" style="color:var(--green)">2.41</div></div>
+              <div class="ap-kpi"><div class="ap-kpi-l">Avg RR</div><div class="ap-kpi-v" id="heroRR" style="color:var(--text)">2.4R</div></div>
+              <div class="ap-kpi"><div class="ap-kpi-l">Net P&amp;L</div><div class="ap-kpi-v" id="heroPnl" style="color:var(--green)">+$1,240</div></div>
+            </div>
+            <!-- Sparkline (SVG mini equity curve) -->
+            <div class="ap-chart" style="padding:8px 10px">
+              <div style="font-size:9px;color:var(--muted);margin-bottom:4px">Equity curve · <span id="heroFilterLabel" style="color:var(--green)">All Trades</span></div>
+              <svg width="100%" height="44" viewBox="0 0 260 44" preserveAspectRatio="none" id="heroSparkline">
+                <polyline id="heroSparkPoly" fill="none" stroke="var(--green)" stroke-width="1.5" stroke-linejoin="round" points="0,40 26,34 52,28 78,32 104,20 130,14 156,18 182,8 208,5 234,2 260,0"/>
+                <linearGradient id="spGrad" x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(0,229,160,.18)"/>
+                  <stop offset="100%" stop-color="rgba(0,229,160,0)"/>
+                </linearGradient>
+                <polygon id="heroSparkArea" fill="url(#spGrad)" points="0,40 26,34 52,28 78,32 104,20 130,14 156,18 182,8 208,5 234,2 260,0 260,44 0,44"/>
+              </svg>
+            </div>
           </div>
 
           <!-- SCREEN 2: Psychology -->
@@ -446,150 +554,107 @@
   </div>
 </section>
 
-<!-- TICKER — TradingView real-time (lazy loaded) -->
-<div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);overflow:hidden">
-  <div class="tradingview-widget-container" id="tvTickerContainer">
-    <div class="tradingview-widget-container__widget"></div>
-    <script id="tvTickerScript" type="application/json">
-    {
-      "symbols": [
-        {"proName":"OANDA:XAUUSD","title":"Gold"},
-        {"proName":"OANDA:EURUSD","title":"EUR/USD"},
-        {"proName":"OANDA:GBPUSD","title":"GBP/USD"},
-        {"proName":"OANDA:USDJPY","title":"USD/JPY"},
-        {"proName":"OANDA:XAGUSD","title":"Silver"},
-        {"proName":"BINANCE:BTCUSDT","title":"Bitcoin"},
-        {"proName":"BINANCE:ETHUSDT","title":"Ethereum"},
-        {"proName":"OANDA:US30USD","title":"Dow Jones"},
-        {"proName":"OANDA:NAS100USD","title":"Nasdaq"},
-        {"proName":"TVC:DXY","title":"DXY"}
-      ],
-      "showSymbolLogo": false,
-      "isTransparent": true,
-      "displayMode": "adaptive",
-      "colorTheme": "dark",
-      "locale": "en"
-    }
-    </script>
-  </div>
-</div>
-<script>
-  // Lazy-load TradingView ticker only when it scrolls into view
-  (function(){
-    var container = document.getElementById('tvTickerContainer');
-    if (!container) return;
-    var cfg = JSON.parse(document.getElementById('tvTickerScript').textContent);
-    var observer = new IntersectionObserver(function(entries){
-      if (!entries[0].isIntersecting) return;
-      observer.disconnect();
-      var s = document.createElement('script');
-      s.type = 'text/javascript';
-      s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
-      s.async = true;
-      s.textContent = JSON.stringify(cfg);
-      container.appendChild(s);
-    }, {rootMargin:'200px'});
-    observer.observe(container);
-  })();
-</script>
+<!-- Ticker moved to top (above hero) -->
 
-<!-- PROOF NUMBERS -->
-<div class="proof">
-  <div class="proof-grid">
-    <div class="proof-item"><div class="proof-num" id="pn1">0</div><div class="proof-label">Setup Tags</div></div>
-    <div class="proof-item"><div class="proof-num" id="pn2">0</div><div class="proof-label">KPI Metrics</div></div>
-    <div class="proof-item"><div class="proof-num" id="pn3">0</div><div class="proof-label">AI Patterns Max</div></div>
-    <div class="proof-item"><div class="proof-num" id="pn4">$0</div><div class="proof-label">Cost. Forever.</div></div>
+<!-- COMBINED FEATURES SECTION -->
+<section class="feat-section" id="features">
+  <div class="feat-cols">
+    <!-- Left: heading + stats + marquee -->
+    <div class="feat-left fade-left">
+      <span class="s-label">Everything you need</span>
+      <h2 class="s-h" style="font-size:clamp(28px,3.5vw,48px)">Features that <em>compound</em><br>your edge.</h2>
+      <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-top:12px">No spreadsheets. No bloated dashboards. Every feature exists because a real SMC trader needed it.</p>
+      <div class="feat-stats">
+        <div class="feat-stat"><div class="feat-stat-num" id="pn1">13</div><div class="feat-stat-lbl">Setup Tags</div></div>
+        <div class="feat-stat"><div class="feat-stat-num" id="pn2">20+</div><div class="feat-stat-lbl">KPI Metrics</div></div>
+        <div class="feat-stat"><div class="feat-stat-num" id="pn3">5</div><div class="feat-stat-lbl">AI Patterns</div></div>
+        <div class="feat-stat"><div class="feat-stat-num" id="pn4">$0</div><div class="feat-stat-lbl">Cost. Forever.</div></div>
+      </div>
+      <div class="feat-marquee">
+        <div class="marquee-inner" id="marqueeInner"></div>
+      </div>
+    </div>
+    <!-- Right: compact bento grid -->
+    <div class="feat-right fade-right">
+      <div id="bentoGrid"></div>
+    </div>
   </div>
-</div>
-
-<!-- SETUP TAGS MARQUEE -->
-<div class="marquee-wrap">
-  <div class="marquee-inner" id="marqueeInner"></div>
-</div>
-
-<!-- BENTO FEATURES -->
-<section class="s" id="features">
-  <div class="center fade-up">
-    <span class="s-label">Everything you need</span>
-    <h2 class="s-h">Features that <em>compound</em><br>your edge.</h2>
-    <p class="s-p">No spreadsheets. No bloated dashboards. Every feature exists because a real SMC trader needed it.</p>
-  </div>
-  <div class="bento" id="bentoGrid"></div>
 </section>
 
-<!-- HOW IT WORKS 01 - Psychology -->
-<section class="s" id="how" style="background:var(--bg2);border-top:1px solid var(--border)">
-  <div class="ed-wrap">
-    <div class="fade-left">
-      <div class="ed-num" aria-hidden="true">01</div>
-      <div class="ed-label">AI Psychology</div>
-      <h2 class="ed-h">Write notes.<br>AI reads your <em>mindset.</em></h2>
-      <p class="ed-p">When you describe your trade, Groq's LLM reads your words for emotions, discipline, and psychological patterns — not market predictions, just your behaviour.</p>
-      <ul class="ed-bullets">
-        <li>Detects frustration, FOMO, revenge, overconfidence, patience</li>
-        <li>Scores discipline from -1.0 (tilt) to +1.0 (calm &amp; focused)</li>
-        <li>Auto-tags SMC setups mentioned in your notes</li>
-        <li>Surfaces up to 5 patterns sorted by dollar damage</li>
-      </ul>
+<!-- HOW IT WORKS — tabbed single section -->
+<section class="how-section" id="how">
+  <div style="max-width:1100px;margin:0 auto 0">
+    <div class="center" style="margin-bottom:32px">
+      <span class="s-label">How it works</span>
+      <h2 class="s-h">Built around <em>how you trade.</em></h2>
     </div>
-    <div class="fade-right">
+    <div class="how-tabs" id="howTabs">
+      <div class="how-tab active" onclick="howGoTo(0)"><span class="how-tab-num">01</span>AI Psychology</div>
+      <div class="how-tab" onclick="howGoTo(1)"><span class="how-tab-num">02</span>Prop Firm</div>
+      <div class="how-tab" onclick="howGoTo(2)"><span class="how-tab-num">03</span>Adaptive Patterns</div>
+    </div>
+  </div>
+  <div class="how-panels">
+    <!-- Panel 01 -->
+    <div class="how-panel active" id="howPanel0">
+      <div>
+        <div class="ed-num" aria-hidden="true">01</div>
+        <div class="ed-label">AI Psychology</div>
+        <h2 class="ed-h">Write notes.<br>AI reads your <em>mindset.</em></h2>
+        <p class="ed-p">Groq's LLM reads your trade notes for emotions, discipline, and behavioural patterns. Not market predictions — just your behaviour.</p>
+        <ul class="ed-bullets">
+          <li>Detects frustration, FOMO, revenge, overconfidence, patience</li>
+          <li>Scores discipline from -1.0 (tilt) to +1.0 (calm &amp; focused)</li>
+          <li>Auto-tags SMC setups mentioned in your notes</li>
+          <li>Surfaces up to 5 patterns sorted by dollar damage</li>
+        </ul>
+      </div>
       <div class="mock">
         <div class="mock-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="mock-title">tradejournal · ai analysis</div></div>
         <div class="mock-body" id="termBody"><div class="ml"><span class="mp">▶</span><span class="mc"> Initializing…</span></div></div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS 02 - Prop Firm -->
-<section class="s" style="border-top:1px solid var(--border)">
-  <div class="ed-wrap">
-    <div class="fade-left">
+    <!-- Panel 02 -->
+    <div class="how-panel" id="howPanel1">
       <div class="mock" style="padding:20px">
         <div style="font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">Prop Firm · Upcomers Thunderbolt $10K</div>
         <div class="prop-strip" id="propStrip"></div>
         <div class="kpi-grid" id="kpiGrid"></div>
       </div>
+      <div>
+        <div class="ed-num" aria-hidden="true">02</div>
+        <div class="ed-label">Prop Firm Tracker</div>
+        <h2 class="ed-h">Know your status<br>before your <em>broker</em> does.</h2>
+        <p class="ed-p">Track profit target, max drawdown, daily loss limits, and consistency score in real-time.</p>
+        <ul class="ed-bullets">
+          <li>Live compliance strip — 5 metrics always visible</li>
+          <li>Works with FTMO, Funded Next, Upcomers, MyFundedFX</li>
+          <li>Consistency % calculated from actual trade data</li>
+          <li>Daily drawdown resets automatically at midnight</li>
+        </ul>
+      </div>
     </div>
-    <div class="fade-right">
-      <div class="ed-num" aria-hidden="true">02</div>
-      <div class="ed-label">Prop Firm Tracker</div>
-      <h2 class="ed-h">Know your status<br>before your <em>broker</em> does.</h2>
-      <p class="ed-p">Track profit target, max drawdown, daily loss limits, and consistency score in real-time. Know exactly where you stand before you place the next trade.</p>
-      <ul class="ed-bullets">
-        <li>Live compliance strip — 5 metrics always visible</li>
-        <li>Works with FTMO, Funded Next, Upcomers, MyFundedFX</li>
-        <li>Consistency % calculated from actual trade data</li>
-        <li>Daily drawdown resets automatically at midnight</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS 03 - History / Pattern -->
-<section class="s" style="background:var(--bg2);border-top:1px solid var(--border)">
-  <div class="ed-wrap">
-    <div class="fade-left">
-      <div class="ed-num" aria-hidden="true">03</div>
-      <div class="ed-label">Adaptive Patterns</div>
-      <h2 class="ed-h">Patterns you fix<br><em>drop off</em> automatically.</h2>
-      <p class="ed-p">The Psychology tab shows up to 5 AI patterns, sorted by dollar damage. As you improve, old patterns disappear and new ones take their place. No stale advice.</p>
-      <ul class="ed-bullets">
-        <li>Sorted by total dollar cost — highest impact first</li>
-        <li>Confidence score based on evidence in your actual trades</li>
-        <li>One concrete rule per pattern, not generic coaching</li>
-        <li>Carousel format — swipe through, focus on one at a time</li>
-      </ul>
-    </div>
-    <div class="fade-right">
+    <!-- Panel 03 -->
+    <div class="how-panel" id="howPanel2">
+      <div>
+        <div class="ed-num" aria-hidden="true">03</div>
+        <div class="ed-label">Adaptive Patterns</div>
+        <h2 class="ed-h">Patterns you fix<br><em>drop off</em> automatically.</h2>
+        <p class="ed-p">Up to 5 AI patterns sorted by dollar damage. As you improve, old patterns disappear and new ones surface.</p>
+        <ul class="ed-bullets">
+          <li>Sorted by total dollar cost — highest impact first</li>
+          <li>Confidence score based on your actual trade evidence</li>
+          <li>One concrete rule per pattern, not generic coaching</li>
+          <li>Carousel format — focus on one at a time</li>
+        </ul>
+      </div>
       <div class="mock" style="padding:20px">
         <div style="font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">AI Pattern Analysis · Psychology Tab</div>
         <div id="patternMock"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
-          <button style="background:var(--panel2);border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px">← Prev</button>
+          <button onclick="patIdx=Math.max(0,patIdx-1);renderPattern()" style="background:var(--panel2);border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px">← Prev</button>
           <div style="display:flex;gap:5px" id="patternDots"></div>
-          <button style="background:var(--panel2);border:1px solid var(--border2);color:var(--green);border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px">Next →</button>
+          <button onclick="patIdx=(patIdx+1)%patterns.length;renderPattern()" style="background:var(--panel2);border:1px solid var(--border2);color:var(--green);border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px">Next →</button>
         </div>
       </div>
     </div>
@@ -665,6 +730,15 @@ window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
 });
 
+// NAV LOGO — cycle 4 words glowing
+const _navWords = ['nw0','nw1','nw2','nw3'];
+let _navLit = 0;
+setInterval(() => {
+  document.getElementById(_navWords[_navLit]).classList.remove('lit');
+  _navLit = (_navLit + 1) % 4;
+  document.getElementById(_navWords[_navLit]).classList.add('lit');
+}, 1200);
+
 // HERO — subtle entrance animations
 if (window.gsap) {
   gsap.from('#heroH1',       {y:20, duration:.8, ease:'power3.out', delay:.1});
@@ -686,35 +760,53 @@ function heroGoTo(i) {
   _heroTitle.textContent = _heroScreens[i];
   _heroDots.forEach((d, idx) => d.classList.toggle('active', idx === i));
 }
-setInterval(() => heroGoTo((_heroCur + 1) % 3), 3200);
+setInterval(() => heroGoTo((_heroCur + 1) % 3), 3800);
 
-// Ticker handled by TradingView widget above
+// HERO ANALYTICS — interactive filter cycling
+const _filterData = [
+  {label:'All Trades',  edge:72, grade:'Good ↑',  win:'66.7%', pf:'2.41', rr:'2.4R', pnl:'+$1,240', color:'var(--green)',
+   poly:'0,40 26,34 52,28 78,32 104,20 130,14 156,18 182,8 208,5 234,2 260,0'},
+  {label:'XAUUSD',      edge:84, grade:'Strong ↑', win:'71.2%', pf:'3.12', rr:'2.8R', pnl:'+$840',   color:'var(--green)',
+   poly:'0,40 26,36 52,30 78,22 104,15 130,10 156,6 182,4 208,2 234,1 260,0'},
+  {label:'This Week',   edge:68, grade:'Fair →',   win:'62.5%', pf:'1.98', rr:'2.1R', pnl:'+$320',   color:'var(--gold)',
+   poly:'0,36 26,38 52,34 78,36 104,30 130,28 156,32 182,26 208,22 234,18 260,14'},
+  {label:'Long Only',   edge:79, grade:'Good ↑',  win:'70.0%', pf:'2.87', rr:'2.6R', pnl:'+$910',   color:'var(--green)',
+   poly:'0,40 26,35 52,28 78,26 104,20 130,14 156,12 182,7 208,4 234,2 260,0'},
+];
+let _filCur = 0;
+function heroFilter(i) {
+  _filCur = i;
+  const d = _filterData[i];
+  document.querySelectorAll('.fil-chip').forEach((c,idx) => c.classList.toggle('active', idx===i));
+  document.getElementById('heroEdge').textContent = d.edge;
+  document.getElementById('heroEdge').style.color = d.color;
+  document.getElementById('heroGrade').textContent = d.grade;
+  document.getElementById('heroGrade').style.color = d.color;
+  document.getElementById('heroEdgeBar').style.width = d.edge + '%';
+  document.getElementById('heroWin').textContent = d.win;
+  document.getElementById('heroPF').textContent = d.pf;
+  document.getElementById('heroRR').textContent = d.rr;
+  document.getElementById('heroPnl').textContent = d.pnl;
+  document.getElementById('heroFilterLabel').textContent = d.label;
+  document.getElementById('heroFilterLabel').style.color = d.color;
+  document.getElementById('heroSparkPoly').setAttribute('points', d.poly);
+  document.getElementById('heroSparkArea').setAttribute('points', d.poly + ' 260,44 0,44');
+}
+setInterval(() => heroFilter((_filCur + 1) % 4), 2200);
 
 // SETUP TAGS MARQUEE
 const tags = ['Order Block','Fair Value Gap','BOS','CHoCH','Liquidity Sweep','Breaker Block','Inducement','OTE','Imbalance','Premium/Discount','Equal Highs/Lows','Turtle Soup','Session Open','NY Killzone','London Killzone','Mitigation Block','4H OB','15min FVG','Weekly Sweep','Daily BOS'];
 const mq = document.getElementById('marqueeInner');
-mq.innerHTML = [...tags,...tags].map(t=>`<span class="m-tag"><span>✦</span>${t}</span>`).join('');
+if (mq) mq.innerHTML = [...tags,...tags].map(t=>`<span class="m-tag"><span>✦</span>${t}</span>`).join('');
 
-// PROOF COUNTERS
-const proofObs = new IntersectionObserver(entries => {
-  if (!entries[0].isIntersecting) return;
-  proofObs.disconnect();
-  const animate = (id, target, prefix='', suffix='') => {
-    let start = 0; const dur = 2000; const step = 16;
-    const timer = setInterval(() => {
-      start += step;
-      const p = Math.min(start/dur, 1);
-      const val = Math.round(p * target);
-      document.getElementById(id).textContent = prefix + val + suffix;
-      if (p >= 1) clearInterval(timer);
-    }, step);
-  };
-  animate('pn1', 13);
-  animate('pn2', 20, '', '+');
-  animate('pn3', 5);
-  document.getElementById('pn4').textContent = '$0';
-}, {threshold: 0.3});
-proofObs.observe(document.querySelector('.proof'));
+// HOW-IT-WORKS TABS
+let _howCur = 0;
+function howGoTo(i) {
+  document.querySelectorAll('.how-tab').forEach((t,idx) => t.classList.toggle('active', idx===i));
+  document.querySelectorAll('.how-panel').forEach((p,idx) => p.classList.toggle('active', idx===i));
+  _howCur = i;
+}
+setInterval(() => howGoTo((_howCur + 1) % 3), 5000);
 
 // FADE-UP SCROLL REVEAL — use fromTo so elements are always visible even if GSAP fails
 // Scroll reveal — only transform, no opacity hiding
@@ -838,11 +930,11 @@ createApp({
     return { cards };
   },
   template: `
-    <div class="bento">
-      <div v-for="(c,i) in cards" :key="i" class="bento-card" :class="{wide:c.wide}" style="opacity:1">
-        <span class="bento-icon">{{ c.icon }}</span>
-        <div class="bento-title">{{ c.title }}</div>
-        <div class="bento-desc">{{ c.desc }}</div>
+    <div class="bento" style="grid-template-columns:repeat(2,1fr);gap:12px">
+      <div v-for="(c,i) in cards" :key="i" class="bento-card" style="opacity:1;padding:18px">
+        <span class="bento-icon" style="font-size:22px;margin-bottom:10px">{{ c.icon }}</span>
+        <div class="bento-title" style="font-size:13px">{{ c.title }}</div>
+        <div class="bento-desc" style="font-size:11px">{{ c.desc }}</div>
         <span class="bento-tag">{{ c.tag }}</span>
       </div>
     </div>`
