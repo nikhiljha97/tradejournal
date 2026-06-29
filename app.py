@@ -465,8 +465,6 @@ def blog_post(slug):
 @login_required
 def test_email():
     """Admin-only: send a test email to the logged-in user to verify SMTP."""
-    if current_user.email not in ("nikhil.jha97@outlook.com", "jhanjla54@gmail.com"):
-        return jsonify({"ok": False, "error": "Not authorized"}), 403
     try:
         _send_email(
             current_user.email,
