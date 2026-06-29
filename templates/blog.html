@@ -8,22 +8,22 @@
   <title>{% if post %}{{ post.title }} — TradeJournal Blog{% else %}Trading Journal Blog — SMC & ICT Tips, Prop Firm Guides{% endif %}</title>
   <meta name="description" content="{% if post %}{{ post.meta_desc }}{% else %}Free guides for SMC and ICT traders. Learn how to journal trades, track psychology, beat prop firm rules, and improve your XAUUSD trading.{% endif %}"/>
   <meta name="robots" content="index, follow"/>
-  <link rel="canonical" href="https://tradejournal-n3hn.onrender.com{% if post %}/blog/{{ post.slug }}{% else %}/blog{% endif %}"/>
+  <link rel="canonical" href="https://backtesting-journalmytrades.com{% if post %}/blog/{{ post.slug }}{% else %}/blog{% endif %}"/>
   <meta property="og:title" content="{% if post %}{{ post.title }}{% else %}TradeJournal Blog{% endif %}"/>
   <meta property="og:description" content="{% if post %}{{ post.meta_desc }}{% else %}Free guides for SMC and ICT traders.{% endif %}"/>
   <meta property="og:type" content="{% if post %}article{% else %}website{% endif %}"/>
-  <meta property="og:url" content="https://tradejournal-n3hn.onrender.com{% if post %}/blog/{{ post.slug }}{% else %}/blog{% endif %}"/>
-  <meta property="og:image" content="https://tradejournal-n3hn.onrender.com/static/og-image.png"/>
+  <meta property="og:url" content="https://backtesting-journalmytrades.com{% if post %}/blog/{{ post.slug }}{% else %}/blog{% endif %}"/>
+  <meta property="og:image" content="https://backtesting-journalmytrades.com/static/og-image.png"/>
   {% if post %}<meta property="article:published_time" content="{{ post.date }}"/>{% endif %}
   <meta name="twitter:card" content="summary_large_image"/>
   <meta name="twitter:title" content="{% if post %}{{ post.title }}{% else %}TradeJournal Blog — SMC & ICT Trading Guides{% endif %}"/>
   <meta name="twitter:description" content="{% if post %}{{ post.meta_desc }}{% else %}Free guides for SMC and ICT traders.{% endif %}"/>
-  <meta name="twitter:image" content="https://tradejournal-n3hn.onrender.com/static/og-image.png"/>
+  <meta name="twitter:image" content="https://backtesting-journalmytrades.com/static/og-image.png"/>
   {% if post %}
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"{{ post.title }}","description":"{{ post.meta_desc }}","url":"https://tradejournal-n3hn.onrender.com/blog/{{ post.slug }}","datePublished":"{{ post.date }}","image":"https://tradejournal-n3hn.onrender.com/static/og-image.png","author":{"@type":"Organization","name":"TradeJournal"},"publisher":{"@type":"Organization","name":"TradeJournal","url":"https://tradejournal-n3hn.onrender.com"}}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tradejournal-n3hn.onrender.com"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://tradejournal-n3hn.onrender.com/blog"},{"@type":"ListItem","position":3,"name":"{{ post.title }}","item":"https://tradejournal-n3hn.onrender.com/blog/{{ post.slug }}"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"{{ post.title }}","description":"{{ post.meta_desc }}","url":"https://backtesting-journalmytrades.com/blog/{{ post.slug }}","datePublished":"{{ post.date }}","image":"https://backtesting-journalmytrades.com/static/og-image.png","author":{"@type":"Organization","name":"TradeJournal"},"publisher":{"@type":"Organization","name":"TradeJournal","url":"https://backtesting-journalmytrades.com"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://backtesting-journalmytrades.com"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://backtesting-journalmytrades.com/blog"},{"@type":"ListItem","position":3,"name":"{{ post.title }}","item":"https://backtesting-journalmytrades.com/blog/{{ post.slug }}"}]}</script>
   {% else %}
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://tradejournal-n3hn.onrender.com"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://tradejournal-n3hn.onrender.com/blog"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://backtesting-journalmytrades.com"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://backtesting-journalmytrades.com/blog"}]}</script>
   {% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
