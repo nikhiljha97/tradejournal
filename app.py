@@ -451,27 +451,11 @@ def blog_post(slug):
     related = [p for p in POSTS if p["slug"] != slug][:3]
     return render_template("blog.html", post=post, posts=None, related=related)
 
-@app.route("/test-email")
-@login_required
-def test_email():
-    """Admin: send a test email to verify Resend is working."""
-    try:
-        _send_email(
-            "nikhiljha97@yahoo.com",
-            "TradeJournal email test ✓",
-            """<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
-              <div style="font-size:18px;font-weight:900;margin-bottom:24px">Trade<span style="color:#00e5a0">·</span>Journal</div>
-              <h2 style="color:#00e5a0;margin-bottom:16px">Email is working!</h2>
-              <p style="color:#5a7080">Sent from <strong style="color:#d4dde8">noreply@backtesting-journalmytrades.com</strong> via Resend. All email flows are live.</p>
-              <p style="color:#5a7080;margin-top:16px;font-size:12px">You can delete this route once confirmed.</p>
-            </div>"""
-        )
-        return jsonify({"ok": True, "sent_to": "nikhiljha97@yahoo.com"})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
 
 @app.route("/sitemap.xml")
 def sitemap():
+    # Use real dates for static pages so Google trusts lastmod.
+    # Only truly dynamic pages (home, blog index, community) get today's date.
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     from blog_posts import POSTS
     blog_urls = "\n".join(
@@ -482,11 +466,12 @@ def sitemap():
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://backtesting-journalmytrades.com/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/register</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/login</loc><lastmod>{today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/register</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/login</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://backtesting-journalmytrades.com/blog</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/blog-posts</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/ideas</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/backtest</loc><lastmod>2026-05-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/blog-posts</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/ideas</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
 {blog_urls}
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
@@ -495,7 +480,6 @@ def sitemap():
 def robots_txt():
     return """User-agent: *
 Disallow: /api/
-Disallow: /backtest
 Disallow: /logout
 Disallow: /settings
 Disallow: /import
