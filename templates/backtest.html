@@ -69,8 +69,22 @@
     @keyframes slideDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
     .theme-btn{font-size:11px;padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--panel);color:var(--muted);cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s}
     .theme-btn:hover{border-color:var(--border2);color:var(--text)}
-    .session-badge{font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis}
+    .session-badge{font-size:10px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
     .session-badge:hover{border-color:var(--border2);color:var(--text)}
+    .session-badge.cta{color:var(--green);background:var(--gdim);border-color:var(--green);font-weight:700;max-width:none}
+    .session-badge.cta:hover{background:rgba(0,229,160,.2)}
+    /* New-session inline panel inside session modal */
+    .new-sess-panel{border:1px solid var(--green);border-radius:8px;padding:14px;background:var(--bg2);margin-top:8px;display:none}
+    .new-sess-panel.open{display:block}
+    .new-sess-hdr{font-size:10px;font-weight:700;color:var(--green);letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px}
+    .new-sess-label{font-size:10px;color:var(--muted);font-weight:600;margin-bottom:5px}
+    .new-sess-input{width:100%;background:var(--panel);border:1px solid var(--green);color:var(--text);border-radius:5px;padding:7px 10px;font-size:12px;font-family:"Inter",sans-serif;outline:none;box-sizing:border-box;margin-bottom:12px}
+    .new-sess-input:focus{box-shadow:0 0 0 2px rgba(0,229,160,.12)}
+    .new-sess-actions{display:flex;gap:8px}
+    .btn-start-sess{flex:1;padding:8px;border-radius:6px;border:none;background:var(--green);color:#000;font-weight:700;font-size:12px;cursor:pointer;font-family:"Inter",sans-serif}
+    .btn-start-sess:hover{background:var(--green2)}
+    .btn-cancel-sess{padding:8px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;cursor:pointer;font-family:"Inter",sans-serif}
+    .btn-cancel-sess:hover{color:var(--text);border-color:var(--border2)}
 
     body{display:flex;flex-direction:column}
     .main{display:flex;flex:1;overflow:hidden;flex-direction:column}
@@ -207,7 +221,7 @@
     <a href="/blog">Blog</a>
   </div>
   <div class="nav-right">
-    <span id="navSessionName" class="session-badge" onclick="showSessionModal()" title="Click to switch session">No session</span>
+    <span id="navSessionName" class="session-badge cta" onclick="showSessionModal()" title="Start or switch session">+ Start New Backtest</span>
     <span>{{ username }}</span>
   </div>
 </nav>
@@ -218,7 +232,16 @@
     <div class="modal-title">📈 Backtest Session</div>
     <div class="modal-sub">Continue a previous session or start a new one</div>
     <div id="sessionListEl"></div>
-    <button class="btn-new" onclick="createNewSession()">+ Start New Session</button>
+    <button class="btn-new" id="btnNewSession" onclick="toggleNewSessionPanel()">+ Start New Backtest</button>
+    <div class="new-sess-panel" id="newSessPanel">
+      <div class="new-sess-hdr">New Session</div>
+      <div class="new-sess-label">Session Name</div>
+      <input class="new-sess-input" id="newSessName" type="text" placeholder="e.g. NQ London Breakout" maxlength="80">
+      <div class="new-sess-actions">
+        <button class="btn-start-sess" onclick="createNewSession()">Start Session →</button>
+        <button class="btn-cancel-sess" onclick="toggleNewSessionPanel(true)">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -568,6 +591,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   loadData(currentSymbol, currentTF, _saved?.replayTimestamp ?? null);
   await loadSessions();
+
+  // Enter key in the new-session name input confirms
+  document.getElementById("newSessName").addEventListener("keydown", e => {
+    if (e.key === "Enter") createNewSession();
+    if (e.key === "Escape") toggleNewSessionPanel(true);
+  });
 
   // Hide context menu and category dropdowns on outside click
   document.addEventListener("click", (e) => {
@@ -2066,6 +2095,8 @@ async function loadSessions(retrying = false) {
 
 function showSessionModal(sessions) {
   document.getElementById("sessionBackdrop").classList.remove("hidden");
+  toggleNewSessionPanel(true); // collapse the new-session panel each time modal opens
+  const inp = document.getElementById("newSessName"); if (inp) inp.value = "";
   const el = document.getElementById("sessionListEl");
   if (!sessions || !sessions.length) {
     el.innerHTML = '<div class="empty-msg">No previous sessions</div>'; return;
@@ -2097,7 +2128,7 @@ async function deleteSessionFromModal(id) {
       partialPnL.clear();
       entryMarkerIds.clear();
       undoStack.length = 0;
-      document.getElementById("navSessionName").textContent = "No session";
+      _setBadgeCta();
       updateSessionStats();
       renderPositions();
     }
@@ -2115,7 +2146,7 @@ async function continueSession(id) {
     const res  = await fetch(`/api/backtest/sessions/${id}`);
     const data = await res.json();
     currentSessionId = data.id;
-    document.getElementById("navSessionName").textContent = data.name || `Session #${id}`;
+    _setBadgeActive(data.name || `Session #${id}`);
     openOrders = (data.trades || []).map((t, i) => ({ ...t, _localId: ++_orderSeq }));
     updateSessionStats();
     renderPositions();
@@ -2123,9 +2154,45 @@ async function continueSession(id) {
   } catch(e) { showToast("Failed to load session", true); }
 }
 
+function toggleNewSessionPanel(forceClose) {
+  const panel = document.getElementById("newSessPanel");
+  const btn   = document.getElementById("btnNewSession");
+  const isOpen = panel.classList.contains("open");
+  if (forceClose || isOpen) {
+    panel.classList.remove("open");
+    btn.textContent = "+ Start New Backtest";
+  } else {
+    panel.classList.add("open");
+    btn.textContent = "▲ Cancel new session";
+    // Pre-fill with a sensible default
+    const inp = document.getElementById("newSessName");
+    if (!inp.value) {
+      const meta = SYMBOL_META[currentSymbol];
+      inp.value = `${meta ? meta.abbr : currentSymbol} ${currentTF.toUpperCase()} — ${new Date().toLocaleDateString()}`;
+    }
+    setTimeout(() => inp.select(), 50);
+  }
+}
+
+function _setBadgeActive(name) {
+  const badge = document.getElementById("navSessionName");
+  badge.classList.remove("cta");
+  badge.textContent = "📈 " + name;
+  badge.title = name + " — click to switch";
+}
+function _setBadgeCta() {
+  const badge = document.getElementById("navSessionName");
+  badge.classList.add("cta");
+  badge.textContent = "+ Start New Backtest";
+  badge.title = "Start or switch session";
+}
+
 async function createNewSession() {
+  const inp  = document.getElementById("newSessName");
+  const auto = `${currentSymbol} ${currentTF.toUpperCase()} — ${new Date().toLocaleDateString()}`;
+  const name = (inp && inp.value.trim()) ? inp.value.trim() : auto;
   document.getElementById("sessionBackdrop").classList.add("hidden");
-  const name = `${currentSymbol} ${currentTF.toUpperCase()} — ${new Date().toLocaleDateString()}`;
+  toggleNewSessionPanel(true);
   try {
     const res  = await fetch("/api/backtest/sessions", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -2134,7 +2201,7 @@ async function createNewSession() {
     const data = await res.json();
     currentSessionId = data.id;
     openOrders = [];
-    document.getElementById("navSessionName").textContent = data.name;
+    _setBadgeActive(data.name);
     updateSessionStats();
     renderPositions();
     showToast("New session started");
