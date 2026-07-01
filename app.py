@@ -84,29 +84,63 @@ def _validate_email(email: str):
 _MAIL_FROM = "TradeJournal <noreply@backtesting-journalmytrades.com>"
 _SITE_URL  = "https://backtesting-journalmytrades.com"
 
-def _send_email(to: str, subject: str, html: str):
-    """Send an HTML email via Resend API."""
+def _send_email(to: str, subject: str, html: str, text: str = ""):
+    """Send a multipart HTML+text email via Resend API."""
     resend.api_key = os.environ.get("RESEND_API_KEY", "")
-    resend.Emails.send({
+    payload = {
         "from": _MAIL_FROM,
         "to": [to],
         "subject": subject,
         "html": html,
-    })
+    }
+    if text:
+        payload["text"] = text
+    resend.Emails.send(payload)
+
+def _email_wrap(body_html: str) -> str:
+    """Wrap email body in a standard light-background shell (better deliverability)."""
+    return (
+        '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+        '<meta name="viewport" content="width=device-width,initial-scale=1">'
+        '<style>body{margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif}'
+        '.wrap{max-width:520px;margin:32px auto;background:#ffffff;border-radius:10px;'
+        'overflow:hidden;border:1px solid #e0e0e0}'
+        '.hdr{background:#111827;padding:20px 28px}'
+        '.logo{font-size:17px;font-weight:900;color:#ffffff;letter-spacing:-.01em}'
+        '.logo span{color:#00c97a}'
+        '.body{padding:32px 28px;color:#1a1a1a;font-size:15px;line-height:1.7}'
+        '.btn{display:inline-block;background:#00a86b;color:#ffffff;font-weight:700;'
+        'font-size:15px;padding:12px 28px;border-radius:8px;text-decoration:none;margin:8px 0}'
+        '.ftr{background:#f9fafb;padding:16px 28px;text-align:center;border-top:1px solid #e0e0e0;'
+        'font-size:11px;color:#6b7280}'
+        '.ftr a{color:#6b7280}'
+        'h2{margin:0 0 12px;font-size:20px;color:#111827}'
+        'p{margin:0 0 16px;color:#374151}'
+        '.muted{color:#6b7280;font-size:12px}'
+        '</style></head><body>'
+        '<div class="wrap">'
+        '<div class="hdr"><div class="logo">Trade<span>·</span>Journal</div></div>'
+        '<div class="body">' + body_html + '</div>'
+        '<div class="ftr">TradeJournal &mdash; backtesting-journalmytrades.com<br>'
+        '<a href="https://backtesting-journalmytrades.com">Visit site</a></div>'
+        '</div></body></html>'
+    )
 
 def _send_verification_email(user_email: str, token: str):
     verify_url = f"{_SITE_URL}/verify-email/{token}"
-    _send_email(
-        user_email,
-        "Verify your TradeJournal email",
-        f"""<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
-          <div style="font-size:18px;font-weight:900;margin-bottom:24px">Trade<span style="color:#00e5a0">·</span>Journal</div>
-          <h2 style="color:#00e5a0;margin-bottom:16px">Confirm your email</h2>
-          <p style="color:#5a7080;margin-bottom:24px">Click the button below to verify your TradeJournal account. This link expires in 24 hours.</p>
-          <a href="{verify_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Verify Email →</a>
-          <p style="color:#5a7080;margin-top:24px;font-size:12px">If you did not create a TradeJournal account, you can safely ignore this email.</p>
-        </div>"""
+    html = _email_wrap(
+        f'<h2>Confirm your email</h2>'
+        f'<p>Click the button below to verify your TradeJournal account. This link expires in 24 hours.</p>'
+        f'<a href="{verify_url}" class="btn">Verify Email</a>'
+        f'<p class="muted" style="margin-top:24px">If you did not create a TradeJournal account, you can safely ignore this email.</p>'
     )
+    text = (
+        f"TradeJournal — Confirm your email\n\n"
+        f"Click the link below to verify your account (expires in 24 hours):\n{verify_url}\n\n"
+        f"If you did not sign up, ignore this email.\n\n"
+        f"— TradeJournal\nhttps://backtesting-journalmytrades.com"
+    )
+    _send_email(user_email, "Verify your TradeJournal email", html, text)
 
 # ── Security headers ──────────────────────────────────────────────────────────
 @app.after_request
@@ -507,17 +541,21 @@ def forgot_password():
         db.session.commit()
         reset_url = f"{_SITE_URL}/reset-password/{token}"
         try:
-            _send_email(
-                email,
-                "Reset your TradeJournal password",
-                f"""<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#07090d;color:#d4dde8;padding:40px;border-radius:12px">
-                  <div style="font-size:18px;font-weight:900;margin-bottom:24px">Trade<span style="color:#00e5a0">·</span>Journal</div>
-                  <h2 style="color:#00e5a0;margin-bottom:16px">Reset your password</h2>
-                  <p style="color:#5a7080;margin-bottom:24px">Click the button below to reset your TradeJournal password. This link expires in 1 hour.</p>
-                  <a href="{reset_url}" style="display:inline-block;background:#00e5a0;color:#000;font-weight:700;padding:12px 28px;border-radius:8px;text-decoration:none">Reset Password →</a>
-                  <p style="color:#5a7080;margin-top:24px;font-size:12px">If you didn't request this, you can safely ignore this email.</p>
-                </div>"""
+            html = _email_wrap(
+                f'<h2>Reset your password</h2>'
+                f'<p>We received a request to reset the password for your TradeJournal account. '
+                f'This link expires in 1 hour.</p>'
+                f'<a href="{reset_url}" class="btn">Reset Password</a>'
+                f'<p class="muted" style="margin-top:24px">If you did not request a password reset, you can safely ignore this email. '
+                f'Your password will not change.</p>'
             )
+            text = (
+                f"TradeJournal — Reset your password\n\n"
+                f"Click the link below to reset your password (expires in 1 hour):\n{reset_url}\n\n"
+                f"If you did not request this, ignore this email.\n\n"
+                f"— TradeJournal\nhttps://backtesting-journalmytrades.com"
+            )
+            _send_email(email, "Reset your TradeJournal password", html, text)
         except Exception as e:
             print(f"Email error: {e}")
     return jsonify({"ok": True})
@@ -669,26 +707,31 @@ def _send_idea_notifications(idea, author):
                     db.session.commit()
                 unsub_url = f"{_SITE_URL}/unsubscribe-ideas/{user.notif_token}"
                 preview   = (idea.content or "")[:200] + ("..." if len(idea.content or "") > 200 else "")
-                html_body = (
-                    "<div style=\"font-family:Inter,sans-serif;max-width:520px;margin:0 auto;background:#07090d;border-radius:12px;overflow:hidden\">"
-                    "<div style=\"background:#111820;padding:24px;border-bottom:1px solid #1c2b3a\">"
-                    "<div style=\"font-size:18px;font-weight:900;color:#d4dde8\">Trade<span style=\"color:#00e5a0\">·</span>Journal</div></div>"
-                    "<div style=\"padding:32px\">"
-                    "<div style=\"font-size:11px;font-weight:700;color:#00e5a0;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px\">New Trade Idea</div>"
-                    f"<h2 style=\"font-size:22px;font-weight:800;color:#d4dde8;margin:0 0 16px\">{idea.title}</h2>"
-                    f"<div style=\"margin-bottom:20px\">"
-                    f"<span style=\"background:#003d2b;color:#00e5a0;font-size:12px;font-weight:700;padding:4px 12px;border-radius:4px;margin-right:8px\">{idea.instrument}</span>"
-                    f"<span style=\"background:{bg_color};color:{txt_color};font-size:12px;font-weight:700;padding:4px 12px;border-radius:4px\">{dir_icon} {dir_emoji}</span></div>"
-                    f"<p style=\"color:#5a7080;font-size:14px;line-height:1.7;margin:0 0 24px\">{preview}</p>"
-                    f"<a href=\"{_SITE_URL}/ideas\" style=\"display:inline-block;background:#00e5a0;color:#000;font-weight:800;font-size:15px;padding:12px 28px;border-radius:8px;text-decoration:none\">View Idea →</a>"
-                    "</div>"
-                    f"<div style=\"padding:20px 32px;border-top:1px solid #1c2b3a;text-align:center\">"
-                    f"<p style=\"color:#5a7080;font-size:11px;margin:0\">Posted by <strong style=\"color:#d4dde8\">{author.username}</strong> on TradeJournal</p>"
-                    f"<p style=\"margin:8px 0 0\"><a href=\"{unsub_url}\" style=\"color:#5a7080;font-size:11px\">Unsubscribe from trade idea notifications</a></p>"
-                    "</div></div>"
+                dir_label = "Bullish (Long)" if idea.direction=="Long" else "Bearish (Short)" if idea.direction=="Short" else "Neutral"
+                badge_bg  = "#d1fae5" if idea.direction=="Long" else "#fee2e2" if idea.direction=="Short" else "#f3f4f6"
+                badge_txt = "#065f46" if idea.direction=="Long" else "#991b1b" if idea.direction=="Short" else "#374151"
+                html_body = _email_wrap(
+                    f'<p style="font-size:11px;font-weight:700;color:#00a86b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">New Trade Idea</p>'
+                    f'<h2>{idea.title}</h2>'
+                    f'<div style="margin-bottom:16px">'
+                    f'<span style="background:#ecfdf5;color:#065f46;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px;margin-right:6px">{idea.instrument}</span>'
+                    f'<span style="background:{badge_bg};color:{badge_txt};font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px">{dir_icon} {dir_emoji}</span>'
+                    f'</div>'
+                    f'<p>{preview}</p>'
+                    f'<a href="{_SITE_URL}/ideas" class="btn">View Trade Idea</a>'
+                    f'<p class="muted" style="margin-top:20px">Posted by <strong>{author.username}</strong> on TradeJournal &mdash; '
+                    f'<a href="{unsub_url}" style="color:#6b7280">Unsubscribe</a></p>'
+                )
+                text_body = (
+                    f"New Trade Idea on TradeJournal\n\n"
+                    f"{idea.title}\n{idea.instrument} — {dir_label}\n\n"
+                    f"{preview}\n\n"
+                    f"View it here: {_SITE_URL}/ideas\n\n"
+                    f"Posted by {author.username}\n"
+                    f"Unsubscribe: {unsub_url}"
                 )
                 try:
-                    _send_email(user.email, f"New Trade Idea: {idea.instrument} — {dir_icon} {dir_emoji}", html_body)
+                    _send_email(user.email, f"New Trade Idea: {idea.instrument} — {dir_emoji}", html_body, text_body)
                 except Exception as e:
                     print(f"Email to {user.email} failed: {e}")
         except Exception as e:
