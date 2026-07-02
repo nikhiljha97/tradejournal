@@ -510,6 +510,10 @@ def sitemap():
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
 
+@app.route("/ads.txt")
+def ads_txt():
+    return "google.com, pub-2562826047096065, DIRECT, f08c47fec0942fa0", 200, {"Content-Type": "text/plain"}
+
 @app.route("/robots.txt")
 def robots_txt():
     return """User-agent: *
