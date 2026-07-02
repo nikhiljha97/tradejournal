@@ -511,3 +511,279 @@ POSTS += [
 """
   },
 ]
+
+POSTS += [
+  {
+    "slug": "pass-prop-firm-challenge-45-days",
+    "tag": "Prop Trading",
+    "title": "How to Pass a Prop Firm Challenge in 45 Days (The Risk Math Most Traders Skip)",
+    "excerpt": "Most traders fail prop firm evaluations not from bad setups but from bad risk math. Here's the 45-day framework — with an interactive calculator — that puts your real numbers in front of you before the challenge starts.",
+    "meta_desc": "Pass your prop firm challenge in 45 days with smart risk math. Interactive partial close calculator for XAUUSD and Gold traders. Works for FTMO, Funded Next, Topstep, MyForexFunds and all major prop firms.",
+    "date": "2026-07-02",
+    "read_time": 9,
+    "content": """
+<p>Studies across multiple prop firm platforms consistently show that <strong>more than 80% of funded account challenges fail</strong>. The official reason is usually "violated the drawdown rule" or "hit the daily loss limit." But the real reason, underneath all of that, is almost always the same: the trader never actually calculated what their strategy needed to look like over the evaluation period.</p>
+
+<p>They had a setup. They had an entry. They had no idea how many of those entries needed to work, how many losses in a row to expect, or what would happen to their account if Gold reversed on them three times in a morning session.</p>
+
+<p>This article fixes that. We'll walk through the exact risk math behind a 45-day prop firm pass — and give you an interactive calculator to plug in your own numbers before the challenge starts.</p>
+
+<h2>Why Traders Fail Prop Firm Challenges (It's Not the Setup)</h2>
+
+<p>Ask any prop firm risk team what kills most accounts and they'll say the same things: revenge trading after a loss, doubling position size trying to recover, or taking low-quality setups in the last week because the profit target feels far away.</p>
+
+<p>All of those behaviours have one root cause: <strong>the trader doesn't trust their numbers.</strong> They don't know their real win rate. They don't know their realistic expectancy. And most importantly, they don't know that a streak of 8 losing trades in a row is statistically expected at a 40% win rate — so when it happens, they panic and make it worse.</p>
+
+<p>The 45-day framework below is built on knowing your numbers before you start, so losing streaks feel like math instead of failure.</p>
+
+<h2>The Partial Close Strategy: Your Third Outcome</h2>
+
+<p>Most prop firm traders think every trade has two outcomes: win or loss. If you're trading Gold with a partial close at 1.5R, you actually have three:</p>
+
+<ul>
+  <li><strong>Full loss:</strong> Gold hits your stop without ever reaching your 1.5R zone. You lose your full risk amount.</li>
+  <li><strong>Partial capture:</strong> Gold reaches 1.5R. You book half your position for profit, move the stop on the remaining half to breakeven, and Gold reverses. You still profit on the partial — the trade is effectively a winner, just not a full one.</li>
+  <li><strong>Full win:</strong> Gold reaches 1.5R (you book half), then continues to your 2R target (the rest closes at full profit).</li>
+</ul>
+
+<p>This third outcome — the partial capture — is what separates traders who pass from traders who blow. It converts trades that would have been full losses into modest gains, and that changes your expectancy dramatically.</p>
+
+<p>Use the calculator below to see exactly what your numbers look like, then we'll walk through the 45-day phase breakdown.</p>
+
+<style>
+#pc-wrap input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer;margin:4px 0}
+#pc-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--green);cursor:pointer}
+#pc-wrap input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--green);cursor:pointer;border:none}
+#pc-wrap select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;outline:none;cursor:pointer;font-family:inherit;font-weight:600}
+#pc-wrap select:focus{border-color:var(--green)}
+</style>
+
+<div id="pc-wrap" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;margin:32px 0;font-family:Inter,system-ui,sans-serif">
+
+  <p style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 20px">Interactive calculator — partial close strategy on Gold (XAU/USD)</p>
+
+  <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;margin-bottom:16px">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:12px;color:var(--muted)">Trades reaching your 1.5R partial zone</span>
+        <strong id="pc_p1l" style="font-size:12px;color:var(--text)">50%</strong>
+      </div>
+      <input type="range" min="20" max="80" step="5" value="50" id="pc_p1">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:2px"><span>20% — rarely</span><span>80% — almost always</span></div>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Lot size</div>
+      <select id="pc_lot">
+        <option value="0.01">0.01 lot</option>
+        <option value="0.02" selected>0.02 lots</option>
+        <option value="0.03">0.03 lots</option>
+        <option value="0.04">0.04 lots</option>
+        <option value="0.05">0.05 lots</option>
+        <option value="0.07">0.07 lots</option>
+        <option value="0.10">0.10 lots</option>
+        <option value="0.15">0.15 lots</option>
+        <option value="0.20">0.20 lots</option>
+        <option value="0.25">0.25 lots</option>
+        <option value="0.30">0.30 lots</option>
+        <option value="0.40">0.40 lots</option>
+        <option value="0.50">0.50 lots</option>
+        <option value="0.75">0.75 lots</option>
+        <option value="1.00">1.00 lot</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="font-size:12px;color:var(--muted)">Of those 1.5R trades, % that run to full 2R target</span>
+      <strong id="pc_p2l" style="font-size:12px;color:var(--text)">50%</strong>
+    </div>
+    <input type="range" min="30" max="100" step="5" value="50" id="pc_p2">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:2px"><span>30% — Gold often reverses</span><span>100% — runs clean to target</span></div>
+  </div>
+
+  <div style="margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+      <span style="font-size:12px;color:var(--muted)">Stop loss distance</span>
+      <strong id="pc_sll" style="font-size:12px;color:var(--text)">200 pips &rarr; 1R = $4.00</strong>
+    </div>
+    <input type="range" min="50" max="500" step="10" value="200" id="pc_sl">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:2px"><span>50 pips ($1.00)</span><span>500 pips ($10.00)</span></div>
+  </div>
+
+  <div id="pc_bar" style="display:flex;height:24px;border-radius:7px;overflow:hidden;margin-bottom:6px;width:100%"></div>
+  <div id="pc_leg" style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-bottom:18px"></div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px">
+    <div style="background:var(--panel);padding:14px">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:5px"><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#c0392b;margin-right:4px"></span>Full loss</div>
+      <div id="pc_flc" style="font-size:18px;font-weight:800;color:var(--text)">100</div>
+      <div id="pc_flp" style="font-size:12px;font-family:monospace;color:#e05050;margin:2px 0">-$400.00</div>
+      <div style="font-size:10px;color:var(--faint)">-1R each &bull; never hit 1.5R</div>
+    </div>
+    <div style="background:var(--panel);padding:14px;border-left:1px solid var(--border)">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:5px"><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#d68910;margin-right:4px"></span>Partial + breakeven</div>
+      <div id="pc_poc" style="font-size:18px;font-weight:800;color:var(--text)">50</div>
+      <div id="pc_pop" style="font-size:12px;font-family:monospace;color:#e8a020;margin:2px 0">+$150.00</div>
+      <div style="font-size:10px;color:var(--faint)">+0.75R each &bull; partial at 1.5R</div>
+    </div>
+    <div style="background:var(--panel);padding:14px;border-left:1px solid var(--border)">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:5px"><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:#00c88a;margin-right:4px"></span>Full win</div>
+      <div id="pc_fwc" style="font-size:18px;font-weight:800;color:var(--text)">50</div>
+      <div id="pc_fwp" style="font-size:12px;font-family:monospace;color:var(--green);margin:2px 0">+$350.00</div>
+      <div style="font-size:10px;color:var(--faint)">+1.75R each &bull; partial + 2R run</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Your strategy (partial close)</div>
+      <div id="pc_net" style="font-size:22px;font-weight:800;color:var(--green)">+$100</div>
+      <div id="pc_netsub" style="font-size:11px;color:var(--muted);margin-top:2px">over 200 trades</div>
+    </div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Simple 2R, no partial</div>
+      <div id="pc_sim" style="font-size:22px;font-weight:800;color:#e05050">-$200</div>
+      <div id="pc_diff" style="font-size:11px;color:var(--green);margin-top:2px">partial adds $300</div>
+    </div>
+  </div>
+
+  <div id="pc_exp" style="border-left:3px solid var(--green);background:var(--panel);border-radius:0 10px 10px 0;padding:14px 16px">
+    <p style="font-size:12px;font-weight:700;color:var(--green);margin:0 0 7px" id="pc_expt"></p>
+    <p style="font-size:12px;color:var(--muted);line-height:1.8;margin:0" id="pc_expb"></p>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var p1=50,p2=50,sl=200,lot=0.02;
+  function rv(){return sl*lot;}
+
+  function run(){
+    var P1=p1/100,P2=p2/100,r=rv();
+    var flR=1-P1,poR=P1*(1-P2),fwR=P1*P2;
+    var E=flR*(-1)+poR*0.75+fwR*1.75;
+    var Es=3*P1*P2-1;
+    var flC=Math.round(flR*200),fwC=Math.round(fwR*200),poC=200-flC-fwC;
+    var flP=flC*(-r),poP=poC*0.75*r,fwP=fwC*1.75*r;
+    var net=flP+poP+fwP,sim=Es*200*r,adv=net-sim;
+    var thr=P2>0.875;
+    var iwr=(P1*P2*100).toFixed(1);
+
+    document.getElementById('pc_p1l').textContent=p1+'%';
+    document.getElementById('pc_p2l').textContent=p2+'%';
+    document.getElementById('pc_sll').textContent=sl+' pips → 1R = $'+r.toFixed(2);
+
+    document.getElementById('pc_flc').textContent=flC;
+    document.getElementById('pc_flp').textContent='-$'+Math.abs(flP).toFixed(2);
+    document.getElementById('pc_poc').textContent=poC;
+    document.getElementById('pc_pop').textContent='+$'+poP.toFixed(2);
+    document.getElementById('pc_fwc').textContent=fwC;
+    document.getElementById('pc_fwp').textContent='+$'+fwP.toFixed(2);
+
+    var ne=document.getElementById('pc_net');
+    ne.textContent=(net>=0?'+':'')+' $'+Math.abs(net).toFixed(0);
+    ne.style.color=net>=0?'var(--green)':'#e05050';
+    document.getElementById('pc_netsub').textContent='over 200 trades · '+(net>=0?'+':'')+' $'+Math.abs(net/20).toFixed(1)+'/day avg';
+
+    var se=document.getElementById('pc_sim');
+    se.textContent=(sim>=0?'+':'')+' $'+Math.abs(sim).toFixed(0);
+    se.style.color=sim>=0?'var(--green)':'#e05050';
+    var de=document.getElementById('pc_diff');
+    de.textContent=(adv>=0?'partial adds $':'partial costs $')+Math.abs(adv).toFixed(0);
+    de.style.color=adv>=0?'var(--green)':'#e8a020';
+
+    var bar=document.getElementById('pc_bar');
+    bar.innerHTML='';
+    [[flR,'#c0392b'],[poR,'#d68910'],[fwR,'#00c88a']].forEach(function(s){
+      var d=document.createElement('div');
+      d.style.cssText='flex:'+s[0]+';background:'+s[1]+';min-width:'+(s[0]>0?'3px':'0');
+      bar.appendChild(d);
+    });
+    document.getElementById('pc_leg').innerHTML=
+      '<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#c0392b"></span>Full losses ('+Math.round(flR*100)+'%)</span>'+
+      '<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#d68910"></span>Partial+BE ('+Math.round(poR*100)+'%)</span>'+
+      '<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:#00c88a"></span>Full wins ('+Math.round(fwR*100)+'%)</span>';
+
+    var exp=document.getElementById('pc_exp');
+    var expt=document.getElementById('pc_expt');
+    var expb=document.getElementById('pc_expb');
+    var perWin=(1.75*r).toFixed(2),perPart=(0.75*r).toFixed(2),perLoss=r.toFixed(2);
+
+    if(E<0&&!thr){
+      exp.style.borderLeftColor='#e05050';
+      expt.style.color='#e05050';
+      expt.textContent='Right now this setup loses money on a prop firm challenge — here is why';
+      expb.textContent='Out of 200 trades, '+flC+' hit your stop without ever reaching the 1.5R zone. Each one costs you $'+perLoss+'. Your implied 2R win rate is only '+iwr+'% — below the 33.3% floor needed to profit at 1:2 R:R. For a prop firm challenge this means every $1 you risk leaks '+Math.abs(E*100).toFixed(1)+' cents on average. To fix this: either be more selective about entries so more reach your 1.5R zone, or tighten your criteria to reduce the full-loss count. The partial close helps (without it you would lose $'+Math.abs(sim).toFixed(0)+' instead of $'+Math.abs(net).toFixed(0)+') but it cannot rescue a fundamentally low-quality entry rate.';
+    } else if(thr&&adv<0){
+      exp.style.borderLeftColor='#e8a020';
+      expt.style.color='#e8a020';
+      expt.textContent='Your strategy is profitable but the partial close is costing you money at this P2 level';
+      expb.textContent='With '+p2+'% of your 1.5R trades running clean to 2R, Gold barely reverses after your partial zone. That means cutting half your position at 1.5R is leaving money on the table. Over 200 trades, holding full size to 2R would earn $'+Math.abs(sim).toFixed(0)+' — that is $'+Math.abs(adv).toFixed(0)+' more than the partial close earns. When your setups run this cleanly, consider holding full size to target. Reserve the partial close for choppier weeks when Gold frequently reverses after your 1.5R zone.';
+    } else if(E<0){
+      exp.style.borderLeftColor='#e05050';
+      expt.style.color='#e05050';
+      expt.textContent='Losing with the partial close and losing more without it — win rate needs work';
+      expb.textContent='Even with the partial close softening the blow, your current settings produce a loss over 200 trades. The root issue is that only '+iwr+'% of your total trades reach the 2R target. On a prop firm challenge, this translates to slow account erosion — manageable at first but dangerous over 45 days. Focus on trade selectivity first: fewer, higher-quality setups that reach your 1.5R zone more often will fix the math faster than any position-sizing adjustment.';
+    } else {
+      exp.style.borderLeftColor='var(--green)';
+      expt.style.color='var(--green)';
+      expt.textContent='This is what a prop-firm-safe partial close system looks like — plain English breakdown';
+      expb.textContent='Out of 200 trades: '+flC+' hit your stop (each -$'+perLoss+', total -$'+Math.abs(flP).toFixed(0)+'). '+poC+' reached your 1.5R zone — you booked half for +$'+perPart+' and moved the rest to breakeven, then Gold reversed. You still profited on those. '+fwC+' went all the way: +$'+perWin+' each. Net: +$'+Math.abs(net).toFixed(0)+' over 200 trades (+$'+Math.abs(net/20).toFixed(1)+'/day average). The simple 2R approach on the same trades would have '+(sim>=0?'earned +$'+Math.abs(sim).toFixed(0):'lost $'+Math.abs(sim).toFixed(0))+'. Your partial close '+(adv>=0?'adds $'+Math.abs(adv).toFixed(0)+' by rescuing '+poC+' trades that a basic strategy counts as full losses':'costs $'+Math.abs(adv).toFixed(0)+' vs full size because your trades tend to run cleanly')+'.';
+    }
+  }
+
+  document.getElementById('pc_p1').addEventListener('input',function(){p1=+this.value;run();});
+  document.getElementById('pc_p2').addEventListener('input',function(){p2=+this.value;run();});
+  document.getElementById('pc_sl').addEventListener('input',function(){sl=+this.value;run();});
+  document.getElementById('pc_lot').addEventListener('change',function(){lot=+this.value;run();});
+  run();
+})();
+</script>
+
+<h2>The 45-Day Phase Breakdown</h2>
+
+<p>Most prop firm challenges run between 30 and 60 days. The traders who pass treat it in four distinct phases rather than one continuous grind:</p>
+
+<h3>Phase 1: Calibration (Days 1-10)</h3>
+<p>Take your smallest position size. Your only goal here is to establish real numbers for P1 and P2 — not to make money. What percentage of your entries actually reach 1.5R? What percentage of those run to 2R? You cannot answer these questions from memory. You need data. Log every single trade. After 30-40 trades your calculator inputs will be grounded in reality, not guesswork.</p>
+<p>Risk per trade during calibration: <strong>0.25-0.5% of account</strong>. You cannot afford a drawdown spike in phase 1.</p>
+
+<h3>Phase 2: Core Phase (Days 11-28)</h3>
+<p>Now you know your numbers. Bump to your full risk per trade and trade consistently. The partial close mechanic should now be automatic — you book half at 1.5R and move the stop every time, no exceptions. Your edge is your edge because you execute it consistently, not sometimes.</p>
+<p>Watch your P2 number specifically. If it drops below 40% (Gold keeps reversing on you after the partial), that tells you your 2R target might be too ambitious for current market conditions. Either tighten the target or take the partial and walk away.</p>
+
+<h3>Phase 3: Target Push (Days 29-40)</h3>
+<p>If phase 2 went well, you should be within reach of the profit target. This is where most traders blow the challenge — they get aggressive trying to finish early. Do the opposite. Stick to exactly the same position size and selectivity. Boring execution beats exciting heroics on a timed evaluation.</p>
+<p>Key risk rule: <strong>once you are within 1% of the profit target, reduce your position size by 50%</strong>. You do not need to take the same risk to cover the last 1% that you needed for the first 7%.</p>
+
+<h3>Phase 4: Buffer Phase (Days 41-45)</h3>
+<p>You are at the profit target or beyond. Your only job now is to not give it back. Take only your clearest A+ setups. Say no to everything else. One bad trade in the buffer phase can wipe a week of careful work.</p>
+
+<h2>The Losing Streak You Need to Prepare For</h2>
+
+<p>Here is the number most traders ignore: at a 40% win rate over 200 trades, <strong>you should expect a losing streak of 9-10 trades in a row</strong> at some point. This is not bad luck. It is the mathematically expected outcome of 200 independent trading events at that win rate.</p>
+
+<p>If you hit trade 6 of a losing streak and you haven't prepared for this psychologically, you will do one of three things: stop trading (miss the recovery), revenge trade (make it worse), or size up (turn a manageable drawdown into a challenge-ending one). None of these are the right move.</p>
+
+<p>The right move is to look at your calculator, confirm that a 9-loss streak was always part of the expected distribution, reduce size by 50% for the next 3 trades to protect drawdown, and keep executing your edge.</p>
+
+<blockquote>Losing streaks feel like failure. The data says they are math. Trust the data.</blockquote>
+
+<h2>Three Daily Rules That Separate Passers from Failures</h2>
+
+<p><strong>1. Check your drawdown before your first trade.</strong> Not after. If you are within 2% of the daily loss limit before you start, your trade size for that day is halved. This single rule prevents the majority of daily-limit breaches.</p>
+
+<p><strong>2. Log the trade before you are in profit or loss.</strong> Write your psychology note at entry, not at exit. You are more honest when you don't yet know the outcome. "I wasn't sure about this one but I took it anyway" is information you need. "Took a trade, hit profit" tells you nothing.</p>
+
+<p><strong>3. No trades in the last 30 minutes before your daily cutoff.</strong> Every prop firm has a daily loss limit that resets at midnight. The traders who breach it almost always do so in the last 30 minutes of the session, chasing a recovery. Hard stop at T-30 minutes. No exceptions.</p>
+
+<h2>Using Your Journal to Pass the Challenge</h2>
+
+<p>Everything above only works if you have the data. Your P1 number (% of trades reaching 1.5R) needs to come from your actual trade log, not your gut feeling. Your P2 number needs to come from 30-40 logged trades with partial close execution, not from what you think Gold does.</p>
+
+<p>TradeJournal tracks both of these automatically once you log your entry, partial close level, and exit. After 30 trades you will have your real numbers — and those numbers plugged into the calculator above will tell you whether your risk sizing is sized for a pass or for a slow bleed.</p>
+"""
+  },
+]
