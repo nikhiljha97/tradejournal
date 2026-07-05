@@ -36,20 +36,23 @@
 
     /* NAV */
     nav{display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:64px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
-    .nav-logo{font-size:17px;font-weight:900}.nav-logo span{color:var(--green)}
+    .nav-logo{font-size:15px;font-weight:900;letter-spacing:-.01em;display:flex;align-items:center;gap:3px;white-space:nowrap;text-decoration:none}
+    .nav-logo .dot{color:var(--border2);font-size:12px;margin:0 1px}
+    .nav-logo .nav-word{color:var(--muted);transition:color .2s}
+    .nav-logo .nav-word.lit{color:var(--green)}
     .nav-links{display:flex;gap:24px;align-items:center}
     .nav-links a{font-size:13px;color:var(--muted);font-weight:500;transition:color .2s}.nav-links a:hover{color:var(--text)}
     .nav-cta{background:var(--green);color:#000;font-weight:800;font-size:13px;padding:8px 20px;border-radius:8px;transition:all .2s}
     .nav-cta:hover{background:var(--green2)}
 
     /* BLOG INDEX */
-    .blog-hero{padding:80px 6% 60px;border-bottom:1px solid var(--border);background:var(--bg2)}
+    .blog-hero{padding:80px 5% 60px;border-bottom:1px solid var(--border);background:var(--bg2)}
     .blog-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:block}
     .blog-hero h1{font-size:clamp(32px,5vw,64px);font-weight:900;letter-spacing:-.03em;line-height:1;margin-bottom:16px}
     .blog-hero h1 em{font-style:italic;color:var(--green);font-weight:300}
     .blog-hero p{font-size:16px;color:var(--muted);max-width:520px;line-height:1.7}
 
-    .posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:24px;width:100%;max-width:1400px;margin:60px auto;padding:0 6%}
+    .posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:24px;width:90%;max-width:1600px;margin:60px auto;padding:0}
     .post-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:28px;transition:all .3s;display:flex;flex-direction:column}
     .post-card:hover{border-color:var(--green);transform:translateY(-3px);box-shadow:0 20px 40px rgba(0,0,0,.4)}
     .post-tag{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green);background:var(--gdim);padding:3px 10px;border-radius:4px;display:inline-block;margin-bottom:14px}
@@ -60,7 +63,7 @@
     .post-read:hover{color:var(--green2)}
 
     /* BLOG POST */
-    .post-wrap{width:94%;max-width:900px;margin:0 auto;padding:60px 0 100px}
+    .post-wrap{width:90%;max-width:1200px;margin:0 auto;padding:60px 0 100px}
     .post-back{font-size:13px;color:var(--muted);margin-bottom:40px;display:inline-flex;align-items:center;gap:6px;transition:color .2s}
     .post-back:hover{color:var(--green)}
     .post-header{margin-bottom:48px}
@@ -122,7 +125,7 @@
 <body>
 
 <nav>
-  <a href="/" class="nav-logo">Trade<span>·</span>Journal</a>
+  <a href="/" class="nav-logo"><span class="nav-word">Trade</span><span class="dot">·</span><span class="nav-word lit">Journal</span><span class="dot">·</span><span class="nav-word">Backtest</span><span class="dot">·</span><span class="nav-word">Analyse</span></a>
   <div class="nav-links">
     <a href="/">Home</a>
     <a href="/blog">Blog</a>
