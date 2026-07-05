@@ -500,12 +500,7 @@ def sitemap():
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://backtesting-journalmytrades.com/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/register</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/login</loc><lastmod>2026-01-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://backtesting-journalmytrades.com/blog</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/backtest</loc><lastmod>2026-05-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/blog-posts</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
-  <url><loc>https://backtesting-journalmytrades.com/ideas</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.6</priority></url>
 {blog_urls}
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
@@ -518,9 +513,14 @@ def ads_txt():
 def robots_txt():
     return """User-agent: *
 Disallow: /api/
+Disallow: /login
+Disallow: /register
 Disallow: /logout
 Disallow: /settings
 Disallow: /import
+Disallow: /backtest
+Disallow: /blog-posts
+Disallow: /ideas
 Disallow: /reset-password/
 Disallow: /verify-email/
 Disallow: /resend-verification
