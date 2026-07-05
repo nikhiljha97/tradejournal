@@ -787,3 +787,99 @@ POSTS += [
 """
   },
 ]
+
+POSTS += [
+  {
+    "slug": "trading-journal-pip-math-gold-forex-crypto-futures",
+    "tag": "Trading Journal",
+    "title": "Why Most Trading Journals Show You the Wrong P&L — Gold, Forex, Crypto and Futures Explained",
+    "excerpt": "If your trading journal can't calculate XAUUSD pip value correctly, every R multiple it shows you is wrong. Here's the correct math for Gold, forex pairs, crypto and futures — and why it matters more than you think.",
+    "meta_desc": "Most trading journals get XAUUSD pip math wrong by 10x. Learn the correct pip value calculation for Gold, forex, crypto (BTC, ETH, XRP) and futures — and how a free trading journal handles all of them correctly.",
+    "date": "2026-07-04",
+    "read_time": 7,
+    "content": """
+<p>Here is a question most traders never think to ask: does your trading journal actually know what instrument you are trading? Not just the name — the contract size, the pip value, the correct dollar-per-pip calculation. Because if it doesn't, every R multiple it shows you is wrong. And if your R multiples are wrong, your entire performance review is built on fiction.</p>
+
+<p>This is not a theoretical problem. The majority of trading journal apps — including paid ones — use a one-size-fits-all pip value that works for standard forex pairs and silently breaks for everything else. Gold traders are the most affected, but futures traders, crypto traders, and anyone trading non-standard instruments all run into the same issue.</p>
+
+<h2>The XAUUSD Problem: Off by a Factor of 10</h2>
+
+<p>Gold (XAUUSD) is the most commonly misjudged instrument in retail trading journals. Here is why.</p>
+
+<p>Most journals assume the standard forex model: 1 standard lot = 100,000 units of the base currency, and pip value approximately $10 per pip. But XAUUSD is priced in ounces, not currency units. The correct model is:</p>
+
+<ul>
+  <li>1 standard lot of XAUUSD = <strong>100 troy ounces</strong></li>
+  <li>1 pip = $0.01 movement in price per ounce</li>
+  <li>Pip value = lot size × 100 oz × $0.01 = <strong>lot size × $1.00 per pip</strong></li>
+</ul>
+
+<p>So at 0.10 lots, your pip value on Gold is $0.10 per pip — not $1.00. At 1.00 lot, it is $1.00 per pip — not $10.00. A journal that assumes the forex model will show your 200-pip Gold trade as a $200 gain at 0.10 lots. The real figure is $20. That is a 10x error in your P&L, your R calculation, and every performance metric built on top of it.</p>
+
+<p>If you have ever wondered why your journal's stats feel disconnected from your actual account balance, this is usually why.</p>
+
+<h2>Forex Pairs: The Baseline Most Journals Get Right</h2>
+
+<p>Standard forex pairs (EURUSD, GBPUSD, AUDUSD and most majors) follow the model journals are built around. At 1 standard lot, pip value is approximately $10. At 0.10 lots, it is $1.00 per pip. At 0.01 lots (1 micro lot), it is $0.10 per pip.</p>
+
+<p>Cross pairs like EURJPY, GBPCHF and others denominated in non-USD quote currencies have pip values that fluctuate with the exchange rate. A robust journal either pulls live rates to calculate this dynamically or lets you enter pip value manually per trade. Static pip values on cross pairs produce small but compounding errors across a large trade log.</p>
+
+<p>The practical takeaway: for majors, most journals work fine. For crosses, you want a journal that either calculates dynamically or lets you override.</p>
+
+<h2>Crypto: Bitcoin, Ethereum and XRP Sizing</h2>
+
+<p>Crypto instruments add a different layer of complexity. Depending on your broker, 1 lot of BTCUSD might represent 1 BTC, 0.1 BTC, or a CFD equivalent. There is no universal standard the way there is in forex.</p>
+
+<p>What matters for your journal is that it lets you define or auto-detect the contract size per symbol. A trade on 0.01 lots of BTC at a broker where 1 lot = 1 BTC means your position is 0.01 BTC. If BTC moves $500 in your favour, your P&L is $5.00 — not $500. A journal that doesn't handle this correctly will show absurd R multiples on crypto trades, making your crypto performance look dramatically better or worse than reality.</p>
+
+<p>XRP and ETH follow the same principle — lot size times the broker's contract size definition equals your actual position in the asset. Always confirm what 1 lot means at your specific broker for each crypto instrument before trusting any journal's auto-calculation.</p>
+
+<h2>Futures and CFDs: NQ, ES and the Tick Value Model</h2>
+
+<p>Futures instruments don't use pips at all — they use <strong>ticks</strong>, and each tick has a fixed dollar value defined by the exchange. For the most common instruments:</p>
+
+<ul>
+  <li><strong>NQ (Nasdaq futures)</strong> — 1 tick = 0.25 index points = $5.00</li>
+  <li><strong>ES (S&amp;P 500 futures)</strong> — 1 tick = 0.25 index points = $12.50</li>
+  <li><strong>YM (Dow futures)</strong> — 1 tick = 1 index point = $5.00</li>
+</ul>
+
+<p>CFD equivalents of these instruments (offered by most retail brokers outside the US) mirror the price but with broker-specific lot definitions. Typically 1 lot of a US30 CFD = $1 per point movement, but this varies. A 500-point move on NQ futures is worth $10,000 per contract. The same 500-point move on a US100 CFD at 0.10 lots might be worth $50, depending on your broker's contract definition.</p>
+
+<p>A journal that can't distinguish between these instruments will produce numbers that bear no relationship to your real account. The only fix is instrument-aware P&L calculation — where the journal knows the tick size and tick value for each instrument you trade.</p>
+
+<h2>Why Wrong Math Ruins Your Review</h2>
+
+<p>The damage from incorrect pip math compounds across every metric in your journal:</p>
+
+<ul>
+  <li><strong>R multiples are wrong</strong> — if your 1R calculation is off by 10x, a trade that looks like a 2R winner is actually 0.2R. Your edge looks nonexistent.</li>
+  <li><strong>Win rate is distorted</strong> — if losses show as smaller than they are and wins show as larger (or vice versa), your apparent win rate doesn't match your actual one.</li>
+  <li><strong>Expectancy is meaningless</strong> — expectancy = (win rate × avg win) minus (loss rate × avg loss). Plug wrong numbers into that formula and you get a number that tells you nothing.</li>
+  <li><strong>Psychology review misleads you</strong> — if you think a trade made 3R but it actually made 0.3R, every conclusion you draw from reviewing it is backwards.</li>
+</ul>
+
+<p>This is why instrument-aware journaling is not a nice-to-have. It is the foundation everything else sits on.</p>
+
+<h2>What a Correct Multi-Instrument Journal Looks Like</h2>
+
+<p>A journal that handles all instruments correctly will do three things automatically.</p>
+
+<p>First, it will calculate pip or tick value based on the instrument's actual contract specification — not assume a universal $10-per-pip default. For XAUUSD it uses the 100 oz/lot model. For NQ it uses the $5/tick model. For crypto it uses the broker-defined contract size.</p>
+
+<p>Second, it will let you log trades from any instrument in the same interface without switching between different sheets or tools. Your Gold trades, your NQ scalps, your EURUSD swing trades, and your BTC positions all live in one place with correct P&amp;L on each.</p>
+
+<p>Third, it will aggregate performance across instruments so you can answer the question that actually matters: <em>which instrument am I most profitable on, and am I trading it enough?</em> Most multi-instrument traders discover that 80% of their real edge comes from one or two instruments and the rest is noise. You cannot see that pattern without a unified journal with correct math on each instrument.</p>
+
+<blockquote>The traders who improve fastest are not the ones who trade the most — they are the ones who review the most accurate data.</blockquote>
+
+<h2>Getting Started Without Starting Over</h2>
+
+<p>If you have an existing trade log in a spreadsheet or another journal, the switch to correct pip math does not require re-entering every historical trade. Start fresh from today with correct calculations. Historical data with wrong math is not useful anyway — the patterns it shows you are built on errors. Clean data from today forward is worth infinitely more than a large dataset of incorrect numbers.</p>
+
+<p>TradeJournal handles XAUUSD, all major forex pairs, BTCUSD, ETHUSD, XRPUSD, and futures CFDs (NQ, ES, YM equivalents) with the correct contract size for each. MT5 imports are parsed instrument-aware — if your broker export says XAUUSD, the journal knows it is a 100 oz/lot instrument and calculates accordingly. You do not need to configure anything manually.</p>
+
+<p>If you are currently trading multiple instruments and your journal treats them all the same, you are not reviewing your trading — you are reviewing a distorted reflection of it.</p>
+"""
+  },
+]
