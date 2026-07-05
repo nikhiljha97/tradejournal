@@ -522,45 +522,106 @@ POSTS += [
     "date": "2026-07-02",
     "read_time": 9,
     "content": """
-<p>Studies across multiple prop firm platforms consistently show that <strong>more than 80% of funded account challenges fail</strong>. The official reason is usually "violated the drawdown rule" or "hit the daily loss limit." But the real reason, underneath all of that, is almost always the same: the trader never actually calculated what their strategy needed to look like over the evaluation period.</p>
-
-<p>They had a setup. They had an entry. They had no idea how many of those entries needed to work, how many losses in a row to expect, or what would happen to their account if Gold reversed on them three times in a morning session.</p>
-
-<p>This article fixes that. We'll walk through the exact risk math behind a 45-day prop firm pass — and give you an interactive calculator to plug in your own numbers before the challenge starts.</p>
-
-<h2>Why Traders Fail Prop Firm Challenges (It's Not the Setup)</h2>
-
-<p>Ask any prop firm risk team what kills most accounts and they'll say the same things: revenge trading after a loss, doubling position size trying to recover, or taking low-quality setups in the last week because the profit target feels far away.</p>
-
-<p>All of those behaviours have one root cause: <strong>the trader doesn't trust their numbers.</strong> They don't know their real win rate. They don't know their realistic expectancy. And most importantly, they don't know that a streak of 8 losing trades in a row is statistically expected at a 40% win rate — so when it happens, they panic and make it worse.</p>
-
-<p>The 45-day framework below is built on knowing your numbers before you start, so losing streaks feel like math instead of failure.</p>
-
-<h2>The Partial Close Strategy: Your Third Outcome</h2>
-
-<p>Most prop firm traders think every trade has two outcomes: win or loss. If you're trading Gold with a partial close at 1.5R, you actually have three:</p>
-
-<ul>
-  <li><strong>Full loss:</strong> Gold hits your stop without ever reaching your 1.5R zone. You lose your full risk amount.</li>
-  <li><strong>Partial capture:</strong> Gold reaches 1.5R. You book half your position for profit, move the stop on the remaining half to breakeven, and Gold reverses. You still profit on the partial — the trade is effectively a winner, just not a full one.</li>
-  <li><strong>Full win:</strong> Gold reaches 1.5R (you book half), then continues to your 2R target (the rest closes at full profit).</li>
-</ul>
-
-<p>This third outcome — the partial capture — is what separates traders who pass from traders who blow. It converts trades that would have been full losses into modest gains, and that changes your expectancy dramatically.</p>
-
-<p>Use the calculator below to see exactly what your numbers look like, then we'll walk through the 45-day phase breakdown.</p>
-
 <style>
+.pcl-hero{background:var(--faint);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:40px}
+.pcl-outer{display:flex;gap:40px;align-items:flex-start}
+.pcl-article{flex:1;min-width:0}
+.pcl-sidebar{width:420px;flex-shrink:0;position:sticky;top:84px;max-height:calc(100vh - 108px);overflow-y:auto}
+#pc-wrap{margin:0!important}
 #pc-wrap input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer;margin:4px 0}
 #pc-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--green);cursor:pointer}
 #pc-wrap input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--green);cursor:pointer;border:none}
 #pc-wrap select{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;outline:none;cursor:pointer;font-family:inherit;font-weight:600}
 #pc-wrap select:focus{border-color:var(--green)}
+@media(max-width:1100px){.pcl-outer{flex-direction:column-reverse}.pcl-sidebar{width:100%;position:static;max-height:none}}
+@media(max-width:640px){.pcl-hero{padding:16px 18px}}
 </style>
 
+<div class="pcl-hero">
+  <p style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--green);margin:0 0 10px">Interactive Calculator — Run Your Numbers Before You Pay for Any Challenge</p>
+  <p style="font-size:19px;font-weight:900;color:var(--text);letter-spacing:-.02em;margin:0 0 14px;line-height:1.2">What this calculator tells you, in plain English</p>
+  <p style="font-size:14px;color:var(--muted);line-height:1.8;margin:0">More than 80% of prop firm challenges fail — and it is almost never because of a bad setup. It is because traders start a 45-day FTMO, Funded Next, or Topstep evaluation without ever checking whether the math of their strategy supports a pass. <strong style="color:var(--text)">This calculator takes three numbers from your own Gold (XAUUSD) trading</strong> — how often your trades reach the 1.5R partial close zone (P1), how often those trades continue to your 2R target (P2), and your stop loss distance. It shows you exactly what 200 trades looks like in dollar terms, whether your partial close is helping or hurting, and whether your current numbers put you in challenge-pass territory or on a slow bleed toward the drawdown limit. Drag the sliders. The numbers update instantly. Find your real edge before you risk your evaluation fee.</p>
+</div>
+
+<div class="pcl-outer">
+<div class="pcl-article">
+
+<h2>Why Most Traders Fail Prop Firm Evaluations (It Is Not Their Setups)</h2>
+
+<p>Studies across multiple prop firm platforms consistently show that <strong>more than 80% of funded account challenges fail.</strong> The official reason is usually "violated the drawdown rule" or "hit the daily loss limit." The real reason underneath is almost always the same: the trader never calculated what their strategy needed to look like over the evaluation period.</p>
+
+<p>They had a setup. They had entries. They had no idea how many of those entries needed to work, how many consecutive losses to expect at their win rate, or whether their partial close math actually supported a positive expectancy at their chosen lot size.</p>
+
+<p>Ask any prop firm risk desk what causes most challenge failures and the answer is almost never bad technical analysis. The consistent culprits are revenge trading after a losing streak, doubling size to recover a bad day, taking marginal setups in the final week when the profit target feels out of reach, or panicking when a losing streak hits and making decisions that end the challenge early.</p>
+
+<p>All of those behaviours share one root cause: <strong>the trader does not trust their numbers</strong> because they never ran them. The fix is running the math before Day 1. That is what the calculator on this page is for.</p>
+
+<h2>The Partial Close Strategy: Your Three Trade Outcomes</h2>
+
+<p>Most traders think every Gold trade has two outcomes: a win or a loss. If you trade XAUUSD with a partial close at 1.5R, you have three distinct outcomes — and understanding all three is the foundation of passing any prop firm challenge.</p>
+
+<ul>
+  <li><strong>Full loss.</strong> Gold hits your stop loss before reaching the 1.5R zone. You lose your full risk amount. A clean -1R.</li>
+  <li><strong>Partial capture.</strong> Gold reaches the 1.5R zone. You close half the position for profit, move the remaining stop to entry (breakeven), then Gold reverses. The second half closes at breakeven. Net result: approximately +0.75R. This trade would have been zero in a simple strategy. With the partial close, it becomes a winning trade.</li>
+  <li><strong>Full win.</strong> Gold reaches 1.5R (you close the partial), then continues to your 2R target. Net result: approximately +1.75R.</li>
+</ul>
+
+<p>That middle outcome — the partial capture — is the mathematical engine separating prop firm passers from blowers. It converts trades that would otherwise be full losses into modest gains, shifting your expectancy dramatically. Drag the P1 and P2 sliders in the calculator and watch the trade distribution change in real time to see exactly how much this matters at your numbers.</p>
+
+<h2>How to Use the Calculator: What Each Input Means</h2>
+
+<p><strong>P1 — Trades reaching your 1.5R zone.</strong> Out of every trade you take, what percentage actually reach your partial close zone before the stop is hit? This is your entry quality score. If you set a 200-pip stop and your 1.5R target is 300 pips away, how often does Gold travel 300 pips in your direction? Most traders find their honest P1 is lower than expected — often 40-60%. Set the slider to your realistic estimate, then drop it 10% to stress-test.</p>
+
+<p><strong>P2 — Of those 1.5R trades, how many reach the full 2R?</strong> Once Gold passes your partial close zone, does it keep running or reverse? If Gold frequently hits 1.5R and reverses sharply, your P2 might be 30-50%. If your setups run cleanly, it might be 60-75%. Look at the calculator — when P2 drops below about 87.5%, the partial close beats holding full size. Above 87.5%, you are better off not closing early. That crossover is in the calculator output.</p>
+
+<p><strong>Stop loss distance and lot size.</strong> These set your 1R value in dollar terms. On XAUUSD at 0.02 lots, a 200-pip stop means 1R = $4.00 (100 oz × $0.01/pip × 200 pips × 0.02 lots). Change the lot size dropdown and the calculator scales all outputs instantly. The dollar figures let you see your realistic challenge trajectory — not just percentages.</p>
+
+<h2>The 45-Day Framework: Four Phases, One Clear Goal</h2>
+
+<p>Whether you are attempting FTMO Phase 1, a Funded Next Standard evaluation, a Topstep combine, or any equivalent challenge, the structure is consistent: profit target (usually 8-10%), maximum overall drawdown (5-10%), daily loss limit (4-5%), minimum trading days. Treating the 45-day window as four distinct phases keeps the math in your favour throughout.</p>
+
+<h3>Phase 1: Calibration (Days 1-10)</h3>
+<p>Trade your smallest position size. Your only goal is to establish real data for P1 and P2 — not to make money, not to chase the profit target. After 30-40 trades, plug your real numbers into the calculator. If the output is challenge-viable, move to Phase 2 with confidence. If not, you have spent almost nothing in drawdown and learned something critical before committing to full size.</p>
+<p>Recommended risk in Phase 1: <strong>0.25-0.5% of account per trade.</strong> A drawdown spike in the first 10 days costs you precious headroom for the rest of the evaluation.</p>
+
+<h3>Phase 2: Core Phase (Days 11-28)</h3>
+<p>You have real data. Move to your standard risk per trade and execute consistently. The partial close at 1.5R must be automatic and unconditional — not most of the time, every time. An edge only exists when executed consistently. Watch P2 specifically: if Gold keeps reversing sharply after your partial zone, current market structure is telling you something. Tighten your 2R target temporarily or take the partial and move on.</p>
+
+<h3>Phase 3: Target Push (Days 29-40)</h3>
+<p>If Phase 2 went well, you are within 2-3% of the profit target. This is where most FTMO and Funded Next failures happen. Traders see the finish line and get aggressive. Keep the same size and selectivity. Once within 1% of the target, <strong>reduce position size by 50%.</strong> You do not need to carry the same risk to close the final 1% that you needed for the first 7%.</p>
+
+<h3>Phase 4: Buffer Phase (Days 41-45)</h3>
+<p>You are at or near the profit target. Your only job is not giving it back. Take only your clearest, highest-conviction setups. Decline everything marginal. One impulsive trade in the buffer phase has ended more prop firm challenges than any losing streak ever has.</p>
+
+<h2>The Losing Streak You Must Prepare for Before Day 1</h2>
+
+<p>At a 40% win rate across 200 trades, <strong>a streak of 9-10 consecutive losses is statistically expected to occur at least once.</strong> This is not a sign your edge has disappeared. It is the mathematical consequence of running 200 independent events at that probability. Most traders know this in theory but have not prepared for it emotionally — so when trade 6 of a losing streak arrives, panic takes over.</p>
+
+<p>The correct response: look at the calculator with your real P1 and P2 data, confirm your expectancy is still positive, reduce position size by 50% for the next three trades to protect drawdown headroom, and keep executing your setup. Do not skip trades. Do not size up to recover. Do not switch strategies mid-challenge.</p>
+
+<blockquote>Losing streaks feel like your edge has disappeared. The math says they were always part of the plan. Trust the math.</blockquote>
+
+<h2>Three Daily Rules That Separate Passers from Failures</h2>
+
+<p><strong>1. Check your drawdown before your first trade, not after.</strong> If you are within 2% of the daily loss limit before opening a position, halve your size for the entire day. This single rule prevents most daily-limit breaches — the number one way FTMO challenges end prematurely.</p>
+
+<p><strong>2. Write your psychology note at entry, not at exit.</strong> Log the trade — your reasoning, confidence level, any hesitation — before you know the outcome. Notes written after exit are contaminated by the result. Notes at entry reveal the honest patterns: overconfidence, FOMO entries, forcing setups you were not sure about. Those patterns, spotted early, are worth more than any technical edge.</p>
+
+<p><strong>3. Hard stop 30 minutes before your daily cutoff.</strong> Most prop firms reset the daily loss limit at midnight server time. Traders who breach it almost always do so in the final 30 minutes of the session, chasing recovery. Set a hard alarm. No trades inside T-30 minutes. No exceptions.</p>
+
+<h2>Finding Your Real P1 and P2 Numbers</h2>
+
+<p>The calculator is only as useful as the numbers you put into it. Gut-feel estimates of P1 and P2 are almost always too optimistic. The only reliable source is a logged trade journal where entry levels, partial close levels, and final exits are recorded consistently for every single trade.</p>
+
+<p>After 30-40 trades with the partial close strategy logged properly: P1 = trades that reached 1.5R divided by total trades taken. P2 = trades that reached 2R after the partial divided by trades that reached 1.5R. Those two real numbers, plugged into the calculator, will tell you whether your prop firm challenge math holds up or whether you need to adjust before spending on evaluation fees.</p>
+
+<p>TradeJournal tracks partial close levels automatically from your trade log. After 30 trades in the system, your real P1 and P2 appear in your analytics dashboard — ready to plug into this calculator and see the honest picture before you commit to any funded challenge.</p>
+
+</div>
+<div class="pcl-sidebar">
 <div id="pc-wrap" style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;margin:32px 0;font-family:Inter,system-ui,sans-serif">
 
-  <p style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 20px">Interactive calculator — partial close strategy on Gold (XAU/USD)</p>
+  <p style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 16px">Your numbers — live partial close calculator</p>
 
   <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;margin-bottom:16px">
     <div>
@@ -742,48 +803,10 @@ POSTS += [
 })();
 </script>
 
-<h2>The 45-Day Phase Breakdown</h2>
 
-<p>Most prop firm challenges run between 30 and 60 days. The traders who pass treat it in four distinct phases rather than one continuous grind:</p>
-
-<h3>Phase 1: Calibration (Days 1-10)</h3>
-<p>Take your smallest position size. Your only goal here is to establish real numbers for P1 and P2 — not to make money. What percentage of your entries actually reach 1.5R? What percentage of those run to 2R? You cannot answer these questions from memory. You need data. Log every single trade. After 30-40 trades your calculator inputs will be grounded in reality, not guesswork.</p>
-<p>Risk per trade during calibration: <strong>0.25-0.5% of account</strong>. You cannot afford a drawdown spike in phase 1.</p>
-
-<h3>Phase 2: Core Phase (Days 11-28)</h3>
-<p>Now you know your numbers. Bump to your full risk per trade and trade consistently. The partial close mechanic should now be automatic — you book half at 1.5R and move the stop every time, no exceptions. Your edge is your edge because you execute it consistently, not sometimes.</p>
-<p>Watch your P2 number specifically. If it drops below 40% (Gold keeps reversing on you after the partial), that tells you your 2R target might be too ambitious for current market conditions. Either tighten the target or take the partial and walk away.</p>
-
-<h3>Phase 3: Target Push (Days 29-40)</h3>
-<p>If phase 2 went well, you should be within reach of the profit target. This is where most traders blow the challenge — they get aggressive trying to finish early. Do the opposite. Stick to exactly the same position size and selectivity. Boring execution beats exciting heroics on a timed evaluation.</p>
-<p>Key risk rule: <strong>once you are within 1% of the profit target, reduce your position size by 50%</strong>. You do not need to take the same risk to cover the last 1% that you needed for the first 7%.</p>
-
-<h3>Phase 4: Buffer Phase (Days 41-45)</h3>
-<p>You are at the profit target or beyond. Your only job now is to not give it back. Take only your clearest A+ setups. Say no to everything else. One bad trade in the buffer phase can wipe a week of careful work.</p>
-
-<h2>The Losing Streak You Need to Prepare For</h2>
-
-<p>Here is the number most traders ignore: at a 40% win rate over 200 trades, <strong>you should expect a losing streak of 9-10 trades in a row</strong> at some point. This is not bad luck. It is the mathematically expected outcome of 200 independent trading events at that win rate.</p>
-
-<p>If you hit trade 6 of a losing streak and you haven't prepared for this psychologically, you will do one of three things: stop trading (miss the recovery), revenge trade (make it worse), or size up (turn a manageable drawdown into a challenge-ending one). None of these are the right move.</p>
-
-<p>The right move is to look at your calculator, confirm that a 9-loss streak was always part of the expected distribution, reduce size by 50% for the next 3 trades to protect drawdown, and keep executing your edge.</p>
-
-<blockquote>Losing streaks feel like failure. The data says they are math. Trust the data.</blockquote>
-
-<h2>Three Daily Rules That Separate Passers from Failures</h2>
-
-<p><strong>1. Check your drawdown before your first trade.</strong> Not after. If you are within 2% of the daily loss limit before you start, your trade size for that day is halved. This single rule prevents the majority of daily-limit breaches.</p>
-
-<p><strong>2. Log the trade before you are in profit or loss.</strong> Write your psychology note at entry, not at exit. You are more honest when you don't yet know the outcome. "I wasn't sure about this one but I took it anyway" is information you need. "Took a trade, hit profit" tells you nothing.</p>
-
-<p><strong>3. No trades in the last 30 minutes before your daily cutoff.</strong> Every prop firm has a daily loss limit that resets at midnight. The traders who breach it almost always do so in the last 30 minutes of the session, chasing a recovery. Hard stop at T-30 minutes. No exceptions.</p>
-
-<h2>Using Your Journal to Pass the Challenge</h2>
-
-<p>Everything above only works if you have the data. Your P1 number (% of trades reaching 1.5R) needs to come from your actual trade log, not your gut feeling. Your P2 number needs to come from 30-40 logged trades with partial close execution, not from what you think Gold does.</p>
-
-<p>TradeJournal tracks both of these automatically once you log your entry, partial close level, and exit. After 30 trades you will have your real numbers — and those numbers plugged into the calculator above will tell you whether your risk sizing is sized for a pass or for a slow bleed.</p>
+</div><!-- end pc-wrap -->
+</div><!-- end pcl-sidebar -->
+</div><!-- end pcl-outer -->
 """
   },
 ]
