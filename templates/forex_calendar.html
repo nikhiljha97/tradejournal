@@ -359,8 +359,24 @@
       </div>
     </div>
 
+    <!-- Column headers (approximated to match TradingView widget internal layout) -->
+    <div style="display:flex;align-items:center;padding:9px 14px 9px 16px;background:#1c2030;border:1px solid var(--border);border-bottom:2px solid #2a3050;border-radius:10px 10px 0 0">
+      <!-- Left section mirrors widget's time + flag + event columns -->
+      <div style="display:flex;align-items:center;flex:0 0 56%">
+        <span style="font-size:10px;font-weight:700;color:#8b95b3;text-transform:uppercase;letter-spacing:.09em;min-width:52px">Time</span>
+        <span style="font-size:10px;font-weight:700;color:#8b95b3;text-transform:uppercase;letter-spacing:.09em;min-width:36px">CCY</span>
+        <span style="font-size:10px;font-weight:700;color:#8b95b3;text-transform:uppercase;letter-spacing:.09em;padding-left:4px">Event</span>
+      </div>
+      <!-- Right section: 3 value columns matching TradingView's equal-width layout -->
+      <div style="flex:1;display:flex;align-items:center">
+        <span style="flex:1;font-size:10px;font-weight:700;color:#e0e6ff;text-transform:uppercase;letter-spacing:.09em;text-align:center">Actual</span>
+        <span style="flex:1;font-size:10px;font-weight:700;color:#8b95b3;text-transform:uppercase;letter-spacing:.09em;text-align:center">Forecast</span>
+        <span style="flex:1;font-size:10px;font-weight:700;color:#8b95b3;text-transform:uppercase;letter-spacing:.09em;text-align:center">Previous</span>
+      </div>
+    </div>
+
     <!-- CALENDAR WIDGET (re-renders on filter change) -->
-    <div id="tv-calendar-outer" style="background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;min-height:600px">
+    <div id="tv-calendar-outer" style="background:var(--panel);border:1px solid var(--border);border-top:none;border-radius:0 0 14px 14px;overflow:hidden;min-height:600px">
       <div id="tv-calendar-container" style="height:600px">
         <div class="tradingview-widget-container" style="height:100%">
           <div id="tv-cal-inner" class="tradingview-widget-container__widget" style="height:100%"></div>
