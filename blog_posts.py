@@ -905,4 +905,282 @@ POSTS += [
 <p>If you are currently trading multiple instruments and your journal treats them all the same, you are not reviewing your trading — you are reviewing a distorted reflection of it.</p>
 """
   },
+  {
+    "slug": "position-size-calculator-risk-percentage",
+    "tag": "Tools",
+    "title": "Free Position Size Calculator: Lot Size by Risk % for Gold, Forex, Futures and Crypto",
+    "excerpt": "Enter your balance, risk percentage, and stop loss. Get the exact lot size to trade, your dollar risk, profit at target, and a prop firm safety check. Works for XAUUSD, forex pairs, NQ, ES, BTC and more.",
+    "meta_desc": "Free position size calculator for forex, gold (XAUUSD), NQ/ES futures and crypto. Enter risk % and stop loss to get exact lot size instantly. Prop firm safe checker included.",
+    "date": "2026-07-06",
+    "read_time": 5,
+    "content": """
+<p>Enter your account balance, risk percentage per trade, and stop loss distance. The calculator gives you the exact lot size, your dollar risk, your profit at target, and a prop firm safety check. Works for XAUUSD, all major forex pairs, NQ/ES/YM futures, and crypto.</p>
+
+<style>
+.rsk-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px;font-family:Inter,system-ui,sans-serif;max-width:620px;margin:32px auto}
+.rsk-row{margin-bottom:18px}
+.rsk-lbl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.rsk-lbl span{color:var(--text);font-weight:800;font-size:13px;text-transform:none;letter-spacing:0}
+.rsk-slider{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border);outline:none;cursor:pointer;margin:6px 0}
+.rsk-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--green);cursor:pointer}
+.rsk-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--green);cursor:pointer;border:none}
+.rsk-input{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:15px;font-weight:700;font-family:inherit;outline:none;box-sizing:border-box}
+.rsk-input:focus{border-color:var(--green)}
+.rsk-select{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600;font-family:inherit;outline:none;cursor:pointer}
+.rsk-select:focus{border-color:var(--green)}
+.rsk-toggle{display:flex;background:var(--panel);border-radius:8px;padding:3px;gap:3px;margin-bottom:14px}
+.rsk-toggle button{flex:1;padding:7px 0;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:.15s;font-family:inherit}
+.rsk-toggle button.rsk-act{background:var(--green);color:#000}
+.rsk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.rsk-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px}
+.rsk-card-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.rsk-card-val{font-size:22px;font-weight:800}
+.rsk-card-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.rsk-bar{grid-column:1/-1}
+.rsk-check{border-left:3px solid var(--green);background:var(--panel);border-radius:0 10px 10px 0;padding:12px 16px;margin-top:12px;font-size:12px;color:var(--muted);line-height:1.75}
+.rsk-check strong{color:var(--text)}
+.rsk-warn{background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.25);border-radius:8px;padding:8px 12px;font-size:12px;color:#e05050;margin-top:8px;display:none}
+@media(max-width:520px){.rsk-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="rsk-wrap">
+
+  <div class="rsk-row">
+    <div class="rsk-lbl">Instrument</div>
+    <select class="rsk-select" id="rsk_inst">
+      <option value="XAUUSD">XAUUSD — Gold</option>
+      <option value="EURUSD">EUR/USD</option>
+      <option value="GBPUSD">GBP/USD</option>
+      <option value="USDJPY">USD/JPY</option>
+      <option value="GBPJPY">GBP/JPY</option>
+      <option value="AUDUSD">AUD/USD</option>
+      <option value="USDCAD">USD/CAD</option>
+      <option value="NQ">NQ — Nasdaq Futures</option>
+      <option value="ES">ES — S&amp;P 500 Futures</option>
+      <option value="YM">YM — Dow Futures</option>
+      <option value="BTCUSD">BTC/USD — Bitcoin</option>
+      <option value="ETHUSD">ETH/USD — Ethereum</option>
+    </select>
+  </div>
+
+  <div class="rsk-row">
+    <div class="rsk-lbl">Account Balance <span id="rsk_bal_l">$10,000</span></div>
+    <input class="rsk-input" type="number" id="rsk_bal" value="10000" min="100" max="2000000" step="500"/>
+  </div>
+
+  <div class="rsk-row">
+    <div class="rsk-lbl">Risk per Trade <span id="rsk_pct_l">1.00%</span></div>
+    <input class="rsk-slider" type="range" id="rsk_pct" min="0.1" max="5" step="0.1" value="1"/>
+  </div>
+
+  <div class="rsk-row">
+    <div class="rsk-lbl">Stop Loss <span id="rsk_sl_l">200 pips</span></div>
+    <input class="rsk-input" type="number" id="rsk_sl" value="200" min="1" max="50000" step="1"/>
+  </div>
+
+  <div class="rsk-row">
+    <div class="rsk-lbl">Take Profit Mode</div>
+    <div class="rsk-toggle">
+      <button id="rsk_btn_pct" class="rsk-act" onclick="rskMode('pct')">% of Balance</button>
+      <button id="rsk_btn_rr" onclick="rskMode('rr')">R:R Ratio</button>
+    </div>
+    <div id="rsk_pct_row">
+      <div class="rsk-lbl">Take Profit <span id="rsk_tp_pct_l">2.00% of balance</span></div>
+      <input class="rsk-slider" type="range" id="rsk_tp_pct" min="0.1" max="20" step="0.1" value="2"/>
+    </div>
+    <div id="rsk_rr_row" style="display:none">
+      <div class="rsk-lbl">R:R Ratio <span id="rsk_tp_rr_l">2.0 : 1</span></div>
+      <input class="rsk-slider" type="range" id="rsk_tp_rr" min="0.5" max="10" step="0.5" value="2"/>
+    </div>
+  </div>
+
+  <div class="rsk-grid">
+    <div class="rsk-card rsk-bar">
+      <div class="rsk-card-lbl">Lot Size</div>
+      <div class="rsk-card-val" id="rsk_lot" style="color:var(--green)">—</div>
+      <div class="rsk-card-sub" id="rsk_lot_sub">—</div>
+      <div class="rsk-warn" id="rsk_warn_min">Below 0.01 lots (minimum micro lot). Reduce stop loss or increase account balance.</div>
+      <div class="rsk-warn" id="rsk_warn_frac">Futures require whole contracts. Round to nearest integer.</div>
+    </div>
+    <div class="rsk-card">
+      <div class="rsk-card-lbl">$ at Risk</div>
+      <div class="rsk-card-val" id="rsk_risk_val" style="color:#e05050">—</div>
+      <div class="rsk-card-sub" id="rsk_risk_sub">—</div>
+    </div>
+    <div class="rsk-card">
+      <div class="rsk-card-lbl">$ at Target</div>
+      <div class="rsk-card-val" id="rsk_tp_val" style="color:var(--green)">—</div>
+      <div class="rsk-card-sub" id="rsk_tp_sub">—</div>
+    </div>
+    <div class="rsk-card">
+      <div class="rsk-card-lbl">R:R Ratio</div>
+      <div class="rsk-card-val" id="rsk_rr_val">—</div>
+      <div class="rsk-card-sub" id="rsk_rr_sub">—</div>
+    </div>
+    <div class="rsk-card">
+      <div class="rsk-card-lbl">TP Distance</div>
+      <div class="rsk-card-val" id="rsk_tpdist">—</div>
+      <div class="rsk-card-sub" id="rsk_tpdist_sub">—</div>
+    </div>
+  </div>
+
+  <div class="rsk-check" id="rsk_check"></div>
+</div>
+
+<script>
+(function(){
+  var mode = 'pct';
+
+  var CFG = {
+    XAUUSD: {pipVal:1.0,  unit:'pip',   isFut:false, name:'Gold',          defSL:200},
+    EURUSD: {pipVal:10.0, unit:'pip',   isFut:false, name:'EUR/USD',        defSL:30},
+    GBPUSD: {pipVal:10.0, unit:'pip',   isFut:false, name:'GBP/USD',        defSL:35},
+    USDJPY: {pipVal:9.09, unit:'pip',   isFut:false, name:'USD/JPY',        defSL:30},
+    GBPJPY: {pipVal:9.09, unit:'pip',   isFut:false, name:'GBP/JPY',        defSL:40},
+    AUDUSD: {pipVal:10.0, unit:'pip',   isFut:false, name:'AUD/USD',        defSL:25},
+    USDCAD: {pipVal:10.0, unit:'pip',   isFut:false, name:'USD/CAD',        defSL:25},
+    NQ:     {pipVal:20.0, unit:'pt',    isFut:true,  name:'NQ Futures',     defSL:20},
+    ES:     {pipVal:50.0, unit:'pt',    isFut:true,  name:'ES Futures',     defSL:10},
+    YM:     {pipVal:5.0,  unit:'pt',    isFut:true,  name:'YM Futures',     defSL:50},
+    BTCUSD: {pipVal:1.0,  unit:'$ move',isFut:false, name:'BTC/USD',        defSL:500},
+    ETHUSD: {pipVal:1.0,  unit:'$ move',isFut:false, name:'ETH/USD',        defSL:50},
+  };
+
+  window.rskMode = function(m) {
+    mode = m;
+    document.getElementById('rsk_btn_pct').classList.toggle('rsk-act', m==='pct');
+    document.getElementById('rsk_btn_rr').classList.toggle('rsk-act', m==='rr');
+    document.getElementById('rsk_pct_row').style.display = m==='pct' ? '' : 'none';
+    document.getElementById('rsk_rr_row').style.display  = m==='rr'  ? '' : 'none';
+    run();
+  };
+
+  function f(n,d){return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});}
+
+  function run(){
+    var bal  = Math.max(100, parseFloat(document.getElementById('rsk_bal').value) || 10000);
+    var rpct = parseFloat(document.getElementById('rsk_pct').value);
+    var sl   = Math.max(1,   parseFloat(document.getElementById('rsk_sl').value)  || 20);
+    var inst = document.getElementById('rsk_inst').value;
+    var cfg  = CFG[inst];
+
+    var dRisk = bal * (rpct / 100);
+    var lots  = dRisk / (sl * cfg.pipVal);
+
+    var dTP, tpPips, rr;
+    if(mode==='pct'){
+      var tpPct = parseFloat(document.getElementById('rsk_tp_pct').value);
+      dTP    = bal * (tpPct / 100);
+      tpPips = lots > 0 ? dTP / (lots * cfg.pipVal) : 0;
+      rr     = dRisk > 0 ? dTP / dRisk : 0;
+      document.getElementById('rsk_tp_pct_l').textContent = f(tpPct,2) + '% of balance';
+    } else {
+      rr     = parseFloat(document.getElementById('rsk_tp_rr').value);
+      dTP    = dRisk * rr;
+      tpPips = sl * rr;
+      document.getElementById('rsk_tp_rr_l').textContent = f(rr,1) + ' : 1';
+    }
+
+    var unit = cfg.unit;
+    document.getElementById('rsk_pct_l').textContent  = f(rpct,2) + '%';
+    document.getElementById('rsk_bal_l').textContent  = '$' + f(bal,0);
+    document.getElementById('rsk_sl_l').textContent   = f(sl,0) + ' ' + unit + (sl!==1?'s':'');
+
+    // Lot display
+    var lotLabel = cfg.isFut ? 'contract' : 'lot';
+    var lotDisp  = lots < 0.001 ? '< 0.001' : f(lots,2);
+    document.getElementById('rsk_lot').textContent = lotDisp + ' ' + (lots!==1 ? lotLabel+'s' : lotLabel);
+    if(!cfg.isFut){
+      document.getElementById('rsk_lot_sub').textContent =
+        f(lots*10,1)+' mini · '+f(lots*100,0)+' micro | $'+f(cfg.pipVal,2)+'/pip/lot';
+    } else {
+      document.getElementById('rsk_lot_sub').textContent =
+        '$'+f(cfg.pipVal,0)+' per point per contract';
+    }
+
+    // Warnings
+    document.getElementById('rsk_warn_min').style.display  = (!cfg.isFut && lots < 0.01) ? 'block' : 'none';
+    document.getElementById('rsk_warn_frac').style.display = (cfg.isFut && lots % 1 !== 0) ? 'block' : 'none';
+
+    // Risk card
+    document.getElementById('rsk_risk_val').textContent = '-$' + f(dRisk,2);
+    document.getElementById('rsk_risk_sub').textContent = f(rpct,2) + '% of $' + f(bal,0);
+
+    // TP card
+    document.getElementById('rsk_tp_val').textContent = '+$' + f(dTP,2);
+    document.getElementById('rsk_tp_sub').textContent = f((dTP/bal)*100,2) + '% of balance';
+
+    // R:R card
+    var rrE = document.getElementById('rsk_rr_val');
+    rrE.textContent = '1 : ' + f(rr,1);
+    rrE.style.color = rr>=2 ? 'var(--green)' : rr>=1 ? '#d68910' : '#e05050';
+    document.getElementById('rsk_rr_sub').textContent = rr>=2 ? 'Healthy' : rr>=1 ? 'Minimal — consider higher' : 'Below break-even';
+
+    // TP distance
+    document.getElementById('rsk_tpdist').textContent    = f(tpPips,0) + ' ' + unit + (tpPips!==1?'s':'');
+    document.getElementById('rsk_tpdist_sub').textContent = 'at ' + f(lots,2) + ' ' + lotLabel;
+
+    // Prop firm check
+    var chk = document.getElementById('rsk_check');
+    var col, msg;
+    if(rpct > 2){
+      col = '#e05050';
+      msg = '<strong>Risky for prop firms.</strong> At '+f(rpct,2)+'% per trade, three losers in a row costs you '+f(rpct*3,2)+'% — close to or past the 4-5% daily loss limit on FTMO and Funded Next. Most funded traders who blow their accounts do so on a 3-trade losing streak at 2%+ per trade.';
+    } else if(rpct > 1){
+      col = '#d68910';
+      msg = '<strong>Caution.</strong> '+f(rpct,2)+'% per trade is within most daily limits, but leaves room for only two losers before you hit a 4% daily cap. Safe if this is your only trade today. Add a second trade and you need a clean run to stay within limits.';
+    } else {
+      col = 'var(--green)';
+      msg = '<strong>Prop firm safe.</strong> At '+f(rpct,2)+'% per trade, you can take three losers in a row and only draw down '+f(rpct*3,2)+'% — well within the 4-5% daily limit on FTMO, Funded Next, and Topstep. This is the sizing range most funded traders operate in during their challenge phase.';
+    }
+    chk.style.borderLeftColor = col;
+    chk.innerHTML = msg;
+  }
+
+  document.getElementById('rsk_bal').addEventListener('input', run);
+  document.getElementById('rsk_pct').addEventListener('input', run);
+  document.getElementById('rsk_sl').addEventListener('input', run);
+  document.getElementById('rsk_tp_pct').addEventListener('input', run);
+  document.getElementById('rsk_tp_rr').addEventListener('input', run);
+  document.getElementById('rsk_inst').addEventListener('change', function(){
+    var inst = this.value;
+    document.getElementById('rsk_sl').value = CFG[inst].defSL;
+    run();
+  });
+
+  run();
+})();
+</script>
+
+<h2>How to Use This Calculator</h2>
+
+<p>Three inputs drive everything. <strong>Account balance</strong> is your current account size in USD. <strong>Risk percentage</strong> is the fraction of that balance you're willing to lose if the trade hits your stop. <strong>Stop loss distance</strong> is how far your stop sits from entry, in pips for forex and gold, points for futures, or dollar move for crypto.</p>
+
+<p>The <strong>Take Profit mode</strong> gives you two ways to set your target. "% of balance" asks what fraction of your account you want to make on this trade. "R:R ratio" lets you set a reward-to-risk multiple directly. Both update instantly.</p>
+
+<h2>The Maths Behind Lot Sizing</h2>
+
+<p>The formula: <strong>lot size = dollar risk divided by (stop loss distance multiplied by pip value per lot)</strong>.</p>
+
+<p>Dollar risk is your balance times your risk percentage. On a $10,000 account at 1% that's $100. If your gold stop is 200 pips (where 1 pip = $1 per standard lot), your lot size is $100 divided by 200, which is 0.50 lots. If gold hits your stop you lose exactly $100 regardless of where price goes after.</p>
+
+<p>For EUR/USD the pip value is $10 per standard lot. A 30-pip stop on a $100 risk trade gives $100 divided by (30 times $10), which is 0.33 lots. For futures, replace pips with points and use the per-point contract value shown in the calculator.</p>
+
+<h2>Prop Firm Sizing Rules You Cannot Ignore</h2>
+
+<p>Most prop firm challenges run two drawdown limits: a daily loss cap (typically 4-5% of account) and a maximum total drawdown (typically 8-10%). Your position sizing needs to respect both at the same time.</p>
+
+<p>At 1% risk per trade you can lose four trades in a row before hitting a 4% daily limit. At 2%, two consecutive losers ends your day. The calculator flags anything above 2% because most traders underestimate how quickly back-to-back losses compound against the daily cap, especially when running multiple instruments or session overlaps.</p>
+
+<p>Some prop firms also flag intraday drawdown spikes, where a single position causes a jump larger than their daily limit even if it closes the same day. Staying at or below 1% per trade keeps you completely clear of these triggers on FTMO, Funded Next, and Topstep.</p>
+
+<h2>Gold Pip Values: What 200 Pips Actually Means</h2>
+
+<p>Gold (XAU/USD) confuses traders because "pip" means different things across platforms. In this calculator, 1 pip equals a $0.01 price movement in gold. So if gold moves from 2350.00 to 2348.00, that is 200 pips. For 1 standard lot (100 oz), that is 100 oz multiplied by $0.02, which equals $2 profit or loss per pip... wait, let's be precise: 100 oz × $0.01 per pip = $1 per pip per lot. Over 200 pips that's $200 per lot, or $10 per 0.05 lot.</p>
+
+<p>A 200-pip gold stop is a $2 price movement, the kind of stop you'd place just below a tight order block on a 15-minute chart. A wider swing trade stop might sit 500 to 1000 pips away ($5 to $10 price move). The calculator handles both — just enter what your chart shows.</p>
+
+<p>Use TradeJournal's backtest replay to check what your real average stop distance has been over your last 20 gold trades. That number, not a rough guess, is what you should enter here. Your actual data will probably surprise you in one direction or the other.</p>
+"""
+  },
 ]
