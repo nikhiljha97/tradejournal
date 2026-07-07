@@ -499,6 +499,89 @@ def blog_post(slug):
     related = [p for p in POSTS if p["slug"] != slug][:3]
     return render_template("blog.html", post=post, posts=None, related=related)
 
+@app.route("/economic-calendar")
+def economic_calendar():
+    return render_template("forex_calendar.html")
+
+@app.route("/api/calendar-ai", methods=["POST"])
+def calendar_ai():
+    """Public AI chat for the forex economic calendar page."""
+    data = request.get_json(silent=True) or {}
+    user_msg = (data.get("message") or "").strip()[:500]
+    history  = (data.get("history") or [])[-4:]   # keep last 4 turns for context
+
+    if not user_msg:
+        return jsonify({"reply": "Please enter a question.", "blog": None}), 200
+
+    from blog_posts import POSTS
+    import json as _json
+
+    blog_index = "\n".join(
+        f'- slug:{p["slug"]} | "{p["title"]}" | {p["excerpt"][:100]}'
+        for p in POSTS
+    )
+
+    system = f"""You are an economic calendar assistant embedded on TradeJournal (backtesting-journalmytrades.com), a free AI trading journal for SMC and ICT forex/gold traders.
+
+Answer questions about forex economic events concisely and accurately. Assume the user is an active retail trader focused on XAUUSD, forex majors, or futures.
+
+TOPIC COVERAGE:
+- What each event means (NFP, FOMC, CPI, PPI, PCE, GDP, PMI, JOLTS, ADP, retail sales, interest rate decisions, etc.)
+- Which pairs/assets each event impacts and the causal mechanism (USD correlation, real rates, safe-haven flows, risk sentiment)
+- Typical pip ranges and volatility windows for high-impact releases
+- Gold (XAUUSD) reaction logic: real interest rates, DXY inverse correlation, safe-haven demand
+- Prop firm risk management around news events (stop widening, position closure, daily loss limit risk)
+- ICT methodology: news as a liquidity event, post-news displacement, kill zones
+- Session timing: London open, New York open, overlap windows
+
+RESPONSE FORMAT — return ONLY a JSON object, no text outside it:
+{{
+  "reply": "Your answer. Short paragraphs only, no markdown headers or bullet lists using dashes. Keep under 160 words.",
+  "blog": null
+}}
+
+If the question is directly answered or meaningfully extended by one of the TradeJournal blog posts below, set "blog" to:
+{{"title": "Exact post title", "url": "/blog/post-slug", "reason": "One sentence, under 12 words, why this helps."}}
+Otherwise keep "blog": null.
+
+BLOG POSTS AVAILABLE:
+{blog_index}
+
+RULES:
+- No financial advice — explain mechanisms and facts only
+- Never invent data or pip figures you are not confident about
+- Return ONLY valid JSON — nothing else"""
+
+    messages = [{"role": "system", "content": system}]
+    for turn in history:
+        role    = turn.get("role")
+        content = (turn.get("content") or "")[:300]
+        if role in ("user", "assistant") and content:
+            messages.append({"role": role, "content": content})
+    messages.append({"role": "user", "content": user_msg})
+
+    try:
+        from groq import Groq
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
+        resp = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=450,
+            temperature=0.3,
+            response_format={"type": "json_object"},
+            messages=messages,
+        )
+        raw    = resp.choices[0].message.content.strip()
+        parsed = _json.loads(raw)
+        return jsonify({
+            "reply": (parsed.get("reply") or "").strip(),
+            "blog":  parsed.get("blog") or None,
+        })
+    except Exception as e:
+        return jsonify({
+            "reply": "The calendar assistant is temporarily unavailable. Please try again in a moment.",
+            "blog": None,
+        }), 200
+
 
 @app.route("/sitemap.xml")
 def sitemap():
@@ -515,6 +598,7 @@ def sitemap():
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://backtesting-journalmytrades.com/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://backtesting-journalmytrades.com/blog</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/economic-calendar</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
 {blog_urls}
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
