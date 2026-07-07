@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+  <link rel="shortcut icon" href="/static/favicon.svg"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Page Not Found | TradeJournal</title>
+  <meta name="robots" content="noindex,nofollow"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#07090d;--bg2:#0c1018;--panel:#111820;
+      --border:#1c2b3a;--text:#d4dde8;--muted:#8899aa;
+      --green:#00e5a0;--green2:#00c88a;
+    }
+    body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
+    .code{font-size:clamp(80px,15vw,140px);font-weight:800;line-height:1;color:var(--green);opacity:.15;letter-spacing:-4px;user-select:none}
+    .msg{font-size:clamp(22px,4vw,32px);font-weight:700;margin:-10px 0 12px;color:var(--text)}
+    .sub{font-size:15px;color:var(--muted);max-width:420px;line-height:1.6;margin-bottom:36px}
+    .links{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+    a.btn{padding:12px 24px;border-radius:9px;font-size:14px;font-weight:600;text-decoration:none;transition:all .2s}
+    a.btn-primary{background:var(--green);color:#07090d}
+    a.btn-primary:hover{background:var(--green2)}
+    a.btn-secondary{background:var(--panel);border:1px solid var(--border);color:var(--text)}
+    a.btn-secondary:hover{border-color:var(--green);color:var(--green)}
+  </style>
+</head>
+<body>
+  <div class="code">404</div>
+  <h1 class="msg">This page doesn't exist.</h1>
+  <p class="sub">The URL may be wrong or this page was removed. Try one of the links below to get back on track.</p>
+  <div class="links">
+    <a href="/" class="btn btn-primary">Go to homepage</a>
+    <a href="/blog" class="btn btn-secondary">Read the blog</a>
+    <a href="/login" class="btn btn-secondary">Sign in</a>
+  </div>
+</body>
+</html>

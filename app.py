@@ -1045,6 +1045,10 @@ def sentiment_endpoint():
 def engine_status():
     return jsonify({"groq":sent.groq_available(),"offline_ready":sent.offline_ready(),"status":sent.engine_status()})
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
+
 if __name__ == "__main__":
     print(f"\n  TradeJournal  →  http://127.0.0.1:5000")
     print(f"  AI sentiment: {'ON (Groq)' if sent.groq_available() else 'OFF'}")

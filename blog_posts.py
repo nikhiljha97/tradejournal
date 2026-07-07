@@ -807,7 +807,13 @@ POSTS += [
 </div><!-- end pc-wrap -->
 </div><!-- end pcl-sidebar -->
 </div><!-- end pcl-outer -->
-"""
+""",
+    "faq": [
+      {"q": "How long does it take to pass a prop firm challenge?", "a": "Most prop firm challenges (FTMO, Funded Next) run 30-45 days, but there is no minimum time limit. You can pass in as few as 1-2 weeks if you hit the profit target without breaching drawdown. The 45-day framing reflects sustainable, rule-safe pacing — most traders who rush and fail do so in the first two weeks by taking oversized positions trying to compress the timeline."},
+      {"q": "What is the safest risk percentage per trade for a prop firm challenge?", "a": "0.5% to 1% per trade is considered safest for most prop firm challenges. At 1%, you can absorb four consecutive losses before hitting a 4% daily limit. Above 2%, just two losing trades in a row can end your trading day — and over a 45-day challenge, a single bad day can erase a week of accumulated gains."},
+      {"q": "What is partial close strategy in prop firm trading?", "a": "Partial close means taking profits on part of your position at an intermediate target (typically 1R or 2R) while leaving the remainder to run to a larger target. In prop firm trading, this protects your profit target progress by locking in real gain on the first partial, then letting the runner work with a reduced position. It also reduces psychological pressure and prevents a winning trade from reversing into a loss."},
+      {"q": "What does maximum drawdown mean on FTMO?", "a": "FTMO's maximum drawdown is a hard limit on how much your account equity can fall from the starting balance. On a $10,000 challenge, a 10% maximum drawdown means if your equity ever drops below $9,000, the challenge is failed immediately. Unlike the daily loss limit which resets each day, maximum drawdown is cumulative and permanent — one bad week can end the entire challenge."}
+    ]
   },
 ]
 
@@ -903,7 +909,13 @@ POSTS += [
 <p>TradeJournal handles XAUUSD, all major forex pairs, BTCUSD, ETHUSD, XRPUSD, and futures CFDs (NQ, ES, YM equivalents) with the correct contract size for each. MT5 imports are parsed instrument-aware — if your broker export says XAUUSD, the journal knows it is a 100 oz/lot instrument and calculates accordingly. You do not need to configure anything manually.</p>
 
 <p>If you are currently trading multiple instruments and your journal treats them all the same, you are not reviewing your trading — you are reviewing a distorted reflection of it.</p>
-"""
+""",
+    "faq": [
+      {"q": "How much is 1 pip worth in XAUUSD (gold)?", "a": "For XAUUSD, 1 pip equals a $0.01 movement in the gold price. For 1 standard lot (100 oz), the pip value is $1 per pip. So a 200-pip gold stop represents a $2.00 price movement, costing $200 per standard lot if hit. For a 0.1 lot, the same stop costs $20. Many trading journals apply forex pip math to gold and produce completely wrong P&L figures."},
+      {"q": "Why does my trading journal show the wrong P&L for gold trades?", "a": "Most generic trading journals apply forex pip math to gold — treating XAUUSD like a currency pair with a $10 pip value per lot. XAUUSD is a commodity with a 100 oz contract size, giving it a $1 pip value per standard lot, not $10. A journal must know each instrument's contract specification to calculate R multiples and dollar P&L correctly."},
+      {"q": "What is the pip value for EURUSD?", "a": "For EURUSD, 1 pip = $10 per standard lot (1.0 lot). A 30-pip stop on 0.1 lot has a dollar risk of $30. GBPUSD has the same $10 per pip per standard lot structure. JPY pairs like USDJPY are approximately $9.09 per pip per standard lot due to the JPY exchange rate conversion."},
+      {"q": "How do futures P&L calculations differ from forex?", "a": "Futures use a point value rather than pip value, and contract sizes are fixed by exchange. NQ (Nasdaq futures) is worth $20 per point, ES (S&P 500) is $50 per point, and YM (Dow) is $5 per point. There is no lot size in the forex sense — you trade contracts, and each contract has a fixed dollar value per point of price movement regardless of your account size."}
+    ]
   },
   {
     "slug": "position-size-calculator-risk-percentage",
@@ -1181,6 +1193,12 @@ POSTS += [
 <p>A 200-pip gold stop is a $2 price movement, the kind of stop you'd place just below a tight order block on a 15-minute chart. A wider swing trade stop might sit 500 to 1000 pips away ($5 to $10 price move). The calculator handles both — just enter what your chart shows.</p>
 
 <p>Use TradeJournal's backtest replay to check what your real average stop distance has been over your last 20 gold trades. That number, not a rough guess, is what you should enter here. Your actual data will probably surprise you in one direction or the other.</p>
-"""
+""",
+    "faq": [
+      {"q": "How do you calculate lot size from risk percentage?", "a": "Lot size = (account balance × risk %) / (stop loss in pips × pip value per lot). For example, on a $10,000 account risking 1% with a 200-pip gold stop: $100 / (200 × $1) = 0.50 lots. This formula ensures every trade risks exactly the same dollar amount regardless of how large or small the stop loss is."},
+      {"q": "How many lots should I trade on a $10,000 account?", "a": "It depends on your risk percentage and stop loss distance. At 1% risk ($100) with a 30-pip EURUSD stop: $100 / (30 × $10) = 0.33 lots. With a 200-pip XAUUSD stop: $100 / (200 × $1) = 0.50 lots. The lot size changes with every trade because stop distance changes — the constant is your dollar risk, not your lot size."},
+      {"q": "What is a safe risk percentage for prop firm challenges?", "a": "0.5% to 1% per trade is the standard range for prop firm challenge trading. At 1%, three consecutive losses cost 3% — safely within the 4-5% daily loss limit on FTMO and Funded Next. Many funded traders use 0.5% to allow for 6-8 stop-outs before the daily cap, giving more room for difficult market sessions with many re-entries."},
+      {"q": "Does this position size calculator work for NQ and ES futures?", "a": "Yes. For NQ, the calculator uses $20 per point (standard contract). For ES, it uses $50 per point. For YM, $5 per point. Enter your stop loss in points — for example, a 20-point NQ stop on a $10,000 account at 1% risk: $100 / (20 × $20) = 0.25 contracts. These are standard NQ/ES/YM values; micro contracts (MNQ, MES, MYM) are one-tenth the size."}
+    ]
   },
 ]

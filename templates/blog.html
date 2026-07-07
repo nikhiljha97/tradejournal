@@ -22,6 +22,9 @@
   {% if post %}
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"{{ post.title }}","description":"{{ post.meta_desc }}","url":"https://backtesting-journalmytrades.com/blog/{{ post.slug }}","datePublished":"{{ post.date }}","image":"https://backtesting-journalmytrades.com/static/og-image.png","author":{"@type":"Organization","name":"TradeJournal"},"publisher":{"@type":"Organization","name":"TradeJournal","url":"https://backtesting-journalmytrades.com"}}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://backtesting-journalmytrades.com"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://backtesting-journalmytrades.com/blog"},{"@type":"ListItem","position":3,"name":"{{ post.title }}","item":"https://backtesting-journalmytrades.com/blog/{{ post.slug }}"}]}</script>
+  {% if post.faq %}
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{% for f in post.faq %}{"@type":"Question","name":{{ f.q | tojson }},"acceptedAnswer":{"@type":"Answer","text":{{ f.a | tojson }}}}{% if not loop.last %},{% endif %}{% endfor %}]}</script>
+  {% endif %}
   {% else %}
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://backtesting-journalmytrades.com"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://backtesting-journalmytrades.com/blog"}]}</script>
   {% endif %}
