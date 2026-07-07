@@ -525,7 +525,68 @@ def ads_txt():
 
 @app.route("/robots.txt")
 def robots_txt():
-    return """User-agent: *
+    return """# AI crawlers — explicitly allowed to index public content
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /logout
+Disallow: /settings
+Disallow: /import
+Disallow: /backtest
+Disallow: /ideas
+Disallow: /reset-password/
+Disallow: /verify-email/
+Disallow: /resend-verification
+Disallow: /forgot-password
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+
+User-agent: meta-externalagent
+Allow: /
+Disallow: /api/
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+
+User-agent: Amazonbot
+Allow: /
+Disallow: /api/
+
+User-agent: Bytespider
+Allow: /
+Disallow: /api/
+
+User-agent: CCBot
+Allow: /
+Disallow: /api/
+
+# All other bots — allow public pages, block private routes
+User-agent: *
 Disallow: /api/
 Disallow: /login
 Disallow: /register

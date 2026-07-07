@@ -7,6 +7,7 @@ POSTS = [
     "title": "The Complete SMC Trading Journal Guide: How to Track Order Blocks, FVGs and BOS",
     "excerpt": "Most SMC traders lose money not because their setups are wrong — but because they never review them. Here's exactly how to journal SMC trades to find your real edge.",
     "meta_desc": "Learn how to journal SMC trades including Order Blocks, Fair Value Gaps, BOS and CHoCH. Free template and AI-powered analysis for serious ICT traders.",
+    "seo_title": "SMC Trading Journal: Track Order Blocks & FVGs",
     "date": "2026-06-15",
     "read_time": 8,
     "content": """
@@ -64,6 +65,7 @@ POSTS = [
     "title": "How to Use a Trading Journal to Pass Your Prop Firm Challenge (FTMO, Funded Next, Upcomers)",
     "excerpt": "Prop firm challenges have strict rules around drawdown, consistency, and daily loss. Most traders fail not from bad setups but from breaking rules they forgot about. A journal fixes that.",
     "meta_desc": "Use a trading journal to track your FTMO, Funded Next or Upcomers prop firm challenge. Monitor drawdown, consistency, and daily loss limits in real time.",
+    "seo_title": "Prop Firm Trading Journal (FTMO & Funded Next)",
     "date": "2026-06-16",
     "read_time": 7,
     "content": """
@@ -108,7 +110,8 @@ POSTS = [
     "tag": "XAUUSD",
     "title": "XAUUSD Trading Journal: The Exact Setup for Gold Traders on MT5",
     "excerpt": "Gold has a contract size of 100 oz per lot — not 10. Most trading journals get the pip math wrong. Here's how to journal XAUUSD trades correctly, including MT5 import and real R calculations.",
-    "meta_desc": "Journal your XAUUSD trades correctly with the right contract size (100 oz/lot). Import from MT5, track real R multiples, and analyse your gold trading psychology.",
+    "meta_desc": "Journal XAUUSD trades correctly with the right contract size (100 oz/lot). Import from MT5, track real R multiples, and analyse your gold trading psychology.",
+    "seo_title": "XAUUSD Trading Journal for Gold Traders",
     "date": "2026-06-17",
     "read_time": 6,
     "content": """
@@ -158,7 +161,8 @@ POSTS = [
     "tag": "Psychology",
     "title": "Trading Psychology Journal: How to Stop Revenge Trading and Tilt Using Your Own Data",
     "excerpt": "Revenge trading and emotional decisions cost traders far more than bad setups. The only way to fix psychology issues is to see them in data — not just feel guilty about them.",
-    "meta_desc": "Use a trading psychology journal to detect revenge trading, FOMO, and tilt patterns. AI analysis identifies your most costly emotional behaviours from your own trade notes.",
+    "meta_desc": "Use a trading psychology journal to detect revenge trading, FOMO and tilt. AI identifies your most costly emotional patterns from your own trade notes.",
+    "seo_title": "Trading Psychology Journal: Stop Revenge Trading",
     "date": "2026-06-18",
     "read_time": 7,
     "content": """
@@ -233,6 +237,7 @@ POSTS += [
     "title": "Best Free Trading Journal App in 2026 (No Excel, No Spreadsheet)",
     "excerpt": "Most free trading journals are just spreadsheets in disguise. Here's what a real free trading journal app looks like — and why the best ones cost nothing.",
     "meta_desc": "Looking for a free trading journal app? TradeJournal is 100% free forever — AI psychology analysis, MT5 import, prop firm tracking. No Excel needed.",
+    "seo_title": "Best Free Trading Journal App 2026",
     "date": "2026-06-18",
     "read_time": 6,
     "content": """
@@ -285,7 +290,8 @@ POSTS += [
     "tag": "Getting Started",
     "title": "What to Write in a Trading Journal (With Real Examples)",
     "excerpt": "Most traders write 'entered long, hit TP' and wonder why their journal isn't helping. Here's exactly what to write — with examples that actually improve your trading.",
-    "meta_desc": "Learn what to write in a trading journal with real examples. Setup, entry reason, psychology notes, exit review — the complete trading journal format that actually works.",
+    "meta_desc": "Learn what to write in a trading journal with real examples. Setup, entry reason, psychology notes, exit review — the trading journal format that works.",
+    "seo_title": "What to Write in a Trading Journal",
     "date": "2026-06-18",
     "read_time": 7,
     "content": """
@@ -352,7 +358,8 @@ POSTS += [
     "tag": "Getting Started",
     "title": "How to Start a Trading Journal in 2026 (Step-by-Step for Beginners)",
     "excerpt": "Starting a trading journal sounds simple but most traders quit within a week. Here's the exact system — tools, format, review process — that actually sticks.",
-    "meta_desc": "How to start a trading journal step by step. The right format, what to track, how to review, and free tools that make journaling take less than 5 minutes per trade.",
+    "meta_desc": "How to start a trading journal step by step. The right format, what to track, how to review — free tools that make journaling take 5 minutes per trade.",
+    "seo_title": "How to Start a Trading Journal 2026",
     "date": "2026-06-18",
     "read_time": 6,
     "content": """
@@ -410,7 +417,18 @@ POSTS += [
 <p>Most traders notice meaningful patterns after <strong>30-50 trades</strong>. At that sample size, statistical patterns start to emerge — which setups work, which sessions are profitable, which psychological states to avoid.</p>
 <p>At 100+ trades, your journal becomes a genuine edge document — a data-backed playbook of exactly what works for you, in your markets, at your times.</p>
 <blockquote>You don't need to journal perfectly. You need to journal consistently. 3 months of imperfect entries beats 2 weeks of perfect ones every time.</blockquote>
-"""
+""",
+    "howto": {
+      "name": "How to Start a Trading Journal",
+      "description": "A step-by-step guide to starting a trading journal that you will actually maintain, including tool choice, what to track, import setup, daily ritual, and weekly review.",
+      "steps": [
+        {"name": "Choose your journaling tool", "text": "Select a dedicated trading journal app over Excel or Notion. A dedicated app handles P&L calculations automatically, imports from MT5, and reduces the friction that causes most traders to quit journaling within two weeks."},
+        {"name": "Decide the five fields to track", "text": "Start with only: date and instrument, entry price and stop loss and take profit, position size in lots, setup name such as Order Block or FVG, and one sentence of psychology. Add more fields only after the habit is established."},
+        {"name": "Import your historical trades", "text": "Export the last 3 months of trades from your broker as a CSV or HTML report and import them into your journal. This gives you immediate baseline data and patterns to analyse before your next trade."},
+        {"name": "Set a daily journaling ritual", "text": "Tie journaling to existing habits: review yesterday's entries before trading, log each trade within 5 minutes of closing while context is fresh, and do a 15-minute weekly review every Friday."},
+        {"name": "Review weekly to extract insights", "text": "Each week answer four questions from your data: which setup had the highest win rate, which session was most profitable, what emotion preceded losing trades, and whether you followed your risk rules on every trade."}
+      ]
+    }
   },
   {
     "slug": "tradezella-vs-edgewonk-vs-tradersync-alternatives",
@@ -418,6 +436,7 @@ POSTS += [
     "title": "TradeZella vs Edgewonk vs TraderSync — And the Free Alternative Nobody Talks About",
     "excerpt": "Comparing the top trading journal apps in 2026. Honest breakdown of features, pricing, and who each one is actually built for — plus one completely free option.",
     "meta_desc": "TradeZella vs Edgewonk vs TraderSync comparison 2026. Features, pricing, pros and cons — plus a free trading journal alternative with AI psychology analysis.",
+    "seo_title": "TradeZella vs Edgewonk vs TraderSync",
     "date": "2026-06-18",
     "read_time": 8,
     "content": """
@@ -518,7 +537,8 @@ POSTS += [
     "tag": "Prop Trading",
     "title": "How to Pass a Prop Firm Challenge in 45 Days (The Risk Math Most Traders Skip)",
     "excerpt": "Most traders fail prop firm evaluations not from bad setups but from bad risk math. Here's the 45-day framework — with an interactive calculator — that puts your real numbers in front of you before the challenge starts.",
-    "meta_desc": "Pass your prop firm challenge in 45 days with smart risk math. Interactive partial close calculator for XAUUSD and Gold traders. Works for FTMO, Funded Next, Topstep, MyForexFunds and all major prop firms.",
+    "meta_desc": "Pass your prop firm challenge in 45 days using smart risk math. Partial close calculator for XAUUSD. Works for FTMO, Funded Next, Topstep and more.",
+    "seo_title": "Pass a Prop Firm Challenge in 45 Days",
     "date": "2026-07-02",
     "read_time": 9,
     "content": """
@@ -813,7 +833,17 @@ POSTS += [
       {"q": "What is the safest risk percentage per trade for a prop firm challenge?", "a": "0.5% to 1% per trade is considered safest for most prop firm challenges. At 1%, you can absorb four consecutive losses before hitting a 4% daily limit. Above 2%, just two losing trades in a row can end your trading day — and over a 45-day challenge, a single bad day can erase a week of accumulated gains."},
       {"q": "What is partial close strategy in prop firm trading?", "a": "Partial close means taking profits on part of your position at an intermediate target (typically 1R or 2R) while leaving the remainder to run to a larger target. In prop firm trading, this protects your profit target progress by locking in real gain on the first partial, then letting the runner work with a reduced position. It also reduces psychological pressure and prevents a winning trade from reversing into a loss."},
       {"q": "What does maximum drawdown mean on FTMO?", "a": "FTMO's maximum drawdown is a hard limit on how much your account equity can fall from the starting balance. On a $10,000 challenge, a 10% maximum drawdown means if your equity ever drops below $9,000, the challenge is failed immediately. Unlike the daily loss limit which resets each day, maximum drawdown is cumulative and permanent — one bad week can end the entire challenge."}
-    ]
+    ],
+    "howto": {
+      "name": "How to Pass a Prop Firm Challenge in 45 Days",
+      "description": "A four-phase framework for passing FTMO, Funded Next, or Topstep prop firm challenges using risk math, partial close strategy, and discipline rules.",
+      "steps": [
+        {"name": "Phase 1 — Calibration (Days 1-10)", "text": "Trade your smallest position size (0.25-0.5% risk per trade). Your only goal is to gather real data for your partial close win rates (P1 and P2). After 30-40 trades, plug your real numbers into the calculator to confirm your strategy is challenge-viable before committing to full size."},
+        {"name": "Phase 2 — Core Phase (Days 11-28)", "text": "Move to your standard risk per trade using the data from Phase 1. Execute the partial close at 1.5R unconditionally on every qualifying trade. Monitor your daily drawdown before each trading session and halve size if within 2% of the daily limit."},
+        {"name": "Phase 3 — Target Push (Days 29-40)", "text": "Maintain the same position size and selectivity as Phase 2. Avoid increasing risk to accelerate toward the profit target. Once within 1% of the target, reduce position size by 50% to protect progress."},
+        {"name": "Phase 4 — Buffer Phase (Days 41-45)", "text": "Take only your clearest, highest-conviction setups. Decline everything marginal. Set a hard stop 30 minutes before the daily session cutoff. One impulsive trade in the buffer phase ends more challenges than any losing streak."}
+      ]
+    }
   },
 ]
 
@@ -823,7 +853,8 @@ POSTS += [
     "tag": "Trading Journal",
     "title": "Why Most Trading Journals Show You the Wrong P&L — Gold, Forex, Crypto and Futures Explained",
     "excerpt": "If your trading journal can't calculate XAUUSD pip value correctly, every R multiple it shows you is wrong. Here's the correct math for Gold, forex pairs, crypto and futures — and why it matters more than you think.",
-    "meta_desc": "Most trading journals get XAUUSD pip math wrong by 10x. Learn the correct pip value calculation for Gold, forex, crypto (BTC, ETH, XRP) and futures — and how a free trading journal handles all of them correctly.",
+    "meta_desc": "Most trading journals get XAUUSD pip math wrong. Learn correct pip value calculations for Gold, forex, crypto and futures — and how TradeJournal handles them.",
+    "seo_title": "Trading Journal Pip Math: Gold, Forex & Futures",
     "date": "2026-07-04",
     "read_time": 7,
     "content": """
@@ -922,7 +953,8 @@ POSTS += [
     "tag": "Tools",
     "title": "Free Position Size Calculator: Lot Size by Risk % for Gold, Forex, Futures and Crypto",
     "excerpt": "Enter your balance, risk percentage, and stop loss. Get the exact lot size to trade, your dollar risk, profit at target, and a prop firm safety check. Works for XAUUSD, forex pairs, NQ, ES, BTC and more.",
-    "meta_desc": "Free position size calculator for forex, gold (XAUUSD), NQ/ES futures and crypto. Enter risk % and stop loss to get exact lot size instantly. Prop firm safe checker included.",
+    "meta_desc": "Free position size calculator for forex, gold (XAUUSD), futures and crypto. Enter your risk % and stop loss to get exact lot size instantly. Prop firm safe.",
+    "seo_title": "Free Position Size Calculator by Risk %",
     "date": "2026-07-06",
     "read_time": 5,
     "content": """
