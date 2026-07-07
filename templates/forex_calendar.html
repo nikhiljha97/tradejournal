@@ -182,7 +182,9 @@
     #ask-ai-label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
     @keyframes ai-blink{0%,45%{opacity:1}55%,100%{opacity:0}}
     .blink-label{animation:ai-blink 1.8s ease-in-out infinite}
-    @media(max-width:700px){#chat-btn{right:16px;bottom:16px}}
+    @media(max-width:700px){
+      #chat-btn{right:16px;bottom:16px}
+    }
     #chat-panel{display:none;position:fixed;bottom:90px;right:24px;width:370px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--border);border-radius:16px;z-index:300;box-shadow:0 20px 60px rgba(0,0,0,.7);flex-direction:column;overflow:hidden;animation:slideUp .2s ease}
     @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     #chat-panel.open{display:flex}
