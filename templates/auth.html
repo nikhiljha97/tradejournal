@@ -17,6 +17,7 @@
   <meta name="twitter:title" content="TradeJournal — Free AI Trading Journal for SMC Traders"/>
   <meta name="twitter:description" content="Track trades, read your psychology, beat prop firm rules. Free forever."/>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2562826047096065" crossorigin="anonymous"></script>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
   <style>
@@ -164,6 +165,10 @@
       {% endif %}
     </div>
 
+    <div style="margin:14px 0;transform:scale(0.95);transform-origin:left">
+      <div class="g-recaptcha" data-sitekey="6LfTT0gtAAAAABo8sBej6kMX6poaWPEMLSc9trBO" data-theme="dark"></div>
+    </div>
+
     <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
       {{ 'Sign in' if mode == 'login' else 'Create account' }}
     </button>
@@ -260,7 +265,15 @@
       }
     }
 
-    const body = { email, password };
+    const recaptchaToken = grecaptcha.getResponse();
+    if (!recaptchaToken) {
+      showError('Please complete the reCAPTCHA verification.');
+      btn.disabled = false;
+      btn.textContent = MODE === 'login' ? 'Sign in' : 'Create account';
+      return;
+    }
+
+    const body = { email, password, recaptcha: recaptchaToken };
     if (MODE === 'register') {
       body.username = document.getElementById('f_username').value.trim();
     }
@@ -295,11 +308,13 @@
         }
         btn.disabled = false;
         btn.textContent = MODE === 'login' ? 'Sign in' : 'Create account';
+        grecaptcha.reset();
       }
     } catch(e) {
       showError('Network error — please try again');
       btn.disabled = false;
       btn.textContent = MODE === 'login' ? 'Sign in' : 'Create account';
+      grecaptcha.reset();
     }
   }
 

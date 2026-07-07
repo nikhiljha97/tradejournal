@@ -1,7 +1,7 @@
 """
 TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 """
-import os, json, uuid, re
+import os, json, uuid, re, requests as http_requests
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from sqlalchemy import text
 from blog_posts import POSTS, get_post
@@ -350,12 +350,24 @@ def _upload_image(file):
 
 
 # ── Auth routes ───────────────────────────────────────────────────────────────
+RECAPTCHA_SECRET = "6LfTT0gtAAAAABIxnN5icIPPzZb1h2OuTfGYiD7O"
+
+def _verify_recaptcha(token):
+    try:
+        r = http_requests.post("https://www.google.com/recaptcha/api/siteverify",
+            data={"secret": RECAPTCHA_SECRET, "response": token}, timeout=5)
+        return r.json().get("success", False)
+    except Exception:
+        return False
+
 @app.route("/register", methods=["GET","POST"])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for("index"))
     if request.method == "POST":
         data = request.get_json(force=True)
+        if not _verify_recaptcha(data.get("recaptcha","")):
+            return jsonify({"error": "reCAPTCHA verification failed. Please try again."}), 400
         email    = (data.get("email","")).strip().lower()
         username = (data.get("username","")).strip()
         password = data.get("password","")
@@ -402,6 +414,8 @@ def login():
         return redirect(url_for("index"))
     if request.method == "POST":
         data = request.get_json(force=True)
+        if not _verify_recaptcha(data.get("recaptcha","")):
+            return jsonify({"error": "reCAPTCHA verification failed. Please try again."}), 400
         email    = (data.get("email","")).strip().lower()
         password = data.get("password","")
         user = User.query.filter_by(email=email).first()
