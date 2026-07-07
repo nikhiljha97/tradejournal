@@ -1233,4 +1233,191 @@ POSTS += [
       {"q": "Does this position size calculator work for NQ and ES futures?", "a": "Yes. For NQ, the calculator uses $20 per point (standard contract). For ES, it uses $50 per point. For YM, $5 per point. Enter your stop loss in points — for example, a 20-point NQ stop on a $10,000 account at 1% risk: $100 / (20 × $20) = 0.25 contracts. These are standard NQ/ES/YM values; micro contracts (MNQ, MES, MYM) are one-tenth the size."}
     ]
   },
+  {
+    "slug": "prop-firm-compliance-dashboard",
+    "tag": "Prop Trading",
+    "title": "Real-Time Prop Firm Compliance Dashboard: Never Break a Rule by Accident Again",
+    "seo_title": "Prop Firm Compliance Dashboard: Live Tracking",
+    "excerpt": "Most prop firm challenge failures come from traders who didn't realise they were near a limit until after they breached it. A real-time compliance dashboard solves this. Here is exactly what it needs to track.",
+    "meta_desc": "Track prop firm drawdown, daily loss, consistency and profit target in real time. The compliance dashboard every FTMO, Funded Next and Topstep trader needs.",
+    "date": "2026-07-07",
+    "read_time": 7,
+    "content": """
+<p>The number one reason traders fail prop firm challenges is not a bad setup; it is breaking a rule they had already forgotten about. You enter a second position on a losing day without realising you are one bad trade from the daily loss limit. Or you hit your profit target but your consistency score is disqualifying. A real-time compliance dashboard eliminates these blind spots.</p>
+
+<h2>What Is a Prop Firm Compliance Dashboard?</h2>
+<p>A compliance dashboard is a live view of every rule your prop firm challenge imposes, updated after each trade. Instead of manually calculating where you stand on drawdown at the end of the day, the dashboard does it automatically and shows you your buffer in real time.</p>
+
+<p>Think of it as the difference between driving with a fuel gauge and driving with only the odometer. Both give you information, but the gauge tells you when you are about to run out, not after you already have.</p>
+
+<h2>The 5 Metrics Every Prop Firm Dashboard Must Track</h2>
+
+<h3>1. Maximum Drawdown: Your Hard Floor</h3>
+<p>Maximum drawdown is the total loss allowed from your starting equity before the challenge terminates. On FTMO and most major firms it sits at 10% of the starting balance. On a $100,000 account that is a $10,000 absolute floor. Your dashboard must show this number as a live percentage, not just a static figure.</p>
+<p>Critical nuance: some firms calculate max drawdown from the <em>starting balance</em>, while others use the <em>highest equity ever reached</em> (trailing drawdown). TradeJournal lets you configure which calculation applies to your firm.</p>
+
+<h3>2. Daily Loss Limit: The Reset That Catches Most Traders</h3>
+<p>The daily loss limit is the most violated rule in prop firm challenges because it resets at midnight. If you lost 4.2% on Monday but made 5% on Tuesday, you are profitable; but if you then give back 4.5% on Wednesday, you have already failed even though your account is still up overall.</p>
+<p>Most major firms set the daily limit at 4-5% of the starting balance. A live dashboard shows your intraday P&L as a percentage of this limit the moment each trade closes, including open floating losses if you configure it to do so.</p>
+
+<h3>3. Profit Target Progress</h3>
+<p>On a standard FTMO 10% challenge, you need to reach $10,000 profit on a $100,000 account while staying within drawdown limits. Tracking this as a percentage of target remaining (rather than a raw dollar amount) tells you how many clean trading days you have left to reach the goal without needing to oversize.</p>
+
+<h3>4. Consistency Percentage</h3>
+<p>Some prop firms, including Upcomers and certain funded account providers, require that no single day's profit exceeds a fixed percentage of your total profit, typically 30-50%. If you bank $9,000 in one trade and $1,000 across nine other days, your consistency score is 90%, which may void your payout eligibility even though you passed the profit target.</p>
+<p>A compliance dashboard that tracks consistency shows this number daily so you can deliberately cap winning days before they skew the ratio.</p>
+
+<h3>5. Minimum Trading Days</h3>
+<p>Many challenges require a minimum number of active trading days, typically 4-10 days depending on the firm. Logging every trade date means your dashboard always shows how many qualifying days you have completed, preventing a situation where you hit your profit target on day 3 only to find you still need 7 more active days before requesting a payout.</p>
+
+<h2>Real-Time vs End-of-Day Compliance Tracking</h2>
+<p>End-of-day tracking tells you if you breached a rule. Real-time tracking tells you <em>before</em> you do. The difference matters most during volatile sessions where a position can move against you faster than you can manually recalculate your drawdown buffer.</p>
+<p>With real-time tracking, you set pre-trade checks: before opening any position, you see exactly how much buffer remains on the daily limit. If the buffer is $180 and your intended risk is $200, the dashboard flags the discrepancy before you place the order.</p>
+
+<h2>How TradeJournal's Compliance Strip Works</h2>
+<p>TradeJournal includes a live compliance strip at the top of the dashboard. You enter your prop firm rules once in Settings: profit target %, max drawdown %, daily loss limit %, minimum trading days, and consistency cap if applicable. Every trade you log (or import from MT5) automatically updates all five metrics in real time.</p>
+<p>The strip uses colour coding: green when you have healthy buffer, amber when you are within 30% of a limit, red when you are within 10%. You can also enable the daily loss alert, which sends a browser notification when your intraday P&L crosses the amber threshold.</p>
+
+<h2>Configuring Your Dashboard for Different Prop Firms</h2>
+<p>Different firms use different rule structures. Here are the settings for the most common ones:</p>
+<ul>
+  <li><strong>FTMO Standard Challenge</strong>: Max drawdown 10%, daily loss 5%, profit target 10%, min 4 trading days</li>
+  <li><strong>Funded Next Standard</strong>: Max drawdown 10%, daily loss 5%, profit target 10%, min 5 trading days</li>
+  <li><strong>Topstep Futures</strong>: Trailing max drawdown (from highest balance), daily loss 2% of starting balance, no consistency rule</li>
+  <li><strong>MyForexFunds (where active)</strong>: Max drawdown 12%, daily loss 5%, profit target 8%</li>
+</ul>
+<p>The trailing drawdown on Topstep is the most dangerous to misunderstand. If you start at $50,000 and peak at $54,000, your drawdown floor is now $50,400, not $45,000. TradeJournal's trailing drawdown mode recalculates your floor every time your equity reaches a new high.</p>
+""",
+    "faq": [
+      {"q": "What is real-time drawdown monitoring for prop firms?", "a": "Real-time drawdown monitoring means your current P&L is calculated against your prop firm's max drawdown and daily loss limits continuously during the trading day, not just at the close, showing you exactly how much buffer remains before you would breach a rule, allowing you to size down or stop trading before a violation occurs."},
+      {"q": "What is the difference between max drawdown and daily drawdown?", "a": "Max drawdown is the total loss allowed from your starting balance across the entire challenge period, typically 10% on FTMO and Funded Next. Daily drawdown is the maximum loss allowed in a single calendar day, typically 4-5%. The daily limit resets at midnight every day regardless of your overall equity level. Both limits apply simultaneously and you must stay within whichever is more restrictive at any given moment."},
+      {"q": "Which prop firms does TradeJournal's compliance dashboard support?", "a": "TradeJournal works with any prop firm because you configure the rules manually in Settings. Pre-tested configurations are available for FTMO, Funded Next, Topstep (including trailing drawdown mode), Upcomers (including consistency percentage), MyForexFunds, The Funded Trader, and City Traders Imperium. If your firm has different parameters, you can enter any custom values."},
+      {"q": "What is trailing drawdown and how is it different from fixed drawdown?", "a": "Fixed drawdown calculates your floor from the starting balance and it never moves. If you start at $50,000 with a 10% max drawdown, your floor is always $45,000. Trailing drawdown recalculates the floor every time your equity reaches a new peak. If you grow from $50,000 to $54,000, your floor rises to $50,400 and stays there even when equity falls back. Topstep and some other futures prop firms use trailing drawdown, which means a profitable run can paradoxically tighten your available buffer."},
+      {"q": "Can I track multiple prop firm challenges at the same time?", "a": "TradeJournal currently supports one active prop firm configuration at a time in Settings. Multi-account tracking across simultaneous challenges is on the roadmap. As a workaround, many traders run separate TradeJournal accounts for each active challenge."}
+    ],
+    "howto": {
+      "name": "How to Set Up a Prop Firm Compliance Dashboard in TradeJournal",
+      "description": "Configure real-time drawdown and rule tracking for your prop firm challenge in under 5 minutes.",
+      "steps": [
+        {"name": "Open Settings and select your prop firm", "text": "Log in to TradeJournal and navigate to Settings. Under Prop Firm Challenge, select your firm from the dropdown or choose Custom to enter your own rules. This sets the baseline for all compliance calculations."},
+        {"name": "Enter your challenge rules", "text": "Input your profit target percentage, max drawdown percentage, daily loss limit percentage, minimum required trading days, and your starting account balance. For trailing drawdown firms like Topstep, enable the Trailing Drawdown toggle."},
+        {"name": "Log or import your first trade", "text": "Either log a trade manually or import your MT5 history. The compliance strip at the top of your dashboard activates immediately and shows current progress toward each rule in real time."},
+        {"name": "Enable the daily loss alert", "text": "In Settings, turn on Daily Loss Alert. Set the warning threshold (recommended: 70% of your daily limit). You will receive a browser notification when your intraday P&L crosses this point, giving you time to stop trading before a breach."},
+        {"name": "Review the compliance strip before each trading session", "text": "Before opening any position, check the compliance strip: max drawdown buffer remaining, daily loss used today, profit target progress, and consistency score if applicable. Make your sizing decision based on the tightest remaining buffer."}
+      ]
+    }
+  },
+  {
+    "slug": "free-vs-paid-trading-journal-ict-traders",
+    "tag": "ICT Trading",
+    "title": "Free vs Paid Trading Journals for ICT Traders: What's Actually Worth Using in 2026",
+    "seo_title": "Free vs Paid Trading Journals for ICT Traders 2026",
+    "excerpt": "TradeZella costs $35/month. Edgewonk costs $169/year. TraderSync costs $29/month. Are any of them worth it for ICT traders, or does the free option actually win?",
+    "meta_desc": "Free vs paid trading journals for ICT traders compared. TradeZella, Edgewonk, TraderSync vs free alternatives for SMC and ICT traders in 2026.",
+    "date": "2026-07-07",
+    "read_time": 8,
+    "content": """
+<p>The first question every ICT trader asks when they start journaling seriously is whether to pay for a tool or use something free. The honest answer has changed in 2026: the best free option now beats most paid tools for ICT-specific workflows, and the pricing gap is significant enough that it affects your net profitability during the early months when you need the margin most.</p>
+
+<h2>What ICT Traders Actually Need in a Journal</h2>
+<p>Generic trading journals were built for stock traders. ICT methodology requires specific fields that most paid tools still handle poorly or not at all:</p>
+<ul>
+  <li><strong>Setup tagging for ICT concepts</strong>: Order Blocks, Fair Value Gaps, BOS, CHoCH, Liquidity Sweeps, Killzones, Optimal Trade Entries. A dropdown that says "Breakout" does not help you.</li>
+  <li><strong>Correct pip math for XAUUSD</strong>: Gold at 100 oz per lot means the P&L math is different from EUR/USD. Most journals get this wrong by a factor of 10.</li>
+  <li><strong>Psychology journaling tied to setups</strong>: ICT traders who follow higher timeframe bias need to know if they are overriding their own bias on losing trades. A separate "emotion" text box that nobody fills in does not surface this.</li>
+  <li><strong>Prop firm compliance</strong>: A large proportion of active ICT traders are working toward or trading through funded accounts. Compliance tracking needs to be built in, not bolted on.</li>
+  <li><strong>Session tracking</strong>: London, New York, Asia session performance differences are central to ICT's kill zone concept. You need session-level analytics, not just instrument-level.</li>
+</ul>
+
+<h2>The Paid Options: What You Actually Get</h2>
+
+<h3>TradeZella ($35/month)</h3>
+<p>TradeZella has the cleanest UI of the paid options and handles multi-broker imports well. It supports MT4 and MT5 CSV imports and has decent trade tagging. Psychology journaling is basic: a mood selector at the start of the day and a free-text notes field per trade, but no AI analysis of what the notes say. ICT-specific setups are not built in; you create your own tags. The prop firm dashboard is limited and does not track trailing drawdown. At $35/month that is $420/year or roughly 42 gold micro lots at 1 pip profit. That is meaningful money when you are building your edge.</p>
+
+<h3>Edgewonk ($169/year, one-time or annual)</h3>
+<p>Edgewonk is the most analytically deep paid tool. Its Tilt Meter is genuinely useful: it detects when you are deviating from your normal position sizing patterns, a reliable signal of emotional trading. The R-multiple tracking is excellent and the statistical depth on win rate by setup is better than most tools. However: the UI feels dated, there is no AI reading of your trade notes, ICT concepts require fully manual tag setup, and XAUUSD pip math requires a manual workaround in the instrument settings. At $169/year it is the best value among paid tools, but it still requires significant configuration to work correctly for ICT traders.</p>
+
+<h3>TraderSync ($29/month, $348/year)</h3>
+<p>TraderSync's main differentiator is the AI trade coach, which reads your tags and P&L and generates a weekly report. In practice the report is template-based rather than truly analytical; it highlights your best and worst setup by win rate but does not read your written notes. The broker integration is the best of the three (supports 30+ brokers for automatic import). For ICT traders, the setup tagging still requires manual configuration and the prop firm dashboard is basic. At $348/year it is the most expensive option and the least likely to justify the cost for traders at the beginning of their ICT journey.</p>
+
+<h2>The Free Options: What Actually Works</h2>
+
+<h3>Notion / Google Sheets</h3>
+<p>Free, infinitely customisable, and terrible for most ICT traders past month two. The problem is not the cost; it is the analytical overhead. You can build a Notion template with every ICT tag you need, but calculating win rate by setup, session performance, or R-multiple distribution requires either a formula-heavy spreadsheet you have to maintain or manual review of every trade row. As your trade log grows past 100 entries, the time cost makes this worse than a basic paid tool.</p>
+
+<h3>TradeJournal (free, no credit card)</h3>
+<p>TradeJournal was built specifically for SMC and ICT traders. It includes all 13 ICT setup tags out of the box (Order Blocks, FVGs, BOS, CHoCH, Liquidity Sweeps, Breaker Blocks, OTE, Premium/Discount, Inducement, Equal Highs/Lows, Imbalance, Turtle Soup, Killzones). The pip math is correct for XAUUSD at 100 oz/lot. No workaround needed. MT5 history imports work directly. The AI psychology feature reads your actual trade notes and identifies patterns costing you money, not just your mood selection from a dropdown. The prop firm compliance dashboard tracks all five key metrics in real time. And it is completely free with no trade caps, no premium tier, and no credit card required.</p>
+
+<h2>The Honest Comparison</h2>
+
+<table style="width:100%;border-collapse:collapse;margin:24px 0;font-size:13px">
+  <thead>
+    <tr style="border-bottom:2px solid var(--border)">
+      <th style="text-align:left;padding:10px 8px;color:var(--text)">Feature</th>
+      <th style="text-align:center;padding:10px 8px;color:var(--green)">TradeJournal (Free)</th>
+      <th style="text-align:center;padding:10px 8px;color:var(--muted)">TradeZella ($35/mo)</th>
+      <th style="text-align:center;padding:10px 8px;color:var(--muted)">Edgewonk ($169/yr)</th>
+      <th style="text-align:center;padding:10px 8px;color:var(--muted)">TraderSync ($29/mo)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 8px;color:var(--muted)">ICT setup tags built in</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)">✓ 13 tags</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Manual only</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Manual only</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Manual only</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 8px;color:var(--muted)">Correct XAUUSD pip math</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)">✓</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Partial</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Workaround needed</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Partial</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 8px;color:var(--muted)">AI reads trade notes</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)">✓</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">✗</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">✗</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Template reports only</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 8px;color:var(--muted)">Prop firm compliance dashboard</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)">✓ Real-time</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Basic</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">✗</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">Basic</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:9px 8px;color:var(--muted)">MT5 import</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)">✓</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)">✓</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">CSV only</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)">✓</td>
+    </tr>
+    <tr>
+      <td style="padding:9px 8px;color:var(--muted)">Annual cost</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--green)"><strong>$0</strong></td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">$420</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">$169</td>
+      <td style="text-align:center;padding:9px 8px;color:var(--muted)">$348</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>When Paid Tools Make Sense</h2>
+<p>If you are a professional trader managing multiple accounts across different brokers, TraderSync's multi-broker auto-import saves meaningful time. If you are statistically sophisticated and want the deepest possible Sharpe ratio and distribution analysis, Edgewonk's analytical engine is worth the $169. For the majority of retail ICT traders working toward a funded account, these advantages do not outweigh the cost.</p>
+
+<h2>The Verdict</h2>
+<p>For ICT and SMC traders in 2026, TradeJournal is the best starting point, not because paid tools are bad, but because the specific features that matter for ICT methodology (setup tagging, XAUUSD math, psychology analysis from trade notes, prop firm compliance) are available for free without the configuration overhead the paid tools require. If you grow beyond what TradeJournal offers, evaluate TraderSync for multi-broker integration or Edgewonk for statistical depth. But start with the tool built for your actual workflow.</p>
+""",
+    "faq": [
+      {"q": "Is there a free trading journal that supports ICT concepts?", "a": "Yes. TradeJournal is built specifically for ICT and SMC traders and is completely free. It includes all 13 major ICT concepts as built-in setup tags (Order Blocks, Fair Value Gaps, BOS, CHoCH, Liquidity Sweeps, OTE, Killzones and more), correct XAUUSD pip math, AI psychology analysis that reads your trade notes, and a prop firm compliance dashboard. No credit card or subscription required."},
+      {"q": "Is TradeZella worth it for ICT traders?", "a": "TradeZella is a capable tool with a clean interface and good broker imports, but it does not include ICT-specific setup tags out of the box; you have to create them manually. The psychology journaling is basic compared to AI-powered options. At $35/month ($420/year) it is hard to justify over a free alternative built specifically for ICT and SMC trading from the ground up."},
+      {"q": "Which trading journal is best for both forex and crypto with accurate P&L?", "a": "TradeJournal handles multi-instrument P&L correctly for forex (standard pip math), gold/XAUUSD (100 oz per lot), crypto (price-based), NQ/ES futures (per-point values), and indices. Most other journals require manual configuration to get gold and futures pip math right. TradeJournal does this automatically on import."},
+      {"q": "What features should an ICT trader look for in a trading journal?", "a": "ICT traders need: (1) built-in setup tags for Order Blocks, FVGs, BOS, CHoCH, Liquidity Sweeps and other concepts, (2) correct pip math for XAUUSD and futures, (3) session-level analytics for London, New York and Asia kill zones, (4) psychology journaling with pattern detection across trade notes, and (5) prop firm compliance tracking if trading funded accounts. Generic journals that require manual configuration for all these features add overhead that undermines the habit of journaling consistently."},
+      {"q": "Can I switch from TradeZella or Edgewonk to a free trading journal?", "a": "Yes. TradeJournal accepts MT5 HTML exports, CSV and XLSX files for trade import. If you export your existing trade history from TradeZella or Edgewonk as a CSV, you can import it into TradeJournal to maintain continuity. Your setup tags will need to be re-applied since the tag systems differ between tools."}
+    ]
+  },
 ]
