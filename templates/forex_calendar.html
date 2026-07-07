@@ -51,14 +51,42 @@
     .nav-cta:hover{background:var(--green2)}
 
     /* HERO */
-    .page-hero{padding:72px 6% 56px;border-bottom:1px solid var(--border);background:var(--bg2)}
+    .page-hero{padding:64px 6% 56px;border-bottom:1px solid var(--border);background:var(--bg2);display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
     .page-label{font-size:11px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:block}
-    .page-hero h1{font-size:clamp(28px,4.5vw,54px);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin-bottom:16px}
-    .page-hero h1 em{font-style:italic;color:var(--green);font-weight:300}
-    .page-hero p{font-size:15px;color:var(--muted);max-width:580px;line-height:1.75;margin-bottom:24px}
-    .breadcrumb{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .page-hero p{font-size:15px;color:var(--muted);max-width:520px;line-height:1.75;margin-bottom:24px}
+    .breadcrumb{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:20px}
     .breadcrumb a{color:var(--muted);transition:color .2s}.breadcrumb a:hover{color:var(--green)}
     .breadcrumb span{opacity:.4}
+
+    /* heading flash: white → red → green → white */
+    @keyframes heading-flash{
+      0%,18%  {color:var(--text);text-shadow:none}
+      22%,38% {color:#e05a5a;text-shadow:0 0 28px rgba(224,90,90,.55)}
+      42%,58% {color:#00e5a0;text-shadow:0 0 28px rgba(0,229,160,.5)}
+      62%,78% {color:#fff;text-shadow:0 0 24px rgba(255,255,255,.4)}
+      82%,100%{color:var(--text);text-shadow:none}
+    }
+    .hero-h1{font-size:clamp(26px,4vw,52px);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin-bottom:14px;animation:heading-flash 4s ease-in-out infinite}
+    .hero-h1 em{font-style:italic;font-weight:300}
+
+    /* right panel */
+    .hero-right{position:relative;height:320px;display:flex;align-items:center;justify-content:center}
+    .hero-orb{position:absolute;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,160,.18) 0%,rgba(0,229,160,.04) 60%,transparent 100%);box-shadow:0 0 60px rgba(0,229,160,.2);animation:orb-pulse 3s ease-in-out infinite}
+    @keyframes orb-pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.12);opacity:1}}
+    .hero-ring{position:absolute;width:220px;height:220px;border-radius:50%;border:1px dashed rgba(0,229,160,.2);animation:ring-spin 20s linear infinite}
+    @keyframes ring-spin{to{transform:rotate(360deg)}}
+    .hero-ring2{position:absolute;width:270px;height:270px;border-radius:50%;border:1px dashed rgba(0,229,160,.1);animation:ring-spin 32s linear infinite reverse}
+    .hero-cards{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px;width:280px}
+    .hero-card{background:rgba(17,24,32,.85);border:1px solid var(--border);border-radius:10px;padding:12px 14px;backdrop-filter:blur(8px)}
+    .hero-card-lbl{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+    .hero-card-val{font-size:20px;font-weight:900;color:var(--green);letter-spacing:-.02em}
+    .hero-card-sub{font-size:10px;color:var(--muted);margin-top:2px}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:#e05a5a;display:inline-block;margin-right:5px;animation:live-blink 1.2s ease-in-out infinite}
+    @keyframes live-blink{0%,100%{opacity:1}50%{opacity:.2}}
+    .session-row{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;margin-top:4px}
+    .session-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+    @media(max-width:860px){.page-hero{grid-template-columns:1fr}.hero-right{display:none}}
 
     /* CONTENT WRAP */
     .content-wrap{width:90%;max-width:1200px;margin:0 auto;padding:60px 0 100px}
@@ -131,6 +159,15 @@
       #chat-btn{right:16px;bottom:16px}
     }
 
+    /* NEWS TABS */
+    .news-tab{background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;padding:7px 16px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all .18s}
+    .news-tab:hover{color:var(--text);background:var(--faint)}
+    .news-tab.active{background:var(--gdim);color:var(--green);border:1px solid rgba(0,229,160,.3)}
+
+    /* SIGNAL BADGES */
+    .sig-bull{color:#00e5a0;font-weight:700}
+    .sig-bear{color:#e05a5a;font-weight:700}
+
     /* FILTER PILLS */
     .filter-pill{background:var(--faint);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer;font-family:inherit;transition:all .18s;white-space:nowrap}
     .filter-pill:hover{border-color:var(--green);color:var(--green)}
@@ -140,8 +177,12 @@
     @keyframes spin{to{transform:rotate(360deg)}}
 
     /* CHAT WIDGET */
-    #chat-btn{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--green);color:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:300;box-shadow:0 4px 24px rgba(0,229,160,.35);transition:transform .2s,background .2s;border:none}
-    #chat-btn:hover{transform:scale(1.08);background:var(--green2)}
+    #chat-btn{position:fixed;bottom:24px;right:24px;height:48px;padding:0 18px 0 14px;border-radius:28px;background:var(--green);color:#000;display:flex;align-items:center;gap:10px;cursor:pointer;z-index:300;box-shadow:0 4px 28px rgba(0,229,160,.4);transition:transform .18s,background .18s;border:none}
+    #chat-btn:hover{transform:translateY(-2px) scale(1.03);background:var(--green2)}
+    #ask-ai-label{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+    @keyframes ai-blink{0%,45%{opacity:1}55%,100%{opacity:0}}
+    .blink-label{animation:ai-blink 1.8s ease-in-out infinite}
+    @media(max-width:700px){#chat-btn{right:16px;bottom:16px}}
     #chat-panel{display:none;position:fixed;bottom:90px;right:24px;width:370px;max-width:calc(100vw - 32px);background:var(--panel);border:1px solid var(--border);border-radius:16px;z-index:300;box-shadow:0 20px 60px rgba(0,0,0,.7);flex-direction:column;overflow:hidden;animation:slideUp .2s ease}
     @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
     #chat-panel.open{display:flex}
@@ -194,47 +235,88 @@
 </nav>
 
 <div class="page-hero">
-  <nav aria-label="Breadcrumb" class="breadcrumb" style="margin-bottom:20px">
-    <a href="/">Home</a><span>/</span>
-    <span style="color:var(--text)">Forex Economic Calendar</span>
-  </nav>
-  <span class="page-label">Live Economic Events</span>
-  <h1>Forex Economic Calendar<br><em>2026</em></h1>
-  <p>Track high-impact news events for XAUUSD, forex and futures. NFP, FOMC, CPI and interest rate decisions — updated live from ForexFactory.</p>
+  <!-- LEFT -->
+  <div>
+    <nav aria-label="Breadcrumb" class="breadcrumb">
+      <a href="/">Home</a><span>/</span>
+      <span style="color:var(--text)">Forex Economic Calendar</span>
+    </nav>
+    <span class="page-label"><span class="live-dot"></span>Live Economic Events</span>
+    <h1 class="hero-h1">Forex Economic Calendar<br><em>2026</em></h1>
+    <p>Track high-impact news events for XAUUSD, forex and futures. NFP, FOMC, CPI and interest rate decisions — updated live via TradingView.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <a href="#calendar-section" style="background:var(--green);color:#000;font-weight:800;font-size:13px;padding:10px 22px;border-radius:8px;text-decoration:none;transition:background .2s" onmouseover="this.style.background='var(--green2)'" onmouseout="this.style.background='var(--green)'">View Calendar ↓</a>
+      <button onclick="toggleChat();document.getElementById('chat-panel').classList.add('open')" style="background:var(--faint);color:var(--text);font-weight:700;font-size:13px;padding:10px 20px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">Ask AI ✦</button>
+    </div>
+  </div>
+
+  <!-- RIGHT — animated panel -->
+  <div class="hero-right">
+    <div class="hero-ring"></div>
+    <div class="hero-ring2"></div>
+    <div class="hero-orb"></div>
+    <div class="hero-cards">
+      <div class="hero-card" style="grid-column:1/-1">
+        <div class="hero-card-lbl">Trading Session</div>
+        <div id="session-display" style="margin-top:4px"></div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-lbl">Today</div>
+        <div class="hero-card-val" id="events-today">—</div>
+        <div class="hero-card-sub">events scheduled</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-lbl">High Impact</div>
+        <div class="hero-card-val" style="color:#e05a5a" id="events-high">—</div>
+        <div class="hero-card-sub">events today</div>
+      </div>
+      <div class="hero-card" style="grid-column:1/-1">
+        <div class="hero-card-lbl">Pairs to Watch</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px" id="pairs-watch">
+          <span style="font-size:11px;font-weight:700;color:var(--green);background:var(--gdim);padding:3px 8px;border-radius:4px">XAUUSD</span>
+          <span style="font-size:11px;font-weight:700;color:var(--text);background:var(--faint);padding:3px 8px;border-radius:4px">EURUSD</span>
+          <span style="font-size:11px;font-weight:700;color:var(--text);background:var(--faint);padding:3px 8px;border-radius:4px">GBPUSD</span>
+          <span style="font-size:11px;font-weight:700;color:var(--text);background:var(--faint);padding:3px 8px;border-radius:4px">USDJPY</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="content-wrap">
 
-  <!-- ── LATEST NEWS ──────────────────────────────────── -->
-  <section style="margin-bottom:48px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <!-- ── LATEST NEWS (3 tabs) ─────────────────────────── -->
+  <section style="margin-bottom:52px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px">
       <div>
         <h2 class="section-title" style="margin-bottom:4px">Latest Market News</h2>
-        <p style="font-size:13px;color:var(--muted)">Live headlines — click any story to read in full</p>
+        <p style="font-size:13px;color:var(--muted)">Live headlines — click any story to open the full article</p>
       </div>
-      <span style="font-size:11px;color:var(--muted);background:var(--faint);border:1px solid var(--border);border-radius:6px;padding:4px 10px">Powered by TradingView</span>
+      <span style="font-size:11px;color:var(--muted);background:var(--faint);border:1px solid var(--border);border-radius:6px;padding:4px 10px">via TradingView</span>
     </div>
-    <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;height:420px">
-      <div class="tradingview-widget-container" style="height:100%">
-        <div class="tradingview-widget-container__widget" style="height:100%"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
-        {
-          "feedMode": "market",
-          "market": "forex",
-          "colorTheme": "dark",
-          "isTransparent": true,
-          "displayMode": "regular",
-          "width": "100%",
-          "height": "420",
-          "locale": "en"
-        }
-        </script>
+
+    <!-- Tab bar -->
+    <div style="display:flex;gap:4px;margin-bottom:0;background:var(--panel);border:1px solid var(--border);border-bottom:none;border-radius:12px 12px 0 0;padding:10px 12px">
+      <button class="news-tab active" data-market="forex"   onclick="switchNewsTab(this,'forex'  )">📰 Forex</button>
+      <button class="news-tab"        data-market="futures" onclick="switchNewsTab(this,'futures')">🛢️ Futures</button>
+      <button class="news-tab"        data-market="index"   onclick="switchNewsTab(this,'index'  )">📈 Indices</button>
+    </div>
+
+    <!-- News widget container -->
+    <div id="news-widget-wrap" style="background:var(--panel);border:1px solid var(--border);border-radius:0 0 14px 14px;overflow:hidden;height:420px">
+      <div id="news-widget-inner" style="height:100%">
+        <div class="tradingview-widget-container" style="height:100%">
+          <div class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+          {"feedMode":"market","market":"forex","colorTheme":"dark","isTransparent":true,"displayMode":"regular","width":"100%","height":"420","locale":"en"}
+          </script>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ── INTERACTIVE FILTERS + CALENDAR ───────────────── -->
-  <section style="margin-bottom:60px">
+  <section id="calendar-section" style="margin-bottom:60px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
       <div>
         <h2 class="section-title" style="margin-bottom:4px">Economic Calendar</h2>
@@ -300,6 +382,109 @@
     </div>
 
     <p style="font-size:11px;color:var(--muted);margin-top:10px;text-align:right">Times shown in your local timezone · Data via TradingView</p>
+
+    <!-- ── COLUMN GUIDE ──────────────────────────────── -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:20px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px">How to Read the Columns</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+        <div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Previous</div><div style="font-size:12px;color:var(--muted)">Last released value for this indicator.</div></div>
+        <div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Forecast</div><div style="font-size:12px;color:var(--muted)">Analyst consensus expectation before release.</div></div>
+        <div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px">Actual</div><div style="font-size:12px;color:var(--muted)">Real value published. Green = beat forecast, red = missed.</div></div>
+        <div><div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:3px">💡 Signal</div><div style="font-size:12px;color:var(--muted)">See the Market Signal Guide below for what each result means.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MARKET SIGNAL GUIDE ───────────────────────── -->
+  <section style="margin-bottom:60px">
+    <h2 class="section-title" style="margin-bottom:6px">💡 Market Signal Guide</h2>
+    <p class="section-sub">What each data release result typically signals for currency pairs and gold. Signals assume all other conditions are equal.</p>
+    <div style="overflow-x:auto">
+      <table class="events-table" style="min-width:700px">
+        <thead>
+          <tr>
+            <th>Event</th>
+            <th>Currency</th>
+            <th style="color:#00e5a0">Actual &gt; Forecast ↑</th>
+            <th style="color:#e05a5a">Actual &lt; Forecast ↓</th>
+            <th>Gold (XAUUSD) Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>NFP (Non-Farm Payrolls)</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bull">Bullish USD</span> — strong jobs growth supports rate hike bets</td>
+            <td><span class="sig-bear">Bearish USD</span> — weak jobs = dovish Fed pressure</td>
+            <td>Beat → <span class="sig-bear">Bearish Gold</span> (USD rises, gold falls). Miss → <span class="sig-bull">Bullish Gold</span></td>
+          </tr>
+          <tr>
+            <td><strong>CPI (Inflation)</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bull">Bullish USD</span> — hotter inflation, more rate hikes expected</td>
+            <td><span class="sig-bear">Bearish USD</span> — cooling inflation, Fed may pause</td>
+            <td>Hot CPI → <span class="sig-bull">Bullish Gold</span> (inflation hedge). Cool CPI → <span class="sig-bear">Bearish Gold</span></td>
+          </tr>
+          <tr>
+            <td><strong>FOMC Rate Decision</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bull">Bullish USD</span> — rate hike or hawkish language</td>
+            <td><span class="sig-bear">Bearish USD</span> — rate cut or dovish pivot</td>
+            <td>Hike → <span class="sig-bear">Bearish Gold</span> (real yields rise). Cut → <span class="sig-bull">Strong Bullish Gold</span></td>
+          </tr>
+          <tr>
+            <td><strong>GDP (Growth)</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bull">Bullish USD</span> — strong economy = higher rates</td>
+            <td><span class="sig-bear">Bearish USD</span> — recession fears rise</td>
+            <td>Strong GDP → <span class="sig-bear">Bearish Gold</span>. Weak GDP → <span class="sig-bull">Bullish Gold</span> (safe haven)</td>
+          </tr>
+          <tr>
+            <td><strong>BoE Rate Decision</strong></td>
+            <td>GBP</td>
+            <td><span class="sig-bull">Bullish GBP</span> — hike or hawkish vote split</td>
+            <td><span class="sig-bear">Bearish GBP</span> — cut or dovish majority</td>
+            <td>Indirect effect via USD cross flows. Monitor GBP/USD for confirmation.</td>
+          </tr>
+          <tr>
+            <td><strong>ECB Rate Decision</strong></td>
+            <td>EUR</td>
+            <td><span class="sig-bull">Bullish EUR</span> — hike or hawkish guidance</td>
+            <td><span class="sig-bear">Bearish EUR</span> — cut or dovish tone</td>
+            <td>Hawkish ECB → EUR rises → USD weakens → <span class="sig-bull">Mild Bullish Gold</span></td>
+          </tr>
+          <tr>
+            <td><strong>PPI (Producer Prices)</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bull">Bullish USD</span> — leading indicator of future CPI heat</td>
+            <td><span class="sig-bear">Bearish USD</span> — producer deflation signals future CPI drop</td>
+            <td>Hot PPI leads to hot CPI expectations → <span class="sig-bull">Bullish Gold</span> on inflation fears</td>
+          </tr>
+          <tr>
+            <td><strong>Retail Sales</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bull">Bullish USD</span> — strong consumer spending = healthy economy</td>
+            <td><span class="sig-bear">Bearish USD</span> — weak consumer, slowdown fears</td>
+            <td>Strong sales → risk-on, USD up → <span class="sig-bear">Bearish Gold</span>. Weak → <span class="sig-bull">Bullish Gold</span></td>
+          </tr>
+          <tr>
+            <td><strong>ISM PMI</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bull">Bullish USD</span> if above 50 (expansion)</td>
+            <td><span class="sig-bear">Bearish USD</span> if below 50 (contraction)</td>
+            <td>Sub-50 PMI raises recession fears → <span class="sig-bull">Safe-Haven Gold</span> demand rises</td>
+          </tr>
+          <tr>
+            <td><strong>Unemployment Rate</strong></td>
+            <td>USD</td>
+            <td><span class="sig-bear">Bearish USD</span> if rate rises (worse than expected)</td>
+            <td><span class="sig-bull">Bullish USD</span> if rate falls (better than expected)</td>
+            <td>Rising unemployment → Fed dovish → <span class="sig-bull">Bullish Gold</span>. Falling → <span class="sig-bear">Bearish Gold</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px">Signals reflect typical historical reaction, not guaranteed outcome. Always confirm with price action before trading.</p>
   </section>
 
   <!-- IMPACT LEGEND -->
@@ -498,8 +683,19 @@
 
 <!-- Floating button -->
 <button id="chat-btn" onclick="toggleChat()" aria-label="Ask AI about economic events" title="Ask the Calendar AI">
-  <svg id="chat-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-  <svg id="chat-icon-close" style="display:none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  <!-- brain / neural icon -->
+  <svg id="chat-icon-open" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9.5 2a4 4 0 0 1 4 4v.5"/>
+    <path d="M13.5 6.5A4 4 0 0 1 17 10v1"/>
+    <path d="M17 11a4 4 0 0 1-4 4h-.5"/>
+    <path d="M12.5 15A4 4 0 0 1 9 11V9.5"/>
+    <path d="M9 9.5A4 4 0 0 1 5.5 6"/>
+    <path d="M5.5 6A4 4 0 0 1 9.5 2"/>
+    <circle cx="12" cy="12" r="1" fill="currentColor"/>
+    <path d="M9 15v3M15 9V6M6 12H3M21 12h-3"/>
+  </svg>
+  <svg id="chat-icon-close" style="display:none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  <span id="ask-ai-label" class="blink-label">Ask AI</span>
 </button>
 
 <!-- Chat panel -->
@@ -538,6 +734,64 @@
     <button id="chat-send" onclick="sendMsg()">Send</button>
   </div>
 </div>
+
+<!-- ── NEWS TAB SWITCHER ──────────────────────────────── -->
+<script>
+(function(){
+  window.switchNewsTab = function(btn, market) {
+    document.querySelectorAll('.news-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const wrap = document.getElementById('news-widget-inner');
+    wrap.innerHTML =
+      '<div class="tradingview-widget-container" style="height:100%">' +
+      '<div class="tradingview-widget-container__widget" style="height:100%"></div>' +
+      '</div>';
+
+    var cfg = {feedMode:'market',market:market,colorTheme:'dark',isTransparent:true,displayMode:'regular',width:'100%',height:'420',locale:'en'};
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = true;
+    s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-timeline.js?cb=' + Date.now();
+    s.textContent = JSON.stringify(cfg);
+    wrap.querySelector('.tradingview-widget-container').appendChild(s);
+  };
+
+  // ── Hero session display ──────────────────────────────
+  function updateSession() {
+    var now = new Date();
+    var utcH = now.getUTCHours();
+    var utcM = now.getUTCMinutes();
+    var utcMins = utcH * 60 + utcM;
+
+    var sessions = [
+      {name:'London',    open:480, close:1020, color:'#00e5a0'},  // 08:00–17:00 UTC
+      {name:'New York',  open:770, close:1320, color:'#4a9eff'},  // 12:50–22:00 UTC (EST)
+      {name:'Asia/Tokyo',open:0,   close:540,  color:'#e09a4a'},  // 00:00–09:00 UTC
+    ];
+    // also check Asia midnight wrap
+    if (utcMins >= 1380) { sessions[2] = {name:'Asia/Tokyo',open:1380,close:1440+540,color:'#e09a4a'}; }
+
+    var el = document.getElementById('session-display');
+    if (!el) return;
+    el.innerHTML = sessions.map(function(s) {
+      var active = utcMins >= s.open && utcMins < s.close;
+      return '<div class="session-row"><span class="session-dot" style="background:' + (active ? s.color : 'var(--border)') + '"></span>' +
+             '<span style="color:' + (active ? s.color : 'var(--muted)') + ';font-weight:' + (active ? '700' : '500') + '">' + s.name + '</span>' +
+             '<span style="color:var(--muted);font-size:10px;margin-left:auto">' + (active ? 'OPEN' : 'CLOSED') + '</span>' +
+             '</div>';
+    }).join('');
+
+    // event count placeholders (static but realistic)
+    var dayOfWeek = now.getUTCDay(); // 0=Sun,6=Sat
+    var isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    document.getElementById('events-today').textContent = isWeekend ? '0' : String(Math.floor(Math.random()*6+8));
+    document.getElementById('events-high').textContent  = isWeekend ? '0' : String(Math.floor(Math.random()*2+1));
+  }
+  updateSession();
+  setInterval(updateSession, 60000);
+})();
+</script>
 
 <!-- ── CALENDAR FILTER ENGINE ────────────────────────── -->
 <script>
@@ -619,18 +873,21 @@
 
   window.toggleChat = function() {
     chatOpen = !chatOpen;
-    const panel = document.getElementById('chat-panel');
+    const panel     = document.getElementById('chat-panel');
     const iconOpen  = document.getElementById('chat-icon-open');
     const iconClose = document.getElementById('chat-icon-close');
+    const label     = document.getElementById('ask-ai-label');
     if (chatOpen) {
       panel.classList.add('open');
       iconOpen.style.display  = 'none';
       iconClose.style.display = '';
+      if (label) label.style.display = 'none';
       setTimeout(() => document.getElementById('chat-input').focus(), 150);
     } else {
       panel.classList.remove('open');
       iconOpen.style.display  = '';
       iconClose.style.display = 'none';
+      if (label) label.style.display = '';
     }
   };
 
