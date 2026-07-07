@@ -65,7 +65,6 @@
 
     /* IFRAME */
     .calendar-frame-wrap{background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:60px}
-    .calendar-frame-wrap iframe{display:block;width:100%;min-height:640px;border:none;filter:invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.1)}
 
     /* IMPACT LEGEND */
     .impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:16px;margin-bottom:56px}
@@ -131,6 +130,14 @@
       #chat-panel{width:calc(100vw - 32px);right:16px;bottom:80px}
       #chat-btn{right:16px;bottom:16px}
     }
+
+    /* FILTER PILLS */
+    .filter-pill{background:var(--faint);border:1px solid var(--border);border-radius:20px;color:var(--muted);font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer;font-family:inherit;transition:all .18s;white-space:nowrap}
+    .filter-pill:hover{border-color:var(--green);color:var(--green)}
+    .filter-pill.active{background:var(--gdim);border-color:var(--green);color:var(--green)}
+    .impact-high-pill.active{background:rgba(224,90,90,.15);border-color:#e05a5a;color:#e05a5a}
+    .impact-med-pill.active{background:rgba(224,154,74,.15);border-color:#e09a4a;color:#e09a4a}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
     /* CHAT WIDGET */
     #chat-btn{position:fixed;bottom:24px;right:24px;width:54px;height:54px;border-radius:50%;background:var(--green);color:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:300;box-shadow:0 4px 24px rgba(0,229,160,.35);transition:transform .2s,background .2s;border:none}
@@ -198,18 +205,102 @@
 
 <div class="content-wrap">
 
-  <!-- IFRAME -->
-  <div class="calendar-frame-wrap">
-    <iframe
-      src="https://www.forexfactory.com/embed/calendar"
-      width="100%"
-      height="640"
-      frameborder="0"
-      loading="lazy"
-      title="Forex Economic Calendar — ForexFactory"
-      aria-label="Live forex economic calendar showing upcoming high-impact news events"
-    ></iframe>
-  </div>
+  <!-- ── LATEST NEWS ──────────────────────────────────── -->
+  <section style="margin-bottom:48px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 class="section-title" style="margin-bottom:4px">Latest Market News</h2>
+        <p style="font-size:13px;color:var(--muted)">Live headlines — click any story to read in full</p>
+      </div>
+      <span style="font-size:11px;color:var(--muted);background:var(--faint);border:1px solid var(--border);border-radius:6px;padding:4px 10px">Powered by TradingView</span>
+    </div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;height:420px">
+      <div class="tradingview-widget-container" style="height:100%">
+        <div class="tradingview-widget-container__widget" style="height:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
+        {
+          "feedMode": "market",
+          "market": "forex",
+          "colorTheme": "dark",
+          "isTransparent": true,
+          "displayMode": "regular",
+          "width": "100%",
+          "height": "420",
+          "locale": "en"
+        }
+        </script>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── INTERACTIVE FILTERS + CALENDAR ───────────────── -->
+  <section style="margin-bottom:60px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 class="section-title" style="margin-bottom:4px">Economic Calendar</h2>
+        <p style="font-size:13px;color:var(--muted)">Filter by currency and impact level</p>
+      </div>
+    </div>
+
+    <!-- FILTER PANEL -->
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px 24px 16px;margin-bottom:16px">
+
+      <!-- Currency filter -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Currency / Pair</div>
+        <div id="currency-pills" style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="filter-pill active" data-val="us,eu,gb,jp,ca,au,nz,ch" onclick="setCurrency(this)">All</button>
+          <button class="filter-pill" data-val="us" onclick="setCurrency(this)">🇺🇸 USD</button>
+          <button class="filter-pill" data-val="eu" onclick="setCurrency(this)">🇪🇺 EUR</button>
+          <button class="filter-pill" data-val="gb" onclick="setCurrency(this)">🇬🇧 GBP</button>
+          <button class="filter-pill" data-val="jp" onclick="setCurrency(this)">🇯🇵 JPY</button>
+          <button class="filter-pill" data-val="ca" onclick="setCurrency(this)">🇨🇦 CAD</button>
+          <button class="filter-pill" data-val="au" onclick="setCurrency(this)">🇦🇺 AUD</button>
+          <button class="filter-pill" data-val="nz" onclick="setCurrency(this)">🇳🇿 NZD</button>
+          <button class="filter-pill" data-val="ch" onclick="setCurrency(this)">🇨🇭 CHF</button>
+          <button class="filter-pill" data-val="us" onclick="setCurrency(this)" title="Gold (XAUUSD) moves most on USD events">🥇 XAU</button>
+        </div>
+      </div>
+
+      <!-- Impact filter -->
+      <div style="margin-bottom:6px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Impact Level</div>
+        <div id="impact-pills" style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="filter-pill active" data-val="-1,0,1" onclick="setImpact(this)">All Events</button>
+          <button class="filter-pill impact-high-pill" data-val="1" onclick="setImpact(this)">🔴 High Only</button>
+          <button class="filter-pill impact-med-pill"  data-val="0,1" onclick="setImpact(this)">🟠 High + Medium</button>
+          <button class="filter-pill" data-val="0" onclick="setImpact(this)">Medium Only</button>
+          <button class="filter-pill" data-val="-1" onclick="setImpact(this)">🟡 Low Only</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR WIDGET (re-renders on filter change) -->
+    <div id="tv-calendar-outer" style="background:var(--panel);border:1px solid var(--border);border-radius:14px;overflow:hidden;min-height:600px">
+      <div id="tv-calendar-container" style="height:600px">
+        <div class="tradingview-widget-container" style="height:100%">
+          <div id="tv-cal-inner" class="tradingview-widget-container__widget" style="height:100%"></div>
+          <script id="tv-cal-script" type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+          {
+            "colorTheme": "dark",
+            "isTransparent": true,
+            "width": "100%",
+            "height": "600",
+            "locale": "en",
+            "importanceFilter": "-1,0,1",
+            "countryFilter": "us,eu,gb,jp,ca,au,nz,ch"
+          }
+          </script>
+        </div>
+      </div>
+      <div id="tv-cal-loading" style="display:none;height:600px;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+        <div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite"></div>
+        <div style="font-size:13px;color:var(--muted)">Updating calendar…</div>
+      </div>
+    </div>
+
+    <p style="font-size:11px;color:var(--muted);margin-top:10px;text-align:right">Times shown in your local timezone · Data via TradingView</p>
+  </section>
 
   <!-- IMPACT LEGEND -->
   <div class="section-title" style="margin-bottom:20px">How to Read the Calendar</div>
@@ -447,6 +538,79 @@
     <button id="chat-send" onclick="sendMsg()">Send</button>
   </div>
 </div>
+
+<!-- ── CALENDAR FILTER ENGINE ────────────────────────── -->
+<script>
+(function(){
+  let activeCurrencies = 'us,eu,gb,jp,ca,au,nz,ch';
+  let activeImpact     = '-1,0,1';
+  let debounceTimer    = null;
+
+  function setActive(group, btn) {
+    group.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  window.setCurrency = function(btn) {
+    setActive(document.getElementById('currency-pills'), btn);
+    activeCurrencies = btn.dataset.val;
+    scheduleRefresh();
+  };
+
+  window.setImpact = function(btn) {
+    setActive(document.getElementById('impact-pills'), btn);
+    activeImpact = btn.dataset.val;
+    scheduleRefresh();
+  };
+
+  function scheduleRefresh() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(refreshCalendar, 300);
+  }
+
+  function refreshCalendar() {
+    const container = document.getElementById('tv-calendar-container');
+    const loading   = document.getElementById('tv-cal-loading');
+    const outer     = document.getElementById('tv-calendar-outer');
+
+    // Show spinner
+    container.style.display = 'none';
+    loading.style.display   = 'flex';
+
+    // Rebuild widget container
+    setTimeout(function() {
+      container.innerHTML =
+        '<div class="tradingview-widget-container" style="height:100%">' +
+        '<div class="tradingview-widget-container__widget" style="height:100%"></div>' +
+        '</div>';
+
+      var cfg = {
+        colorTheme: 'dark',
+        isTransparent: true,
+        width: '100%',
+        height: '600',
+        locale: 'en',
+        importanceFilter: activeImpact,
+        countryFilter: activeCurrencies
+      };
+
+      var s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.async = true;
+      // cache-bust to force re-execution
+      s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js?cb=' + Date.now();
+      s.textContent = JSON.stringify(cfg);
+      container.querySelector('.tradingview-widget-container').appendChild(s);
+
+      // Hide spinner after widget has had time to render
+      setTimeout(function() {
+        container.style.display = '';
+        loading.style.display   = 'none';
+      }, 1800);
+    }, 200);
+  }
+})();
+</script>
 
 <script>
 (function(){
