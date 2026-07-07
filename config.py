@@ -14,9 +14,17 @@ class Config:
     # pool_pre_ping tests the connection before use and reconnects if closed.
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
-        "pool_recycle": 280,      # recycle connections every 4.5 min
+        "pool_recycle": 180,      # recycle every 3 min (Neon closes idle at ~5 min)
         "pool_size": 5,
         "max_overflow": 2,
+        "pool_timeout": 30,
+        "connect_args": {
+            "connect_timeout": 10,
+            "keepalives": 1,
+            "keepalives_idle": 30,    # send keepalive after 30s idle
+            "keepalives_interval": 5, # retry every 5s
+            "keepalives_count": 3,    # drop connection after 3 failed keepalives
+        },
     }
 
     # Anthropic — required for LLM sentiment
