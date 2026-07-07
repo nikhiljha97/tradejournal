@@ -2,7 +2,7 @@
 TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 """
 import os, json, uuid, re, requests as http_requests
-from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
+from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, Response
 from sqlalchemy import text
 from blog_posts import POSTS, get_post
 import resend
@@ -545,6 +545,52 @@ Sitemap: https://backtesting-journalmytrades.com/sitemap.xml""", 200, {"Content-
 @app.route("/favicon.ico")
 def favicon_ico():
     return redirect("/static/favicon.svg", 301)
+
+@app.route("/llms.txt")
+def llms_txt():
+    content = """# TradeJournal
+
+> Free AI-powered trading journal for SMC and ICT traders. Tracks trades, reads trading psychology from notes, monitors prop firm compliance, and calculates correct P&L across gold (XAUUSD), forex pairs, futures (NQ/ES/YM), and crypto.
+
+TradeJournal is a web application built for retail traders who use Smart Money Concepts (SMC) and Inner Circle Trader (ICT) methodology, as well as traders attempting prop firm challenges (FTMO, Funded Next, Topstep). It is free forever with no credit card required.
+
+## Core Capabilities
+
+- AI psychology analysis: reads trade notes, detects emotions (FOMO, revenge, patience, overconfidence), scores discipline from -1 to +1, surfaces cost-per-pattern data
+- MT5 trade import via HTML export, CSV, or XLSX — pip math is instrument-aware
+- Prop firm compliance dashboard: profit target %, daily loss limit, max drawdown, cooling period
+- SMC/ICT setup tagging: Order Blocks, Fair Value Gaps, BOS, CHoCH, Liquidity Sweeps, Breaker Blocks, Mitigation Blocks, Inducement, OTE, Premium/Discount, Imbalance, Equal Highs/Lows, Turtle Soup, Killzones, Session Opens
+- Correct contract math for all instruments: XAUUSD (100 oz/lot, $1/pip), EURUSD/GBPUSD ($10/pip), JPY pairs ($9.09/pip), NQ ($20/pt), ES ($50/pt), YM ($5/pt), BTC/ETH ($1/$ move)
+- Backtest replay tool with drawing tools and session annotation
+- Position size calculator: lot size from risk % and stop loss distance
+- Community trade ideas board
+
+## Blog Articles
+
+- [How to Pass a Prop Firm Challenge in 45 Days](https://backtesting-journalmytrades.com/blog/pass-prop-firm-challenge-45-days)
+- [Free Position Size Calculator: Lot Size by Risk %](https://backtesting-journalmytrades.com/blog/position-size-calculator-risk-percentage)
+- [Why Trading Journals Show Wrong P&L for Gold, Forex and Futures](https://backtesting-journalmytrades.com/blog/trading-journal-pip-math-gold-forex-crypto-futures)
+- [The Complete SMC Trading Journal Guide](https://backtesting-journalmytrades.com/blog/smc-trading-journal-guide)
+- [XAUUSD Trading Journal for Gold Traders on MT5](https://backtesting-journalmytrades.com/blog/xauusd-trading-journal)
+- [Trading Psychology Journal: Stop Revenge Trading](https://backtesting-journalmytrades.com/blog/trading-psychology-journal)
+- [Best Free Trading Journal App in 2026](https://backtesting-journalmytrades.com/blog/free-trading-journal-app)
+- [What to Write in a Trading Journal](https://backtesting-journalmytrades.com/blog/what-to-write-in-trading-journal)
+- [How to Start a Trading Journal (Beginners)](https://backtesting-journalmytrades.com/blog/how-to-start-trading-journal)
+- [TradeZella vs Edgewonk vs TraderSync Alternatives](https://backtesting-journalmytrades.com/blog/tradezella-vs-edgewonk-vs-tradersync-alternatives)
+- [Prop Firm Trading Journal Guide](https://backtesting-journalmytrades.com/blog/prop-firm-trading-journal)
+
+## Pricing
+
+Free forever. No trial period. No credit card. No feature tiers. All functionality available from signup.
+
+## Target Users
+
+- Retail traders using SMC/ICT methodology (order blocks, FVGs, liquidity)
+- Prop firm challenge traders on FTMO, Funded Next, Topstep, Upcomers
+- XAUUSD, forex, NQ/ES futures, and crypto day traders
+- Traders who want AI-driven pattern analysis from their trade notes
+"""
+    return Response(content, mimetype="text/plain")
 
 @app.route("/forgot-password", methods=["GET","POST"])
 def forgot_password():
