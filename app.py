@@ -84,7 +84,7 @@ def _validate_email(email: str):
 _MAIL_FROM = "TradeJournal <noreply@backtesting-journalmytrades.com>"
 _SITE_URL  = "https://backtesting-journalmytrades.com"
 
-def _send_email(to: str, subject: str, html: str, text: str = ""):
+def _send_email(to: str, subject: str, html: str, text: str = "", headers: dict = None):
     """Send a multipart HTML+text email via Resend API."""
     resend.api_key = os.environ.get("RESEND_API_KEY", "")
     payload = {
@@ -95,6 +95,8 @@ def _send_email(to: str, subject: str, html: str, text: str = ""):
     }
     if text:
         payload["text"] = text
+    if headers:
+        payload["headers"] = headers
     resend.Emails.send(payload)
 
 def _email_wrap(body_html: str) -> str:
@@ -944,7 +946,8 @@ def _send_idea_notifications(idea, author):
                     f"Unsubscribe: {unsub_url}"
                 )
                 try:
-                    _send_email(user.email, f"New Trade Idea: {idea.instrument} — {dir_emoji}", html_body, text_body)
+                    _send_email(user.email, f"New Trade Idea: {idea.instrument} — {dir_emoji}", html_body, text_body,
+                                headers={"List-Unsubscribe": f"<{unsub_url}>", "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"})
                 except Exception as e:
                     print(f"Email to {user.email} failed: {e}")
         except Exception as e:
@@ -984,7 +987,8 @@ def _send_community_notifications(title, excerpt, url, author_name, tag):
                     f"Unsubscribe: {unsub_url}"
                 )
                 try:
-                    _send_email(user.email, f"New Post: {title[:60]}", html_body, text_body)
+                    _send_email(user.email, f"New Post: {title[:60]}", html_body, text_body,
+                                headers={"List-Unsubscribe": f"<{unsub_url}>", "List-Unsubscribe-Post": "List-Unsubscribe=One-Click"})
                 except Exception as e:
                     print(f"Email to {user.email} failed: {e}")
         except Exception as e:
@@ -1881,3 +1885,28 @@ def bt_delete_trade(sid, tid):
 def backtest_results_page(sid):
     s = BacktestSession.query.filter_by(id=sid, user_id=current_user.id).first_or_404()
     return render_template("backtest_results.html", session_id=s.id, username=current_user.username)
+
+
+@app.route("/api/contact", methods=["POST"])
+def contact_us():
+    """Public contact form — sends message to admin email."""
+    data = request.json or {}
+    email = (data.get("email") or "").strip()
+    message = (data.get("message") or "").strip()
+    if not email or not message:
+        return jsonify({"error": "Both fields required"}), 400
+    if len(message) > 2000:
+        return jsonify({"error": "Message too long"}), 400
+    try:
+        html_body = _email_wrap(
+            f'<p style="font-size:11px;font-weight:700;color:#00a86b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Contact Form</p>'
+            f'<h2>New message from {email}</h2>'
+            f'<div style="background:#f8f9fa;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-top:12px;white-space:pre-wrap;font-size:14px;color:#374151">{message}</div>'
+            f'<a href="mailto:{email}" class="btn" style="margin-top:20px">Reply to {email}</a>'
+        )
+        text_body = f"Contact Form Submission\n\nFrom: {email}\n\nMessage:\n{message}"
+        _send_email("nikhil.jha97@outlook.com", f"TradeJournal Contact: {email}", html_body, text_body)
+        return jsonify({"ok": True})
+    except Exception as e:
+        print(f"Contact form error: {e}")
+        return jsonify({"error": "Failed to send"}), 500

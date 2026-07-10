@@ -1504,6 +1504,7 @@ POSTS += [
     ],
     "howto": {
       "name": "How to Build a Sustainable Prop Firm Trading Strategy",
+      "description": "A five-step framework for building a consistent, psychology-first prop firm trading strategy that survives drawdowns and delivers repeatable payouts.",
       "steps": [
         {"name": "Build your psychological foundation first", "text": "Before touching risk percentages or entry rules, build the habit of journalling your emotional state before and after each session. Note your reaction to drawdown, whether you deviated from your plan, and why. This data is more valuable than your win rate in the early stages."},
         {"name": "Write two separate rulebooks", "text": "Define your challenge rules and your funded rules as separate documents. During challenges: defined aggression to pass within a timeframe. Once funded: conservative risk, daily loss limit discipline, and no chasing. Treat them as two different games and never mix them up."},

@@ -220,5 +220,87 @@
   <div class="fc">© 2026 TradeJournal · Free AI trading journal for SMC & ICT traders</div>
 </footer>
 
+
+<!-- ── CONTACT SLIDE-IN PANEL ──────────────────── -->
+<style>
+#cp-tab{position:fixed;right:0;top:50%;transform:translateY(-50%);background:linear-gradient(160deg,#00e5a0,#00b37a);color:#000;font-weight:700;font-size:11px;letter-spacing:.07em;padding:16px 8px;border-radius:10px 0 0 10px;cursor:pointer;z-index:9000;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:-2px 0 18px rgba(0,229,160,.35);animation:cp-glow 2.4s ease-in-out infinite;user-select:none}
+@keyframes cp-glow{0%,100%{box-shadow:-2px 0 18px rgba(0,229,160,.35)}50%{box-shadow:-2px 0 28px rgba(0,229,160,.65)}}
+#cp-tab svg{width:14px;height:14px;fill:none;stroke:#000;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s}
+#cp-tab span{writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);text-transform:uppercase}
+#cp-tab.open svg{transform:rotate(180deg)}
+#cp-panel{position:fixed;right:-350px;top:50%;transform:translateY(-50%);width:320px;background:#111820;border:1px solid #1e2d3d;border-right:none;border-radius:14px 0 0 14px;z-index:9001;transition:right .35s cubic-bezier(.4,0,.2,1);box-shadow:-6px 0 36px rgba(0,0,0,.55);padding:24px 22px 22px}
+#cp-panel.open{right:0}
+#cp-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+#cp-head-title{font-size:15px;font-weight:700;color:#e8edf5;margin-bottom:3px}
+#cp-head-sub{font-size:12px;color:#6b7a99}
+#cp-close{background:none;border:none;color:#6b7a99;cursor:pointer;font-size:18px;line-height:1;padding:0;margin-top:-2px;transition:color .2s}
+#cp-close:hover{color:#e8edf5}
+#cp-form input,#cp-form textarea{width:100%;box-sizing:border-box;background:#0d1117;border:1px solid #1e2d3d;border-radius:8px;color:#d4dde8;padding:11px 13px;font-size:13px;font-family:inherit;margin-bottom:11px;outline:none;transition:border-color .2s;resize:none}
+#cp-form input:focus,#cp-form textarea:focus{border-color:#00e5a0}
+#cp-form input::placeholder,#cp-form textarea::placeholder{color:#4a5568}
+#cp-form textarea{min-height:100px;resize:vertical}
+#cp-submit{width:100%;background:#00e5a0;color:#000;font-weight:700;font-size:13px;padding:11px;border:none;border-radius:8px;cursor:pointer;transition:background .2s;letter-spacing:.03em}
+#cp-submit:hover{background:#00c98e}
+#cp-submit:disabled{opacity:.6;cursor:not-allowed}
+#cp-status{font-size:12px;text-align:center;margin-top:9px;min-height:18px}
+</style>
+<div id="cp-tab" onclick="cpToggle()" title="Contact Us">
+  <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  <span>Contact</span>
+</div>
+<div id="cp-panel">
+  <div id="cp-head">
+    <div>
+      <div id="cp-head-title">Get in Touch</div>
+      <div id="cp-head-sub">We reply within 24 hours</div>
+    </div>
+    <button id="cp-close" onclick="cpToggle()" title="Close">&times;</button>
+  </div>
+  <form id="cp-form" onsubmit="cpSubmit(event)">
+    <input type="email" id="cp-email" placeholder="Your email address" required autocomplete="email">
+    <textarea id="cp-msg" placeholder="How can we help?" required></textarea>
+    <button type="submit" id="cp-submit">Send Message</button>
+    <div id="cp-status"></div>
+  </form>
+</div>
+<script>
+(function(){
+  function cpToggle(){
+    var panel=document.getElementById('cp-panel');
+    var tab=document.getElementById('cp-tab');
+    panel.classList.toggle('open');
+    tab.classList.toggle('open');
+  }
+  window.cpToggle=cpToggle;
+  async function cpSubmit(e){
+    e.preventDefault();
+    var btn=document.getElementById('cp-submit');
+    var status=document.getElementById('cp-status');
+    btn.textContent='Sending…';btn.disabled=true;
+    status.textContent='';
+    try{
+      var r=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:document.getElementById('cp-email').value,message:document.getElementById('cp-msg').value})});
+      var d=await r.json();
+      if(d.ok){
+        status.style.color='#00e5a0';
+        status.textContent='✓ Message sent! We’ll be in touch soon.';
+        document.getElementById('cp-email').value='';
+        document.getElementById('cp-msg').value='';
+      }else{
+        status.style.color='#ff4757';
+        status.textContent='Something went wrong. Please try again.';
+      }
+    }catch(err){
+      status.style.color='#ff4757';
+      status.textContent='Something went wrong. Please try again.';
+    }
+    btn.textContent='Send Message';btn.disabled=false;
+  }
+  window.cpSubmit=cpSubmit;
+})();
+</script>
+<!-- ── END CONTACT PANEL ──────────────────────── -->
+
 </body>
 </html>
