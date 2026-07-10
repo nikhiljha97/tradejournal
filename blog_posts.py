@@ -1420,4 +1420,97 @@ POSTS += [
       {"q": "Can I switch from TradeZella or Edgewonk to a free trading journal?", "a": "Yes. TradeJournal accepts MT5 HTML exports, CSV and XLSX files for trade import. If you export your existing trade history from TradeZella or Edgewonk as a CSV, you can import it into TradeJournal to maintain continuity. Your setup tags will need to be re-applied since the tag systems differ between tools."}
     ]
   },
+  {
+    "slug": "prop-firm-playbook-elite-funded-trader-strategy",
+    "tag": "Prop Firm Trading",
+    "title": "The Prop Firm Playbook: What Elite Funded Traders Actually Do Differently",
+    "excerpt": "Most prop firm traders fail for the same predictable reasons. The ones who crack it and withdraw consistently share a set of behaviours that have nothing to do with a secret entry or indicator. Here is the full breakdown of how elite funded traders actually think and operate.",
+    "meta_desc": "The prop firm traders who make consistent payouts share one framework: risk discipline, psychology first, and payout locking over chasing home runs.",
+    "seo_title": "Prop Firm Playbook: What Elite Traders Do",
+    "date": "2026-07-10",
+    "read_time": 10,
+    "content": """
+<p>The traders who consistently extract six and seven-figure payouts from prop firms share a set of behaviours that most retail traders never develop. This is not about a secret entry technique or a hidden indicator. It is about how they think about risk, how they structure their process, and how they protect the accounts that are working while absorbing the cost of the ones that are not.</p>
+
+<p>This is our view at TradeJournal, built from observing what separates traders who make consistent withdrawals from traders who cycle through challenges indefinitely.</p>
+
+<h2>The Real Cost Behind the Big Numbers</h2>
+<p>The headline payout figures that circulate on social media are not what funded traders actually keep. Getting to six or seven figures in withdrawals means absorbing the cost of failed challenges, reset fees, psychological burnout, and months of inconsistent performance across multiple accounts. The net figure is always smaller. The journey is always harder than the result implies.</p>
+
+<p>Elite funded traders understand this from the start. They treat prop firm trading as a business with operating costs, not a lottery with a jackpot. That framing changes everything: the failed challenge is not a disaster, it is a cost of acquisition. The funded account is the asset. The payout is the revenue.</p>
+
+<h2>Psychology Comes Before Profitability</h2>
+<p>Without exception, the traders who perform best over time address psychology before strategy. Specifically: your relationship with losing, your ability to separate your identity from your P&L, and your tolerance for operating under sustained uncertainty.</p>
+
+<p>A trader with a mediocre strategy and rock-solid psychology will outperform a trader with a brilliant strategy and fragile psychology, every single time. The prop firm environment amplifies this because there are hard rules, daily loss limits, and the constant awareness that one bad session can end the account. If your mental game is not built for that pressure, no edge will save you.</p>
+
+<p>The practical implication: psychological review belongs in your journal alongside trade outcomes. Not just entry rationale, but your emotional state before the session, your reaction to drawdown, and whether you deviated from your plan. This is the data that separates traders who improve from traders who repeat the same mistakes in different market conditions.</p>
+
+<h2>The Numbers Game: Two Separate Rulebooks</h2>
+<p>The most successful prop firm traders treat the challenge phase and the funded phase as two entirely different games with two entirely different rulebooks.</p>
+
+<p>During the challenge: calculated aggression, acceptance that some accounts will not pass, and a clear target to pass within a defined timeframe. Once funded: capital preservation first, consistent payouts over home runs, and strict adherence to daily loss limits without exception.</p>
+
+<p>This is portfolio thinking applied to prop firms. The accounts that fail are the cost of doing business. The accounts that pass are the asset. The question is not how to never lose a challenge. It is how to structure your attempts so the ones you pass generate enough to absorb the ones you lose. Mixing the two rulebooks is one of the most common and damaging mistakes retail traders make.</p>
+
+<h2>Choose Markets That Trend</h2>
+<p>Consistently funded traders are deliberate about market selection. They gravitate toward instruments with clean directional character, avoiding markets that chop sideways and generate false signals at a high rate. Trending markets allow for longer holds, momentum trades, and fewer decisions per session, which itself reduces psychological load.</p>
+
+<p>If you are not tracking which instruments you perform best on, you are leaving one of the most actionable insights on the table. A trading journal that separates performance by market will show you within 30 to 50 trades whether your edge is instrument-specific or genuinely portable. In our experience with TradeJournal users, it is almost always the former.</p>
+
+<h2>Fixed Risk-Reward Is a Crutch: Adapt to Conditions</h2>
+<p>The best prop firm traders do not apply a fixed 1:2 or 1:3 ratio on every trade. They adapt based on market conditions: tighter targets in choppy environments, extended targets when momentum is clean and liquidity is favourable. The ratio is a tool, not a rule.</p>
+
+<p>This is an advanced concept that requires experience to execute without rationalising bad behaviour. The risk is that adaptive risk-reward becomes an excuse to widen targets on losing trades or tighten them prematurely on winning ones. The only way to stay honest is to record your intended risk-reward before entry and your actual outcome after exit, then review the gap over time. A journal makes this visible. Without it, you are guessing.</p>
+
+<h2>Lock In Payouts: Do Not Chase Home Runs</h2>
+<p>One of the clearest patterns among traders who sustain long-term prop firm income: they withdraw consistently rather than waiting for accounts to balloon. Once a withdrawal threshold is hit, they take it. They do not leave large unrealised balances sitting in funded accounts when those accounts are still subject to daily loss limits and drawdown rules.</p>
+
+<p>A withdrawn payout is realised. It cannot be taken back by a bad day. This runs counter to the natural instinct to compound and grow, but in the prop firm context it is the correct strategy. Your journal should track payout behaviour alongside trading performance: when you withdrew, how much you left in the account, and whether your timing was driven by a plan or by emotion.</p>
+
+<h2>Breakeven Rules Must Be Pre-Defined</h2>
+<p>Elite funded traders use structured breakeven rules: once a trade moves a defined distance in their favour, the stop moves to entry. The critical point is that this level is pre-defined, not felt. They do not move stops based on how the trade looks in the moment. They have written criteria for when the stop shifts, and they execute without second-guessing.</p>
+
+<p>Lower timeframe entries also feature heavily in the approach of consistent funded traders. Tighter initial stops, made possible by refined entry timing, meaningfully increase the number of trades you can take before hitting your percentage-based daily loss ceiling. In a prop firm account, every basis point of risk allocation matters.</p>
+
+<h2>Burnout Is a Risk Variable, Not a Soft Concern</h2>
+<p>Managing multiple funded accounts simultaneously creates a level of psychological load that most retail traders underestimate. Sleep deprivation, stress, and the mental weight of rule-based trading at scale are real performance variables, not personality weaknesses.</p>
+
+<p>The traders who sustain long-term performance build routines that account for rest and recovery alongside their trading schedules. The ones who do not will eventually see their performance degrade regardless of how good their strategy is. If you are tracking only trade results and not your energy level and mental baseline, your journal is incomplete.</p>
+
+<h2>Prop Firms Are Amplifiers, Not Shortcuts</h2>
+<p>Prop firms offer leverage and scale that most retail traders cannot access with their own capital. For a trader who already has a genuine, tested edge, this is a powerful amplifier. For a trader who is still searching for an edge, it is a faster and more expensive route to losing money.</p>
+
+<p>Our view: build and validate your strategy on live capital first, even a small account. The challenge structure should confirm an edge you already have, not be the place where you try to discover one under time pressure and financial stress.</p>
+
+<h2>Not All Prop Firms Are Equal: Choose Like a Business</h2>
+<p>The quality of prop firms varies significantly on the dimensions that matter most: payout consistency, rule transparency, drawdown structure (trailing vs static, balance vs equity), and the firm's verified track record of actually paying out. A firm offering a $200,000 account that delays payouts or changes rules retroactively is worth less than a firm offering $50,000 with a clean, documented payout history.</p>
+
+<p>Evaluate prop firms the same way you evaluate any business relationship. Look for transparency, verifiable track records, and alignment between their rules and your trading style. This decision deserves more due diligence than most traders give it.</p>
+
+<h2>The Journal Is the Common Thread</h2>
+<p>Every principle in this framework has a journaling component. Psychology review after each session. Instrument performance separated by market. Risk-reward documented before and after entry. Payout timing recorded against a pre-defined plan. Breakeven rule adherence tracked over time. Energy and mental state logged alongside trade data.</p>
+
+<p>None of this is optional for traders who want to build a sustainable prop firm income. You cannot improve what you do not measure, and you cannot measure what you do not record. TradeJournal gives you a structured space to do all of it, free, without a subscription or a spreadsheet that breaks when you try to analyse it.</p>
+
+<p>The traders who crack the prop firm game are not the ones with the best entries. They are the ones who do the serious work between sessions: reviewing honestly, identifying patterns in their own behaviour, and building a clear picture of where their edge actually lives.</p>
+""",
+    "faq": [
+      {"q": "What is the most common reason prop firm traders fail?", "a": "The most common reason is mixing challenge-phase risk rules with funded-phase rules. Traders who use aggressive risk to pass a challenge often continue that aggression on the funded account, triggering the daily loss limit or max drawdown. The second most common reason is poor psychological baseline: trading through fatigue, frustration, or with an identity attached to the P&L. Both are addressable through a structured journaling practice that tracks behaviour alongside trade outcomes."},
+      {"q": "How much risk per trade should I use on a prop firm challenge?", "a": "Risk per trade depends on the challenge rules, your strategy win rate, and your timeframe for passing. A general framework: during the challenge, risk should be high enough to reach the profit target within the allowed window without relying on a single trade. Once funded, most consistent traders reduce to 0.5 to 1 percent per trade, prioritising account longevity over maximum growth. Document your planned risk per phase before you start and hold yourself to it."},
+      {"q": "How do I choose the right prop firm to trade with?", "a": "Evaluate prop firms on four dimensions: payout consistency (verified payment proof from real traders, not just marketing), rule transparency (all conditions clearly documented before purchase), drawdown structure (static drawdown is generally more manageable than trailing drawdown for volatile strategies), and alignment with your trading style. Cross-reference on independent forums and community groups before committing capital."},
+      {"q": "What markets work best for prop firm trading?", "a": "Markets with strong directional character and liquidity work best: major forex pairs (EURUSD, GBPUSD, USDJPY), XAUUSD (gold), and equity index futures (NQ, ES) during their active sessions. Avoid markets that chop sideways without clean setups, as these generate high-frequency small losses that erode your daily loss buffer quickly. Track your performance by instrument in a trading journal to identify which markets your specific edge works on."},
+      {"q": "When should I withdraw from a prop firm account?", "a": "Withdraw on a schedule, not based on feelings about the account. Set a withdrawal threshold before you start trading (for example, every time the account reaches 5 percent profit) and execute it without exception. Do not let funded accounts accumulate large unrealised balances. A withdrawn payout is protected from the account's daily loss limit and drawdown rules. Consistent smaller withdrawals are safer and more sustainable than waiting for a large sum that can be erased by a single bad stretch."}
+    ],
+    "howto": {
+      "name": "How to Build a Sustainable Prop Firm Trading Strategy",
+      "steps": [
+        {"name": "Build your psychological foundation first", "text": "Before touching risk percentages or entry rules, build the habit of journalling your emotional state before and after each session. Note your reaction to drawdown, whether you deviated from your plan, and why. This data is more valuable than your win rate in the early stages."},
+        {"name": "Write two separate rulebooks", "text": "Define your challenge rules and your funded rules as separate documents. During challenges: defined aggression to pass within a timeframe. Once funded: conservative risk, daily loss limit discipline, and no chasing. Treat them as two different games and never mix them up."},
+        {"name": "Select one or two trending instruments and track performance separately", "text": "Use your trading journal to filter performance by instrument. Within 30 to 50 trades you will see clearly which markets your edge works on and which ones drain your account. Trade only the instruments where your data shows a genuine edge."},
+        {"name": "Set adaptive risk-reward and document your intended target before entry", "text": "Record your planned risk-reward ratio before you enter every trade. After exit, record what actually happened. Review the gap between planned and actual over time. This reveals whether you are cutting winners short, holding losers too long, or executing your plan correctly."},
+        {"name": "Lock in payouts on a schedule and journal every withdrawal", "text": "Set a withdrawal threshold in advance and take payouts when you hit it, without exception. Log each withdrawal in your journal alongside your account balance and the market conditions at the time. Over time this creates a clear picture of your payout consistency and protects realised gains from being erased by a single bad stretch."}
+      ]
+    }
+  },
 ]

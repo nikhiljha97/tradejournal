@@ -828,6 +828,10 @@ def create_blog_post():
     slug = f"{slug}-{int(datetime.now(timezone.utc).timestamp())}"
     post = BlogPost(author_id=current_user.id,title=d.get("title",""),slug=slug,excerpt=d.get("excerpt",""),content=d.get("content",""),tag=d.get("tag","Chart Update"))
     db.session.add(post); db.session.commit()
+    try:
+        _send_community_notifications(post.title, post.excerpt or "", f"{_SITE_URL}/community", current_user.username, post.tag)
+    except Exception as e:
+        print(f"Blog notification error: {e}")
     return jsonify(post.to_dict(current_user.id))
 
 @app.route("/api/blog-posts/<int:pid>", methods=["DELETE"])
@@ -914,7 +918,7 @@ def _send_idea_notifications(idea, author):
                 if not user.notif_token:
                     user.notif_token = secrets.token_urlsafe(32)
                     db.session.commit()
-                unsub_url = f"{_SITE_URL}/unsubscribe-ideas/{user.notif_token}"
+                unsub_url = f"{_SITE_URL}/unsubscribe/{user.notif_token}"
                 preview   = (idea.content or "")[:200] + ("..." if len(idea.content or "") > 200 else "")
                 dir_label = "Bullish (Long)" if idea.direction=="Long" else "Bearish (Short)" if idea.direction=="Short" else "Neutral"
                 badge_bg  = "#d1fae5" if idea.direction=="Long" else "#fee2e2" if idea.direction=="Short" else "#f3f4f6"
@@ -946,6 +950,118 @@ def _send_idea_notifications(idea, author):
         except Exception as e:
             print(f"Notification thread error: {e}")
     threading.Thread(target=send, daemon=True).start()
+
+def _send_community_notifications(title, excerpt, url, author_name, tag):
+    """Send email notification to all subscribed users for any new community content."""
+    import threading
+    def send():
+        try:
+            tag_icon = {"Chart Update": "📊", "Trade Idea": "💡", "Analysis": "🔍", "Education": "📚"}.get(tag, "📝")
+            preview = (excerpt or "")[:200] + ("..." if len(excerpt or "") > 200 else "")
+            subscribers = User.query.filter_by(idea_notifications=True).all()
+            for user in subscribers:
+                if not user.notif_token:
+                    user.notif_token = secrets.token_urlsafe(32)
+                    db.session.commit()
+                unsub_url = f"{_SITE_URL}/unsubscribe/{user.notif_token}"
+                html_body = _email_wrap(
+                    f'<p style="font-size:11px;font-weight:700;color:#00a86b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">{tag_icon} New Post in Community</p>'
+                    f'<h2>{title}</h2>'
+                    f'<div style="margin-bottom:16px">'
+                    f'<span style="background:#ecfdf5;color:#065f46;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px">{tag}</span>'
+                    f'</div>'
+                    f'<p>{preview}</p>'
+                    f'<a href="{url}" class="btn">View Post</a>'
+                    f'<p class="muted" style="margin-top:20px">Posted by <strong>{author_name}</strong> on TradeJournal &mdash; '
+                    f'<a href="{unsub_url}" style="color:#6b7280">Unsubscribe from all notifications</a></p>'
+                )
+                text_body = (
+                    f"New Community Post on TradeJournal\n\n"
+                    f"{title}\n{tag}\n\n"
+                    f"{preview}\n\n"
+                    f"View it here: {url}\n\n"
+                    f"Posted by {author_name}\n"
+                    f"Unsubscribe: {unsub_url}"
+                )
+                try:
+                    _send_email(user.email, f"New Post: {title[:60]}", html_body, text_body)
+                except Exception as e:
+                    print(f"Email to {user.email} failed: {e}")
+        except Exception as e:
+            print(f"Community notification thread error: {e}")
+    threading.Thread(target=send, daemon=True).start()
+
+
+@app.route("/unsubscribe/<token>")
+def unsubscribe_all(token):
+    """General unsubscribe — covers all notification types (blog posts, trade ideas, chart updates)."""
+    user = User.query.filter_by(notif_token=token).first()
+    if user:
+        user.idea_notifications = False
+        db.session.commit()
+    html = ("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/>"
+            "<style>body{background:#07090d;color:#d4dde8;font-family:Inter,sans-serif;"
+            "display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}"
+            ".box{background:#111820;border:1px solid #1c2b3a;border-radius:14px;padding:40px;"
+            "max-width:420px;text-align:center}.icon{font-size:48px;margin-bottom:16px}"
+            ".title{font-size:20px;font-weight:700;margin-bottom:8px}"
+            ".sub{color:#5a7080;font-size:14px;line-height:1.6}"
+            ".btn{display:inline-block;margin-top:20px;background:#00e5a0;color:#000;"
+            "font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px}"
+            "</style></head><body><div class=\"box\">"
+            "<div class=\"icon\">&#x2705;</div>"
+            "<div class=\"title\">Unsubscribed</div>"
+            "<div class=\"sub\">You will no longer receive notifications for new blog posts, "
+            "trade ideas, or chart updates.<br><br>"
+            "You can re-subscribe any time from the Community page.</div>"
+            "<a href=\"/community\" class=\"btn\">Back to Community</a>"
+            "</div></body></html>")
+    return html
+
+
+@app.route("/api/admin/notify-static-blog/<slug>", methods=["POST"])
+@login_required
+def notify_static_blog(slug):
+    """Admin endpoint: trigger notification emails for a static SEO blog post (blog_posts.py)."""
+    if not is_admin(): return jsonify({"error": "Unauthorized"}), 403
+    from blog_posts import POSTS
+    post = next((p for p in POSTS if p["slug"] == slug), None)
+    if not post: return jsonify({"error": "Post not found"}), 404
+    import threading
+    def send():
+        try:
+            url = f"{_SITE_URL}/blog/{slug}"
+            excerpt = post.get("excerpt", "")[:200]
+            subscribers = User.query.filter_by(idea_notifications=True).all()
+            for user in subscribers:
+                if not user.notif_token:
+                    user.notif_token = secrets.token_urlsafe(32)
+                    db.session.commit()
+                unsub_url = f"{_SITE_URL}/unsubscribe/{user.notif_token}"
+                html_body = _email_wrap(
+                    f'<p style="font-size:11px;font-weight:700;color:#00a86b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">&#x1F4D6; New Article on TradeJournal</p>'
+                    f'<h2>{post["title"]}</h2>'
+                    f'<p>{excerpt}</p>'
+                    f'<a href="{url}" class="btn">Read Article</a>'
+                    f'<p class="muted" style="margin-top:20px">From the TradeJournal Team &mdash; '
+                    f'<a href="{unsub_url}" style="color:#6b7280">Unsubscribe from all notifications</a></p>'
+                )
+                text_body = (
+                    f"New Article on TradeJournal\n\n"
+                    f"{post['title']}\n\n"
+                    f"{excerpt}\n\n"
+                    f"Read it here: {url}\n\n"
+                    f"Unsubscribe: {unsub_url}"
+                )
+                try:
+                    _send_email(user.email, f"New Article: {post['title'][:60]}", html_body, text_body)
+                except Exception as e:
+                    print(f"Email to {user.email} failed: {e}")
+        except Exception as e:
+            print(f"Static blog notification error: {e}")
+    threading.Thread(target=send, daemon=True).start()
+    return jsonify({"ok": True, "slug": slug})
+
 
 @app.route("/api/ideas/<int:iid>", methods=["DELETE"])
 @login_required
@@ -1004,7 +1120,18 @@ def unsubscribe_ideas(token):
     if user:
         user.idea_notifications = False
         db.session.commit()
-    html = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><style>body{background:#07090d;color:#d4dde8;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.box{background:#111820;border:1px solid #1c2b3a;border-radius:14px;padding:40px;max-width:400px;text-align:center}.icon{font-size:48px;margin-bottom:16px}.title{font-size:20px;font-weight:700;margin-bottom:8px}.sub{color:#5a7080;font-size:14px;line-height:1.6}.btn{display:inline-block;margin-top:20px;background:#00e5a0;color:#000;font-weight:700;padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px}</style></head><body><div class=\"box\"><div class=\"icon\">✅</div><div class=\"title\">Unsubscribed</div><div class=\"sub\">You won't receive trade idea notifications anymore.<br>You can re-subscribe anytime from the Trade Ideas page.</div><a href=\"/ideas\" class=\"btn\">Go to Trade Ideas</a></div></body></html>"
+    html = ("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><style>body{background:#07090d;color:#d4dde8;"
+            "font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}"
+            ".box{background:#111820;border:1px solid #1c2b3a;border-radius:14px;padding:40px;max-width:420px;text-align:center}"
+            ".icon{font-size:48px;margin-bottom:16px}.title{font-size:20px;font-weight:700;margin-bottom:8px}"
+            ".sub{color:#5a7080;font-size:14px;line-height:1.6}"
+            ".btn{display:inline-block;margin-top:20px;background:#00e5a0;color:#000;font-weight:700;"
+            "padding:10px 24px;border-radius:8px;text-decoration:none;font-size:14px}"
+            "</style></head><body><div class=\"box\"><div class=\"icon\">&#x2705;</div>"
+            "<div class=\"title\">Unsubscribed</div>"
+            "<div class=\"sub\">You will no longer receive notifications for new blog posts, trade ideas, or chart updates."
+            "<br><br>You can re-subscribe any time from the Community page.</div>"
+            "<a href=\"/community\" class=\"btn\">Back to Community</a></div></body></html>")
     return html
 
 @app.route("/api/me/notifications", methods=["GET","POST"])
