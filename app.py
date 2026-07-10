@@ -1905,7 +1905,15 @@ def contact_us():
             f'<a href="mailto:{email}" class="btn" style="margin-top:20px">Reply to {email}</a>'
         )
         text_body = f"Contact Form Submission\n\nFrom: {email}\n\nMessage:\n{message}"
-        _send_email("nikhil.jha97@outlook.com", f"TradeJournal Contact: {email}", html_body, text_body)
+        resend.api_key = os.environ.get("RESEND_API_KEY", "")
+        resend.Emails.send({
+            "from": _MAIL_FROM,
+            "to": ["noreply@backtesting-journalmytrades.com"],
+            "reply_to": email,
+            "subject": f"TradeJournal Contact: {email}",
+            "html": html_body,
+            "text": text_body,
+        })
         return jsonify({"ok": True})
     except Exception as e:
         print(f"Contact form error: {e}")
