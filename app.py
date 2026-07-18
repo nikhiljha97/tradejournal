@@ -491,14 +491,14 @@ def public_prices():
 
 @app.route("/blog")
 def blog_index():
-    return render_template("blog.html", posts=POSTS, post=None)
+    return render_template("blog.html", posts=sorted(POSTS, key=lambda p: p["date"], reverse=True), post=None)
 
 @app.route("/blog/<slug>")
 def blog_post(slug):
     post = get_post(slug)
     if not post:
         return redirect(url_for("blog_index"))
-    related = [p for p in POSTS if p["slug"] != slug][:3]
+    related = sorted([p for p in POSTS if p["slug"] != slug], key=lambda p: p["date"], reverse=True)[:3]
     return render_template("blog.html", post=post, posts=None, related=related)
 
 @app.route("/economic-calendar")
