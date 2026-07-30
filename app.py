@@ -1622,8 +1622,20 @@ def _fetch_and_cache(symbol_key: str, tf: str):
         if attempt < 2:
             _time.sleep(2 ** attempt)   # 1s, 2s
 
+    # Fallback: yf.download() sometimes succeeds when Ticker().history() is blocked
     if df is None or df.empty:
-        print(f"[chart] no data returned for {symbol_key}/{tf} after retries")
+        try:
+            print(f"[chart] Ticker.history empty, trying yf.download fallback for {symbol_key}/{tf}")
+            df = yf.download(ticker_sym, period=period, interval=interval,
+                             auto_adjust=True, progress=False, actions=False)
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = [col[0] for col in df.columns]
+        except Exception as e:
+            print(f"[chart] yf.download fallback failed for {symbol_key}/{tf}: {e}")
+            df = None
+
+    if df is None or df.empty:
+        print(f"[chart] no data returned for {symbol_key}/{tf} after all attempts")
         return
 
     # Flatten multi-level columns (newer yfinance versions)
@@ -1735,15 +1747,25 @@ def chart_data():
 
     if cached_count == 0:
         # No data at all: fetch synchronously so the user gets something
-        # (bulk ops are fast enough to stay within the 120s timeout)
         _fetch_and_cache(symbol, tf)
     elif stale:
-        # Data exists but is stale: return cache immediately, refresh in background
-        _threading.Thread(
-            target=_background_fetch,
-            args=(app, symbol, tf),
-            daemon=True
-        ).start()
+        # Check how old the most recent candle actually is
+        latest_candle = (ChartCandle.query
+                         .filter_by(symbol=symbol, timeframe=tf)
+                         .order_by(ChartCandle.ts.desc())
+                         .first())
+        latest_ts_ms = latest_candle.ts if latest_candle else 0
+        data_age_hours = (datetime.utcnow().timestamp() * 1000 - latest_ts_ms) / 3_600_000
+
+        if data_age_hours > 6:
+            # Data is significantly outdated: wait up to 12s for a live refresh
+            # so the user gets current candles on this very response
+            t = _threading.Thread(target=_background_fetch, args=(app, symbol, tf), daemon=True)
+            t.start()
+            t.join(timeout=12)
+        else:
+            # Only slightly stale: return cache now, refresh quietly in background
+            _threading.Thread(target=_background_fetch, args=(app, symbol, tf), daemon=True).start()
 
     candles = (ChartCandle.query
                .filter_by(symbol=symbol, timeframe=tf)
