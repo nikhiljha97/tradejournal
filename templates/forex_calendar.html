@@ -114,6 +114,27 @@
     .impact-high{background:rgba(224,90,90,.15);color:#e05a5a}
     .impact-med{background:rgba(224,154,74,.15);color:#e09a4a}
 
+    /* Events Explained Grid */
+    .explain-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+    .explain-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+    .explain-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+    .explain-badge{font-size:9px;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:4px}
+    .badge-usd{background:rgba(33,150,243,.18);color:#64b5f6}
+    .badge-gbp{background:rgba(0,176,255,.15);color:#40c4ff}
+    .badge-eur{background:rgba(0,200,130,.15);color:#00e5a0}
+    .impact-high-dot::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red)}
+    .impact-med-dot::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--orange)}
+    .explain-what{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:10px}
+    .explain-signals{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+    .explain-row{font-size:11.5px;padding:6px 10px;border-radius:7px;line-height:1.45}
+    .explain-bull{background:rgba(0,229,160,.08);border-left:3px solid #00e5a0}
+    .explain-bear{background:rgba(224,90,90,.08);border-left:3px solid #e05a5a}
+    .dir-label{font-weight:700;margin-right:4px}
+    .explain-bull .dir-label{color:#00e5a0}
+    .explain-bear .dir-label{color:#e05a5a}
+    .explain-asset{font-size:10.5px;color:var(--muted);margin:0}
+    .event-explain{display:block;font-size:11px;color:var(--muted);line-height:1.45;margin-top:4px;font-weight:400}
+
     /* HOW-TO */
     .howto-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(240px,100%),1fr));gap:16px;margin-top:28px;margin-bottom:60px}
     .step-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
@@ -401,6 +422,213 @@
 
     <p style="font-size:11px;color:var(--muted);margin-top:10px;text-align:right">Times shown in your local timezone · Data via TradingView</p>
 
+  <!-- EVENTS EXPLAINED GUIDE -->
+  <section style="margin-bottom:48px">
+    <h2 class="section-title" style="margin-bottom:6px">What Every News Release Actually Means</h2>
+    <p class="section-sub">Plain-English breakdown of every major economic event. Higher than forecast vs lower than forecast, and what it means for gold, USD, and indices.</p>
+    <div class="explain-grid">
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>Non-Farm Payrolls (NFP)</strong>
+        </div>
+        <p class="explain-what">Counts the number of new paid jobs added to the US economy in a month, excluding farm workers and a handful of other categories. It is the single most-watched US jobs report.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Higher</span> USD rises, gold falls. Strong hiring = Fed keeps rates higher for longer, hurting gold and boosting the dollar.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Lower</span> USD falls, gold spikes. Weak jobs growth raises recession fears and bets on Fed rate cuts, which are the biggest fuel for gold rallies.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>XAUUSD, DXY, EUR/USD, GBP/USD, US500</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>CPI (Consumer Price Index)</strong>
+        </div>
+        <p class="explain-what">Tracks how much a basket of everyday items (food, rent, petrol, clothes) costs compared to the previous month or year. It is the Fed&#39;s primary inflation gauge.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Higher</span> Gold rises on inflation-hedge demand. USD may also rise short-term if rate hikes are expected. Bonds fall. A volatile, split reaction is common.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Lower</span> Inflation cooling = Fed may cut rates sooner. USD weakens, gold can dip briefly then rally. Equities often rally on rate-cut hopes.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>XAUUSD, DXY, US10Y yield, US500, NAS100</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>FOMC Rate Decision</strong>
+        </div>
+        <p class="explain-what">Eight times a year the Federal Reserve votes on whether to raise, lower, or hold the US interest rate. The press conference 30 minutes later often causes a second, larger price move than the decision itself.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Rate Hike / Hawkish</span> USD rallies sharply. Gold sells off (higher rates = higher opportunity cost to hold gold). Stocks can drop.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Rate Cut / Dovish</span> Gold surges. USD falls. Stocks often rally. This is the most powerful catalyst for large gold moves.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>XAUUSD, DXY, all USD pairs, US500, NAS100, bonds</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>GDP (Gross Domestic Product)</strong>
+        </div>
+        <p class="explain-what">The total value of everything the US produced and sold in a quarter. Released three times per quarter: Advance (first estimate), Preliminary (revised), and Final (confirmed reading).</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Higher</span> USD strengthens. Gold can pull back. Strong economic output signals the Fed does not need to cut rates to stimulate growth.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Lower / Negative</span> Recession fears spike. Gold rallies as a safe-haven. USD falls. Two consecutive negative GDP prints = official recession.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>XAUUSD, DXY, US500, US bonds, all USD pairs</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>JOLTS Job Openings</strong>
+        </div>
+        <p class="explain-what">Counts how many unfilled job vacancies exist across the US at the end of each month. A high number means employers are desperate to hire, pointing to a tight labor market and potential wage inflation.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Higher</span> USD up (tight labor = wage pressure = Fed stays hawkish). Gold may slip. Fewer job openings ahead of NFP can limit its surprise impact.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Lower</span> Labor market cooling = Fed may ease sooner. USD softens, gold can nudge higher. A sharp drop in JOLTS often foreshadows a weak NFP.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>DXY, XAUUSD, EUR/USD, rate expectations</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>ADP National Employment</strong>
+        </div>
+        <p class="explain-what">A private-sector payroll count released two days before NFP. Created by payroll processor ADP, it gives traders an early read on Friday&#39;s jobs number, though it does not always predict NFP accurately.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Higher</span> USD may edge up and gold dip slightly, especially if the ADP beat is large and traders expect NFP to follow. Reaction is usually milder than NFP itself.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Lower</span> USD softens, gold can rise modestly. Traders often discount the miss if other labor data remains strong.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>DXY, XAUUSD, EUR/USD</strong> (preview effect only)</p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-med-dot"></span>
+          <strong>Initial Jobless Claims</strong>
+        </div>
+        <p class="explain-what">Released every Thursday, this counts the number of people filing for unemployment benefits for the first time that week. It is the most frequent US labor market snapshot and acts as a real-time health check.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bear"><span class="dir-label">Higher (more claims)</span> Bad for the economy. USD falls, gold can edge up as recession risk rises. Sustained high claims ahead of NFP often triggers larger gold moves.</div>
+          <div class="explain-row explain-bull"><span class="dir-label">Lower (fewer claims)</span> Good for the economy. USD firms up, gold may pull back slightly. Shows the labor market remains resilient.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>DXY, XAUUSD</strong> (moderate weekly impact)</p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>Unemployment Rate</strong>
+        </div>
+        <p class="explain-what">The percentage of people in the workforce who are actively looking for work but cannot find it. Released alongside NFP on the first Friday of the month. A rising rate is a red flag for the economy.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bear"><span class="dir-label">Higher (worse)</span> More people jobless = economy weakening = Fed likely to cut rates = USD down, gold up. A large jump above 4% tends to spark strong safe-haven buying.</div>
+          <div class="explain-row explain-bull"><span class="dir-label">Lower (better)</span> Fewer people unemployed = strong economy = Fed stays hawkish = USD up, gold down. Low unemployment supports risk-on sentiment.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>XAUUSD, DXY, US500, all USD pairs</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-med-dot"></span>
+          <strong>ISM Manufacturing PMI</strong>
+        </div>
+        <p class="explain-what">A monthly survey of purchasing managers at US factories. A score above 50 means the manufacturing sector is growing; below 50 means it is shrinking. It is one of the first data releases each month.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Above 50 / Higher</span> Manufacturing expanding. USD can firm up. Gold may ease. A strong PMI early in the month can set a bullish USD tone for the rest of the week.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Below 50 / Lower</span> Factories contracting. Recession risk rises. USD softens, gold benefits from safe-haven demand. Prolonged sub-50 readings often precede Fed dovish pivots.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>DXY, XAUUSD, US500, industrial commodity pairs</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-med-dot"></span>
+          <strong>ISM Services PMI</strong>
+        </div>
+        <p class="explain-what">Same survey structure as Manufacturing PMI but covers the services sector (banks, restaurants, healthcare, tech), which makes up roughly 70% of the US economy. Often has a bigger market impact than manufacturing PMI.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Above 50 / Higher</span> Services expanding. USD firms. Gold can ease. A hot services PMI signals consumer demand is holding up, which supports Fed hawkishness.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Below 50 / Lower</span> Services contracting. USD weakens, gold rallies. Since services dominate the US economy, a weak read here carries more weight than a weak manufacturing read.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>DXY, XAUUSD, US500, NAS100</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-med-dot"></span>
+          <strong>Retail Sales</strong>
+        </div>
+        <p class="explain-what">Measures total spending at US retail stores in a month, from car dealerships to clothing shops. It is the best real-time gauge of consumer confidence. Consumer spending drives about two-thirds of US GDP.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Higher</span> Consumers are spending freely, economy is healthy. USD rises. Gold may pull back. Equities often benefit from strong retail data.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Lower</span> Consumers cutting back, slowdown risk rising. USD weakens. Gold and bonds can gain as traders shift to safe-haven assets.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>DXY, XAUUSD, US500, consumer discretionary pairs</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-usd">USD</span>
+          <span class="explain-impact impact-med-dot"></span>
+          <strong>PPI (Producer Price Index)</strong>
+        </div>
+        <p class="explain-what">Tracks price changes at the wholesale / factory level, before goods reach consumers. Think of PPI as the early-warning system for CPI. If factories are paying more, stores will eventually charge more.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Higher</span> Inflation pipeline heating up. Gold rises on future-inflation expectations. USD may also rise if it signals the Fed needs to hike. Both can move together in an unusual dual reaction.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Lower</span> Pipeline inflation cooling. Gold eases on reduced inflation-hedge demand. USD softens slightly. Often confirms a CPI downtrend already in motion.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>XAUUSD, DXY, US bonds, inflation-sensitive pairs</strong></p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-gbp">GBP</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>BoE Rate Decision</strong>
+        </div>
+        <p class="explain-what">The Bank of England&#39;s Monetary Policy Committee votes on the UK interest rate. Markets watch the vote split (e.g., 7-2 to hold) and the forward guidance statement as closely as the actual decision.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Hike / Hawkish split</span> GBP surges. GBP/USD and EUR/GBP react sharply. Gold indirect effect only (via USD cross-flows). A 5-4 split toward hiking is often more bullish than a unanimous hold.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Cut / Dovish majority</span> GBP falls, GBP/USD drops. Can indirectly lift USD and push gold slightly lower. Watch for dovish language even when the rate is held.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>GBP/USD, EUR/GBP, GBP/JPY</strong> (indirect gold effect)</p>
+      </div>
+
+      <div class="explain-card">
+        <div class="explain-header">
+          <span class="explain-badge badge-eur">EUR</span>
+          <span class="explain-impact impact-high-dot"></span>
+          <strong>ECB Rate Decision</strong>
+        </div>
+        <p class="explain-what">The European Central Bank sets the rate for all 20 eurozone countries. Because EUR/USD is the most traded pair globally, any ECB decision that moves EUR also moves USD in the opposite direction, and gold along with it.</p>
+        <div class="explain-signals">
+          <div class="explain-row explain-bull"><span class="dir-label">Hike / Hawkish</span> EUR surges, USD falls (mirror effect). Falling USD means gold often rises. EUR/USD, EUR/GBP, and gold all react simultaneously.</div>
+          <div class="explain-row explain-bear"><span class="dir-label">Cut / Dovish</span> EUR falls, USD strengthens. Gold can dip alongside EUR. But if the cut signals global growth fears, gold may still rally on safe-haven demand.</div>
+        </div>
+        <p class="explain-asset">Affects: <strong>EUR/USD, XAUUSD, EUR/GBP, EUR/JPY</strong></p>
+      </div>
+
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:14px">Signals reflect typical market reactions under normal conditions. Always confirm with live price action before entering a trade.</p>
+  </section>
+
+
     <!-- ── COLUMN GUIDE ──────────────────────────────── -->
     <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:20px">
       <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px">How to Read the Columns</div>
@@ -430,70 +658,70 @@
         </thead>
         <tbody>
           <tr>
-            <td><strong>NFP (Non-Farm Payrolls)</strong></td>
+            <td><strong>NFP (Non-Farm Payrolls)</strong><br><span class="event-explain">Counts new US jobs added outside farming each month. Higher readings signal a strong labor market and keep Fed rate-cut hopes low. A miss raises recession fears.</span></td>
             <td>USD</td>
             <td><span class="sig-bull">Bullish USD</span> — strong jobs growth supports rate hike bets</td>
             <td><span class="sig-bear">Bearish USD</span> — weak jobs = dovish Fed pressure</td>
             <td>Beat → <span class="sig-bear">Bearish Gold</span> (USD rises, gold falls). Miss → <span class="sig-bull">Bullish Gold</span></td>
           </tr>
           <tr>
-            <td><strong>CPI (Inflation)</strong></td>
+            <td><strong>CPI (Consumer Price Index)</strong><br><span class="event-explain">Tracks how much everyday prices (groceries, rent, gas) have risen. Higher CPI means inflation is running hot and the Fed may delay rate cuts. Lower CPI suggests price pressures are easing.</span></td>
             <td>USD</td>
             <td><span class="sig-bull">Bullish USD</span> — hotter inflation, more rate hikes expected</td>
             <td><span class="sig-bear">Bearish USD</span> — cooling inflation, Fed may pause</td>
             <td>Hot CPI → <span class="sig-bull">Bullish Gold</span> (inflation hedge). Cool CPI → <span class="sig-bear">Bearish Gold</span></td>
           </tr>
           <tr>
-            <td><strong>FOMC Rate Decision</strong></td>
+            <td><strong>FOMC Rate Decision</strong><br><span class="event-explain">The US Federal Reserve announces whether it is raising, cutting, or holding interest rates. Higher rates make the USD more attractive to hold; lower rates reduce returns and typically boost gold.</span></td>
             <td>USD</td>
             <td><span class="sig-bull">Bullish USD</span> — rate hike or hawkish language</td>
             <td><span class="sig-bear">Bearish USD</span> — rate cut or dovish pivot</td>
             <td>Hike → <span class="sig-bear">Bearish Gold</span> (real yields rise). Cut → <span class="sig-bull">Strong Bullish Gold</span></td>
           </tr>
           <tr>
-            <td><strong>GDP (Growth)</strong></td>
+            <td><strong>GDP (Gross Domestic Product)</strong><br><span class="event-explain">Measures the total value of goods and services the US economy produced in a quarter. A strong GDP print means the economy is expanding; a weak or negative reading signals potential recession.</span></td>
             <td>USD</td>
             <td><span class="sig-bull">Bullish USD</span> — strong economy = higher rates</td>
             <td><span class="sig-bear">Bearish USD</span> — recession fears rise</td>
             <td>Strong GDP → <span class="sig-bear">Bearish Gold</span>. Weak GDP → <span class="sig-bull">Bullish Gold</span> (safe haven)</td>
           </tr>
           <tr>
-            <td><strong>BoE Rate Decision</strong></td>
+            <td><strong>BoE Rate Decision</strong><br><span class="event-explain">The Bank of England votes on UK interest rates. A hike or hawkish split signals tighter monetary policy; a cut or dovish majority suggests the BoE is worried about UK economic weakness.</span></td>
             <td>GBP</td>
             <td><span class="sig-bull">Bullish GBP</span> — hike or hawkish vote split</td>
             <td><span class="sig-bear">Bearish GBP</span> — cut or dovish majority</td>
             <td>Indirect effect via USD cross flows. Monitor GBP/USD for confirmation.</td>
           </tr>
           <tr>
-            <td><strong>ECB Rate Decision</strong></td>
+            <td><strong>ECB Rate Decision</strong><br><span class="event-explain">The European Central Bank sets rates for the eurozone. A hawkish decision strengthens the EUR and weakens USD, which indirectly supports gold. A dovish decision does the opposite.</span></td>
             <td>EUR</td>
             <td><span class="sig-bull">Bullish EUR</span> — hike or hawkish guidance</td>
             <td><span class="sig-bear">Bearish EUR</span> — cut or dovish tone</td>
             <td>Hawkish ECB → EUR rises → USD weakens → <span class="sig-bull">Mild Bullish Gold</span></td>
           </tr>
           <tr>
-            <td><strong>PPI (Producer Prices)</strong></td>
+            <td><strong>PPI (Producer Price Index)</strong><br><span class="event-explain">Tracks price changes at the factory level before goods reach consumers. Think of it as the early warning signal for future CPI. Hot PPI today often means hot CPI next month.</span></td>
             <td>USD</td>
             <td><span class="sig-bull">Bullish USD</span> — leading indicator of future CPI heat</td>
             <td><span class="sig-bear">Bearish USD</span> — producer deflation signals future CPI drop</td>
             <td>Hot PPI leads to hot CPI expectations → <span class="sig-bull">Bullish Gold</span> on inflation fears</td>
           </tr>
           <tr>
-            <td><strong>Retail Sales</strong></td>
+            <td><strong>Retail Sales</strong><br><span class="event-explain">Measures total spending at retail stores across the US. Strong sales mean consumers are confident and spending freely. Weak sales suggest belt-tightening and may signal economic slowdown.</span></td>
             <td>USD</td>
             <td><span class="sig-bull">Bullish USD</span> — strong consumer spending = healthy economy</td>
             <td><span class="sig-bear">Bearish USD</span> — weak consumer, slowdown fears</td>
             <td>Strong sales → risk-on, USD up → <span class="sig-bear">Bearish Gold</span>. Weak → <span class="sig-bull">Bullish Gold</span></td>
           </tr>
           <tr>
-            <td><strong>ISM PMI</strong></td>
+            <td><strong>ISM Manufacturing PMI</strong><br><span class="event-explain">A monthly survey of US manufacturers. Readings above 50 mean factories are expanding; below 50 means contraction. It is one of the first major data releases each month, so markets often react sharply.</span></td>
             <td>USD</td>
             <td><span class="sig-bull">Bullish USD</span> if above 50 (expansion)</td>
             <td><span class="sig-bear">Bearish USD</span> if below 50 (contraction)</td>
             <td>Sub-50 PMI raises recession fears → <span class="sig-bull">Safe-Haven Gold</span> demand rises</td>
           </tr>
           <tr>
-            <td><strong>Unemployment Rate</strong></td>
+            <td><strong>Unemployment Rate</strong><br><span class="event-explain">The percentage of the workforce actively looking for a job but unable to find one. A rising rate is bad for the economy; a falling rate signals a healthy labor market. Released with NFP on the same Friday.</span></td>
             <td>USD</td>
             <td><span class="sig-bear">Bearish USD</span> if rate rises (worse than expected)</td>
             <td><span class="sig-bull">Bullish USD</span> if rate falls (better than expected)</td>

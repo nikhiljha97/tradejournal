@@ -566,13 +566,18 @@ RULES:
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="qwen/qwen3.8-27b",
             max_tokens=450,
             temperature=0.3,
-            response_format={"type": "json_object"},
             messages=messages,
         )
-        raw    = resp.choices[0].message.content.strip()
+        raw = resp.choices[0].message.content.strip()
+        # strip markdown code fences some models add
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+            raw = raw.strip()
         parsed = _json.loads(raw)
         return jsonify({
             "reply": (parsed.get("reply") or "").strip(),
