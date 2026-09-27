@@ -5,10 +5,11 @@ load_dotenv()
 class Config:
     # Database — swap DATABASE_URL to your Neon/Postgres URL for production
     # Neon free tier: https://neon.tech → create project → copy connection string
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL",
-        "sqlite:///journal_dev.db"          # local fallback for development
-    ).replace("postgres://", "postgresql://")  # fix Render/Neon legacy prefix
+    SQLALCHEMY_DATABASE_URI = (
+        os.environ.get("DATABASE_URL", "sqlite:///journal_dev.db")
+        .replace("postgres://", "postgresql://")       # fix Render/Neon legacy prefix
+        .replace("postgresql://", "postgresql+psycopg2://", 1)  # force psycopg2 driver (SQLAlchemy 2.1+)
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # Neon closes idle connections after ~5 min.
     # pool_pre_ping tests the connection before use and reconnects if closed.
