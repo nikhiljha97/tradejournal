@@ -53,8 +53,18 @@ _OLD_HOST  = "tradejournal-n3hn.onrender.com"
 
 @app.before_request
 def redirect_to_canonical():
-    if request.host == _OLD_HOST:
+    host = request.host.lower()
+    # Redirect old Render hostname
+    if host == _OLD_HOST:
         return redirect(_CANONICAL + request.full_path.rstrip("?"), 301)
+    # Redirect www to non-www
+    if host.startswith("www."):
+        url = request.url.replace("://www.", "://", 1)
+        return redirect(url, 301)
+    # Redirect plain http to https (skip localhost)
+    if request.scheme == "http" and not host.startswith("localhost") and host != "127.0.0.1":
+        url = request.url.replace("http://", "https://", 1)
+        return redirect(url, 301)
 
 
 # ── Email validation helpers ──────────────────────────────────────────────────
@@ -157,13 +167,23 @@ def add_security_headers(response):
 
 with app.app_context():
     db.create_all()
-    # Add notification columns if they don't exist
+    # Add notification + telegram columns if they don't exist
     with db.engine.connect() as conn:
-        for col, typ in [("idea_notifications","BOOLEAN DEFAULT TRUE"),("notif_token","VARCHAR(100)")]:
+        for col, typ in [
+            ("idea_notifications","BOOLEAN DEFAULT TRUE"),
+            ("notif_token","VARCHAR(100)"),
+            ("telegram_chat_id","BIGINT"),
+            ("telegram_link_token","VARCHAR(100)"),
+        ]:
             try:
                 conn.execute(text(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col} {typ}"))
                 conn.commit()
             except: pass
+        # Backfill NULLs so existing users stay subscribed
+        try:
+            conn.execute(text("UPDATE users SET idea_notifications=TRUE WHERE idea_notifications IS NULL"))
+            conn.commit()
+        except: pass
         # Add reset token columns if they don't exist
     try:
         with db.engine.connect() as conn:
@@ -1017,8 +1037,15 @@ def _send_idea_notifications(idea, author):
             badge_txt = "#065f46" if idea.direction=="Long" else "#991b1b" if idea.direction=="Short" else "#374151"
             bias_color= "#00a86b" if idea.direction=="Long" else "#dc2626" if idea.direction=="Short" else "#6b7280"
 
-            # Generate AI summary once — used in every subscriber email
+            # Generate AI summary once — used in every subscriber email AND channel broadcast
             ai = _ai_idea_summary(idea)
+
+            # Broadcast to Telegram channel (non-blocking, errors logged only)
+            try:
+                import telegram_bot as tgbot
+                tgbot.broadcast_idea(idea, author.username, ai)
+            except Exception as e:
+                print(f"Telegram channel broadcast error: {e}")
 
             # Canonical post URL
             post_slug = re.sub(r"[^a-z0-9]+", "-", idea.title.lower()).strip("-")
@@ -1069,7 +1096,8 @@ def _send_idea_notifications(idea, author):
             else:
                 ai_block = ""
 
-            subscribers = User.query.filter_by(idea_notifications=True).all()
+            # isnot(False) treats NULL as subscribed — covers users created before the column existed
+            subscribers = User.query.filter(User.idea_notifications.isnot(False)).all()
             for user in subscribers:
                 if user.id == author.id:
                     continue
@@ -1334,6 +1362,48 @@ def delete_idea_comment(iid,cid):
     if c.user_id!=current_user.id and not is_admin(): return jsonify({"error":"Unauthorized"}),403
     db.session.delete(c); db.session.commit()
     return jsonify({"ok":True})
+
+# ── Telegram Bot Routes ────────────────────────────────────────────────────────
+
+@app.route("/api/telegram/webhook", methods=["POST"])
+def telegram_webhook():
+    """Receive incoming Telegram updates via webhook."""
+    try:
+        import telegram_bot as tgbot
+        update = request.get_json(silent=True) or {}
+        tgbot.dispatch(update, app)
+    except Exception as e:
+        print(f"Telegram webhook error: {e}")
+    return jsonify({"ok": True})
+
+@app.route("/api/telegram/link-token", methods=["POST"])
+@login_required
+def telegram_link_token():
+    """Generate a one-time deep-link token for connecting Telegram."""
+    token = secrets.token_urlsafe(24)
+    current_user.telegram_link_token = token
+    db.session.commit()
+    bot_username = os.environ.get("TELEGRAM_BOT_USERNAME", "TradeJournalBot")
+    deep_link    = f"https://t.me/{bot_username}?start={token}"
+    return jsonify({"ok": True, "link": deep_link, "token": token})
+
+@app.route("/api/telegram/status", methods=["GET"])
+@login_required
+def telegram_status():
+    """Return whether the current user has Telegram linked."""
+    return jsonify({
+        "linked": current_user.telegram_chat_id is not None,
+        "chat_id": current_user.telegram_chat_id,
+    })
+
+@app.route("/api/telegram/disconnect", methods=["POST"])
+@login_required
+def telegram_disconnect():
+    """Unlink Telegram from the current user's account."""
+    current_user.telegram_chat_id    = None
+    current_user.telegram_link_token = None
+    db.session.commit()
+    return jsonify({"ok": True})
 
 @app.route("/unsubscribe-ideas/<token>")
 def unsubscribe_ideas(token):

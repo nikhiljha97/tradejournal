@@ -154,6 +154,35 @@ POSTS = [
 <p><strong>3. Ignoring spread on small accounts.</strong> On micro lots, a 30-pip spread on gold can eat 30% of a typical trade's profit. Log commission separately to see your true edge.</p>
 
 <blockquote>The best gold traders I've seen all share one habit: they review their last 20 trades before taking the next one. The journal is the edge.</blockquote>
+
+<h2>Which Session to Trade XAUUSD (and Why It Matters for Your Journal)</h2>
+<p>XAUUSD does not behave the same across all sessions. When you journal consistently, the session column will reveal patterns most traders never notice:</p>
+<ul>
+  <li><strong>Asian session (00:00–08:00 GMT):</strong> Tight, choppy range. Most SMC traders avoid this session entirely. If your journal shows consistent losses during Asian hours, that's your first easy win — stop trading it.</li>
+  <li><strong>London session (08:00–12:00 GMT):</strong> Most liquidity runs happen here. Stop hunts above Asian highs and lows are extremely common. ICT traders specifically target the London Open for this reason.</li>
+  <li><strong>New York Open (13:30–16:00 GMT):</strong> Highest volume. The true direction of the day is usually confirmed here. XAUUSD often makes its largest daily move in the first 90 minutes of NY.</li>
+  <li><strong>London/NY overlap (13:00–16:00 GMT):</strong> Strongest confluence for directional trades. Your journal will almost certainly show your best R:R trades cluster here.</li>
+</ul>
+<p>Log the session on every trade for 30 days and let your own data tell you where your edge actually lives. Most traders are surprised by what they find.</p>
+
+<h2>XAUUSD SMC Setups Worth Journaling Separately</h2>
+<p>If you trade using SMC or ICT methodology, tag your setup type on every gold trade. Over time, your journal will show you which of these actually has edge for you:</p>
+<ul>
+  <li><strong>Order Block (OB):</strong> The last up/down candle before a strong displacement. High probability but requires patience to wait for the return.</li>
+  <li><strong>Fair Value Gap (FVG):</strong> A three-candle imbalance where the high of candle 1 and the low of candle 3 don't overlap. Gold respects FVGs frequently.</li>
+  <li><strong>Breaker Block:</strong> A failed order block that price trades through, then returns to as resistance. Common after liquidity sweeps on gold.</li>
+  <li><strong>Liquidity Sweep + Reversal:</strong> Price takes out obvious swing highs or lows, then reverses hard. NFP and CPI days are especially prone to this pattern on XAUUSD.</li>
+</ul>
+<p>Journaling your setup type alongside your R outcome will show you which setups are actually profitable — not which ones look cleanest in hindsight on Twitter screenshots.</p>
+
+<h2>Building a Consistent XAUUSD Review Routine</h2>
+<p>Raw data without review is just a log. The review is where the learning happens. Set aside 15 minutes at the end of each trading week to do three things:</p>
+<ol>
+  <li>Check your session breakdown — are you profitable in the sessions you planned to trade?</li>
+  <li>Review your setup tags — which setups actually produced positive R?</li>
+  <li>Read your last five psychology notes — are the same words appearing before your losses?</li>
+</ol>
+<p>Gold trading rewards patience and structure above almost everything else. Your journal is the tool that keeps you honest about whether you're actually being patient and structured — or just telling yourself you are.</p>
 """
   },
   {
@@ -221,6 +250,11 @@ POSTS = [
   <li><strong>Track the rule</strong> — did following it improve your results?</li>
 </ol>
 <p>Over 3 months of consistent journaling, most traders eliminate 1-2 major psychology patterns. The dollar impact is usually larger than any strategy improvement they could make.</p>
+
+<h2>When to Stop Trading: Using Your Journal as a Circuit Breaker</h2>
+<p>The hardest decision in trading is recognising when you should not be at the charts. Your journal makes this objective. Set a rule based on your data — for example, "if I am down more than 2R before noon, I close the platform for the day." This is not a guess. It is a rule derived from observing what happens to your afternoon sessions after a difficult morning.</p>
+<p>Many traders find that their worst losing streaks share a common thread: they kept trading after a clear signal from their own data that the session was not going their way. The journal gives you the permission to stop — because stopping becomes a rule rather than a surrender.</p>
+<p>Psychology journaling is not about becoming a robot. It is about understanding your own patterns well enough to work with them instead of against them. The traders who improve fastest are not the ones with the best strategies — they are the ones who build the most accurate picture of themselves.</p>
 """
   },
 ]
@@ -349,8 +383,22 @@ POSTS += [
 </ul>
 <blockquote>The goal of a trading journal isn't to make you feel bad about your losses. It's to make the patterns visible so you can fix the ones that cost you the most.</blockquote>
 
+<h2>The Screenshot Rule: One Image Is Worth 200 Words</h2>
+<p>For setups with a clear chart basis, attach a screenshot at the moment of entry. Not the after chart where the trade worked out — the chart you actually saw when you clicked buy or sell. This is critical because memory distorts setups after the fact. We remember our entries as cleaner than they were and our exits as more deliberate than they felt.</p>
+<p>A timestamp-accurate entry screenshot forces honesty. Over time, you will see the difference between your A+ setups (clean, high-confluence, obvious) and your C setups (messy, uncertain, rationalized). Both may have worked in isolation — but your data will show you which type produces consistent R and which type is random.</p>
+
+<h2>The Weekly Review: Where the Real Learning Happens</h2>
+<p>Writing in your journal is half the process. Reviewing it weekly is the other half. Here is a simple 15-minute weekly review format:</p>
+<ol>
+  <li><strong>Read every note from this week</strong> without looking at P&amp;L first. How did you sound? Confident, nervous, uncertain, impulsive?</li>
+  <li><strong>Find the note that embarrasses you most.</strong> That is your lesson for next week.</li>
+  <li><strong>Check your setup distribution.</strong> Are you trading your planned setups or drifting into others?</li>
+  <li><strong>Calculate emotion-to-R.</strong> On trades where you noted confidence, what was your average R? On trades where you noted doubt or hesitation?</li>
+</ol>
+<p>The weekly review turns a journal from a log into a feedback system. Without it, you are collecting data that never becomes insight.</p>
+
 <h2>Using AI to Analyse Your Journal Notes</h2>
-<p>Writing honest psychology notes is powerful on its own. But AI can take it further — reading your notes across 50+ trades and identifying which emotional states correlate with your losses, which setups actually have edge, and which behaviours cost you the most in dollar terms. That's pattern detection you can't do manually.</p>
+<p>Writing honest psychology notes is powerful on its own. But AI can take it further — reading your notes across 50+ trades and identifying which emotional states correlate with your losses, which setups actually have edge, and which behaviours cost you the most in dollar terms. That is pattern detection you cannot do manually, and it removes the bias of reviewing your own work with your own blind spots. After 30 days of consistent entries, an AI analysis of your notes will usually surface one pattern that costs you significantly more than any other. That single insight, corrected, tends to move the needle more than weeks of strategy work.</p>
 """
   },
   {
