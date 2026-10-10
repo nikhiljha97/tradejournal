@@ -11,6 +11,6 @@ __pycache__/
 .env
 *.log
 .DS_Store
-static/uploads/
+static/uploads/trades/
 node_modules/
 *.md

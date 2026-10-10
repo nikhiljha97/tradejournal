@@ -592,8 +592,6 @@ RULES:
 
 @app.route("/sitemap.xml")
 def sitemap():
-    # Use real dates for static pages so Google trusts lastmod.
-    # Only truly dynamic pages (home, blog index, community) get today's date.
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     from blog_posts import POSTS
     blog_urls = "\n".join(
@@ -601,12 +599,21 @@ def sitemap():
         f'<lastmod>{p.get("date", today)}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>'
         for p in POSTS
     )
+    # Add individual trade idea post URLs
+    ideas = TradeIdea.query.order_by(TradeIdea.created_at.desc()).all()
+    idea_urls = "\n".join(
+        f'  <url><loc>https://backtesting-journalmytrades.com/ideas/{idea.id}/{_idea_slug(idea)}</loc>'
+        f'<lastmod>{idea.created_at.strftime("%Y-%m-%d")}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>'
+        for idea in ideas
+    )
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://backtesting-journalmytrades.com/</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://backtesting-journalmytrades.com/blog</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://backtesting-journalmytrades.com/ideas</loc><lastmod>{today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://backtesting-journalmytrades.com/economic-calendar</loc><lastmod>{today}</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
 {blog_urls}
+{idea_urls}
 </urlset>""", 200, {"Content-Type": "application/xml"}
     return xml
 
@@ -626,7 +633,6 @@ Disallow: /logout
 Disallow: /settings
 Disallow: /import
 Disallow: /backtest
-Disallow: /ideas
 Disallow: /reset-password/
 Disallow: /verify-email/
 Disallow: /resend-verification
@@ -685,8 +691,6 @@ Disallow: /logout
 Disallow: /settings
 Disallow: /import
 Disallow: /backtest
-Disallow: /blog-posts
-Disallow: /ideas
 Disallow: /reset-password/
 Disallow: /verify-email/
 Disallow: /resend-verification
@@ -814,6 +818,51 @@ def is_admin():
 @app.route("/ideas")
 def ideas_page():
     return render_template("community.html", section="ideas")
+
+def _idea_slug(idea):
+    """Generate a URL-safe slug from a trade idea title."""
+    return re.sub(r"[^a-z0-9]+", "-", idea.title.lower()).strip("-")
+
+def _idea_excerpt(html_content, max_len=160):
+    """Strip HTML tags and return a plain-text excerpt."""
+    from html.parser import HTMLParser
+    class _Strip(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self._parts = []
+        def handle_data(self, d):
+            self._parts.append(d)
+        def get_data(self):
+            return " ".join(self._parts)
+    s = _Strip()
+    s.feed(html_content or "")
+    plain = " ".join(s.get_data().split())
+    return plain[:max_len] + ("..." if len(plain) > max_len else "")
+
+@app.route("/ideas/<int:idea_id>")
+@app.route("/ideas/<int:idea_id>/<slug>")
+def idea_post(idea_id, slug=None):
+    idea = TradeIdea.query.get_or_404(idea_id)
+    canonical_slug = _idea_slug(idea)
+    # 301-redirect non-canonical URLs (missing slug or wrong slug)
+    if slug != canonical_slug:
+        return redirect(url_for("idea_post", idea_id=idea_id, slug=canonical_slug), 301)
+    author = User.query.get(idea.author_id)
+    excerpt = _idea_excerpt(idea.content)
+    canonical_url = f"https://backtesting-journalmytrades.com/ideas/{idea_id}/{canonical_slug}"
+    og_image = idea.image_url or ""
+    if og_image and og_image.startswith("/"):
+        og_image = f"https://backtesting-journalmytrades.com{og_image}"
+    if not og_image:
+        og_image = "https://backtesting-journalmytrades.com/static/og-image.png"
+    return render_template("idea_post.html",
+        idea=idea,
+        author=author,
+        slug=canonical_slug,
+        excerpt=excerpt,
+        canonical_url=canonical_url,
+        og_image=og_image,
+    )
 
 @app.route("/api/blog-posts", methods=["GET"])
 def get_blog_posts():

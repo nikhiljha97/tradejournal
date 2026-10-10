@@ -299,17 +299,21 @@ async function loadFeed(){
   }catch(e){feed.innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><h3>Failed to load</h3></div>';}
 }
 
+function ideaSlug(title){return title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+function ideaUrl(p){return `/ideas/${p.id}/${ideaSlug(p.title)}`;}
+
 function renderPost(p){
   const isIdea=SECTION==='ideas';
   const dirClass=p.direction==='Long'?'dir-long':p.direction==='Short'?'dir-short':'dir-neutral';
   const tagClass=p.direction==='Long'?'tag-green':p.direction==='Short'?'tag-red':'tag-blue';
   const canDelete=isAdmin||(isLoggedIn&&isIdea&&currentUser&&p.author===currentUser.username);
+  const postUrl=isIdea?ideaUrl(p):'';
   return `<div class="post-card" id="post-${p.id}">
     <div style="display:flex;align-items:center;justify-content:space-between">
       <span class="post-tag ${isIdea?tagClass:'tag-gold'}">${isIdea?(p.direction||'Idea'):(p.tag||'Update')}</span>
       ${canDelete?`<button class="delete-btn" onclick="deletePost(${p.id})">🗑 Delete</button>`:''}
     </div>
-    <div class="post-title" onclick="toggleContent(${p.id})">${p.title}</div>
+    ${isIdea?`<a class="post-title" href="${postUrl}" style="display:block;cursor:pointer">${p.title}</a>`:`<div class="post-title" onclick="toggleContent(${p.id})">${p.title}</div>`}
     <div class="post-meta">
       <span class="post-author">${p.author||'TradeJournal'}</span>
       ${isIdea?`<span class="${dirClass}">${p.direction}</span><span style="font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:700">${p.instrument}</span>`:''}
@@ -317,12 +321,11 @@ function renderPost(p){
     </div>
     ${p.excerpt?`<div class="post-excerpt">${p.excerpt}</div>`:''}
     ${p.image_url?`<img class="post-image" src="${p.image_url}" alt="${p.title}" loading="lazy" onclick="window.open('${p.image_url}','_blank')"/>`:''}
-    <div class="post-content" id="content-${p.id}">${p.content||''}</div>
-    ${p.content?`<button class="expand-btn" id="expand-${p.id}" onclick="toggleContent(${p.id})">Read more ↓</button>`:''}
+    ${isIdea?`<div style="margin:12px 0"><a href="${postUrl}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--green);text-decoration:none;border:1px solid rgba(0,229,160,.3);padding:7px 14px;border-radius:8px;transition:all .2s" onmouseover="this.style.background='rgba(0,229,160,.08)'" onmouseout="this.style.background='transparent'">Read full analysis <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></div>`:`<div class="post-content" id="content-${p.id}">${p.content||''}</div>${p.content?`<button class="expand-btn" id="expand-${p.id}" onclick="toggleContent(${p.id})">Read more ↓</button>`:''}`}
     <div class="post-actions">
       <button class="action-btn ${p.liked?'liked':''}" onclick="react(${p.id},true)">👍 <span id="likes-${p.id}">${p.likes}</span></button>
       <button class="action-btn ${p.disliked?'disliked':''}" onclick="react(${p.id},false)">👎 <span id="dislikes-${p.id}">${p.dislikes}</span></button>
-      ${isIdea?`<button class="action-btn share-btn" id="share-${p.id}" onclick="copyLink(${p.id})"><span class="share-tip">Share idea</span>🔗</button>`:''}
+      ${isIdea?`<button class="action-btn share-btn" id="share-${p.id}" onclick="copyLink(${p.id},${JSON.stringify(p.title)})"><span class="share-tip">Share idea</span>🔗</button>`:''}
       <button class="action-btn comment-btn" onclick="toggleComments(${p.id})">💬 <span id="ccount-${p.id}">${p.comment_count}</span></button>
     </div>
     <div class="comments-section" id="comments-${p.id}">
@@ -504,8 +507,9 @@ async function submitPost(){
   }
 }
 
-function copyLink(id){
-  const url=`${window.location.origin}/ideas?idea=${id}`;
+function copyLink(id,title){
+  const slug=ideaSlug(title||'idea');
+  const url=`${window.location.origin}/ideas/${id}/${slug}`;
   navigator.clipboard.writeText(url).then(()=>{
     const btn=document.getElementById(`share-${id}`);
     if(!btn)return;

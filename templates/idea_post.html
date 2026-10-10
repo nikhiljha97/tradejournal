@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+  <link rel="apple-touch-icon" href="/static/favicon.svg"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{{ idea.title }} | TradeJournal</title>
+  <meta name="description" content="{{ excerpt }}"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="{{ canonical_url }}"/>
+  <meta property="og:title" content="{{ idea.title }}"/>
+  <meta property="og:description" content="{{ excerpt }}"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="{{ canonical_url }}"/>
+  <meta property="og:image" content="{{ og_image }}"/>
+  <meta property="article:published_time" content="{{ idea.created_at.strftime('%Y-%m-%d') }}"/>
+  <meta property="article:author" content="{{ author.username if author else 'TradeJournal' }}"/>
+  <meta property="article:tag" content="{{ idea.instrument }}"/>
+  <meta property="article:tag" content="{{ idea.direction }} trade"/>
+  <meta property="article:tag" content="SMC trading"/>
+  <meta property="article:tag" content="ICT trading"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="{{ idea.title }}"/>
+  <meta name="twitter:description" content="{{ excerpt }}"/>
+  <meta name="twitter:image" content="{{ og_image }}"/>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": {{ idea.title | tojson }},
+    "description": {{ excerpt | tojson }},
+    "url": {{ canonical_url | tojson }},
+    "datePublished": "{{ idea.created_at.strftime('%Y-%m-%dT%H:%M:%SZ') }}",
+    "dateModified": "{{ idea.created_at.strftime('%Y-%m-%dT%H:%M:%SZ') }}",
+    "image": {{ og_image | tojson }},
+    "author": {
+      "@type": "Person",
+      "name": {{ (author.username if author else 'TradeJournal') | tojson }},
+      "url": "https://backtesting-journalmytrades.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "TradeJournal",
+      "url": "https://backtesting-journalmytrades.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://backtesting-journalmytrades.com/static/favicon.svg"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": {{ canonical_url | tojson }}
+    },
+    "about": {
+      "@type": "Thing",
+      "name": "{{ idea.instrument }} {{ idea.direction }} Trade Analysis"
+    },
+    "keywords": "{{ idea.instrument }}, {{ idea.direction }} trade, SMC trading, ICT methodology, forex trading, gold trading, XAUUSD analysis, prop firm trading, order block, fair value gap"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://backtesting-journalmytrades.com"},
+      {"@type": "ListItem", "position": 2, "name": "Trade Ideas", "item": "https://backtesting-journalmytrades.com/ideas"},
+      {"@type": "ListItem", "position": 3, "name": {{ idea.title | tojson }}, "item": {{ canonical_url | tojson }}}
+    ]
+  }
+  </script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2562826047096065" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#07090d;--bg2:#0c1018;--panel:#111820;--border:#1c2b3a;--text:#d4dde8;--muted:#5a7080;--faint:#1e2d3d;--green:#00e5a0;--green2:#00c88a;--gdim:#003d2b;--red:#ff5757;--amber:#f59e0b}
+    body{background:var(--bg);color:var(--text);font-family:"Inter",sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+
+    /* NAV */
+    nav{display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:64px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:100}
+    .nav-logo{font-size:15px;font-weight:900;letter-spacing:-.01em;display:flex;align-items:center;gap:3px;white-space:nowrap;text-decoration:none}
+    .nav-links{display:flex;gap:24px;align-items:center}
+    .nav-links a{font-size:13px;color:var(--muted);font-weight:500;transition:color .2s}.nav-links a:hover{color:var(--text)}
+    .nav-cta{background:var(--green);color:#000;font-weight:800;font-size:13px;padding:8px 20px;border-radius:8px;transition:all .2s}
+    .nav-cta:hover{background:var(--green2)}
+
+    /* HERO */
+    .post-hero{padding:64px 5% 48px;border-bottom:1px solid var(--border);background:var(--bg2);max-width:900px;margin:0 auto}
+    .breadcrumb{font-size:12px;color:var(--muted);margin-bottom:20px}
+    .breadcrumb a{color:var(--muted)}.breadcrumb a:hover{color:var(--green)}
+    .breadcrumb span{margin:0 6px;color:var(--border)}
+    .post-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;align-items:center}
+    .badge-instrument{background:rgba(0,229,160,.12);color:var(--green);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(0,229,160,.25)}
+    .badge-long{background:rgba(0,229,160,.1);color:var(--green);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;border:1px solid rgba(0,229,160,.2)}
+    .badge-short{background:rgba(255,87,87,.1);color:var(--red);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;border:1px solid rgba(255,87,87,.2)}
+    .badge-neutral{background:rgba(245,158,11,.1);color:var(--amber);font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;text-transform:uppercase;border:1px solid rgba(245,158,11,.2)}
+    .post-hero h1{font-size:clamp(24px,4vw,48px);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin-bottom:20px;color:#fff}
+    .post-meta{display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+    .post-meta .author-dot{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--green),#00a87a);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#000}
+
+    /* BODY */
+    .post-wrap{max-width:900px;margin:0 auto;padding:48px 5% 80px}
+    .post-content h1{font-size:28px;font-weight:800;margin:36px 0 14px;color:#fff}
+    .post-content h2{font-size:22px;font-weight:700;margin:32px 0 12px;color:#fff;border-bottom:1px solid var(--border);padding-bottom:8px}
+    .post-content h3{font-size:17px;font-weight:700;margin:24px 0 10px;color:var(--text)}
+    .post-content p{font-size:15px;line-height:1.8;margin-bottom:16px;color:var(--text)}
+    .post-content strong{color:#fff;font-weight:700}
+    .post-content em{font-style:italic;color:var(--muted)}
+    .post-content ul,.post-content ol{margin:12px 0 20px 22px;font-size:15px;line-height:1.8}
+    .post-content li{margin-bottom:6px}
+    .post-content blockquote{border-left:3px solid var(--green);padding:12px 20px;margin:20px 0;background:var(--faint);border-radius:0 8px 8px 0;color:var(--muted)}
+    .post-content img{max-width:100%;border-radius:8px;margin:20px 0;border:1px solid var(--border);display:block}
+    .post-content table{width:100%;border-collapse:collapse;margin:20px 0;font-size:13px}
+    .post-content th{background:var(--panel);color:var(--green);font-weight:700;padding:10px 14px;text-align:left;border:1px solid var(--border)}
+    .post-content td{padding:9px 14px;border:1px solid var(--border);color:var(--text)}
+    .post-content tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+    .post-content code{font-family:"JetBrains Mono",monospace;font-size:12px;background:var(--panel);padding:2px 6px;border-radius:4px;color:var(--green)}
+    .post-content pre{background:var(--panel);padding:16px;border-radius:8px;overflow-x:auto;margin:16px 0}
+    .post-content pre code{background:none;padding:0}
+    .post-content a{color:var(--green);text-decoration:underline;text-underline-offset:3px}
+
+    /* BACK LINK */
+    .back-bar{border-top:1px solid var(--border);padding:24px 5%;max-width:900px;margin:0 auto}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--muted);transition:color .2s}
+    .back-btn:hover{color:var(--green)}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:28px 5%;text-align:center;font-size:12px;color:var(--muted)}
+    footer a{color:var(--muted)}.footer a:hover{color:var(--green)}
+
+    @media(max-width:640px){
+      .nav-links{display:none}
+      .post-hero{padding:40px 4% 32px}
+      .post-wrap{padding:32px 4% 60px}
+    }
+  </style>
+</head>
+<body>
+<nav>
+  <a class="nav-logo" href="/">
+    <span style="color:var(--green)">Trade</span><span style="color:var(--muted)">Journal</span>
+  </a>
+  <div class="nav-links">
+    <a href="/blog">Blog</a>
+    <a href="/ideas" style="color:var(--green)">Trade Ideas</a>
+    <a href="/economic-calendar">Calendar</a>
+    <a href="/register" class="nav-cta">Start Free</a>
+  </div>
+</nav>
+
+<div style="border-bottom:1px solid var(--border);background:var(--bg2)">
+  <div class="post-hero">
+    <div class="breadcrumb">
+      <a href="/">Home</a><span>/</span>
+      <a href="/ideas">Trade Ideas</a><span>/</span>
+      {{ idea.instrument }}
+    </div>
+    <div class="post-badges">
+      <span class="badge-instrument">{{ idea.instrument }}</span>
+      {% if idea.direction|lower == 'long' %}
+        <span class="badge-long">Long</span>
+      {% elif idea.direction|lower == 'short' %}
+        <span class="badge-short">Short</span>
+      {% else %}
+        <span class="badge-neutral">{{ idea.direction }}</span>
+      {% endif %}
+    </div>
+    <h1>{{ idea.title }}</h1>
+    <div class="post-meta">
+      <div class="author-dot">{{ (author.username[0] if author else 'T')|upper }}</div>
+      <span>{{ author.username if author else 'TradeJournal' }}</span>
+      <span style="color:var(--border)">|</span>
+      <span>{{ idea.created_at.strftime('%B %d, %Y') }}</span>
+    </div>
+  </div>
+</div>
+
+<div class="post-wrap">
+  <div class="post-content">
+    {{ idea.content | safe }}
+  </div>
+</div>
+
+<div class="back-bar">
+  <a class="back-btn" href="/ideas">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to Trade Ideas
+  </a>
+</div>
+
+<footer>
+  <p style="margin-bottom:6px">
+    <a href="/">TradeJournal</a> &mdash; Free AI Trading Journal for SMC &amp; ICT Traders
+  </p>
+  <p>
+    <a href="/blog">Blog</a> &nbsp;&middot;&nbsp;
+    <a href="/ideas">Trade Ideas</a> &nbsp;&middot;&nbsp;
+    <a href="/economic-calendar">Economic Calendar</a> &nbsp;&middot;&nbsp;
+    <a href="/register">Sign Up Free</a>
+  </p>
+</footer>
+</body>
+</html>
