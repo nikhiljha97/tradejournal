@@ -9,6 +9,7 @@
   <meta name="description" content="{% if section=='blog' %}Daily market analysis and SMC trade setups for forex and futures traders. XAUUSD, EURUSD, NQ, ES and more. Free.{% else %}Share and discover SMC & ICT trade ideas. Discuss Order Blocks, Fair Value Gaps, BOS, prop firm strategies with real traders. Free community.{% endif %}"/>
   <meta name="robots" content="index, follow"/>
   <link rel="canonical" href="https://backtesting-journalmytrades.com{% if section=='blog' %}/blog-posts{% else %}/ideas{% endif %}"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css"/>
   <meta property="og:title" content="{% if section=='blog' %}Market Analysis & SMC Trade Setups — TradeJournal{% else %}SMC & ICT Trade Ideas — TradeJournal Community{% endif %}"/>
   <meta property="og:description" content="{% if section=='blog' %}Daily chart analysis and trade setups for SMC and ICT traders.{% else %}Community trade ideas from real SMC and ICT traders.{% endif %}"/>
   <meta property="og:type" content="website"/>
@@ -58,7 +59,16 @@
     .post-author{font-weight:600;color:var(--text)}
     .post-excerpt{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px}
     .post-image{width:100%;border-radius:8px;margin-bottom:16px;max-height:400px;object-fit:cover;cursor:pointer}
-    .post-content{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:16px;display:none;white-space:pre-wrap}
+    .post-content{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:16px;display:none}
+    .post-content h1,.post-content h2,.post-content h3{color:var(--text);font-weight:700;margin:14px 0 6px}
+    .post-content h1{font-size:18px}.post-content h2{font-size:16px}.post-content h3{font-size:14px}
+    .post-content p{margin:6px 0}.post-content ul,.post-content ol{padding-left:20px;margin:6px 0}
+    .post-content img{max-width:100%;border-radius:8px;margin:10px 0;cursor:zoom-in;display:block}
+    .post-content blockquote{border-left:3px solid var(--green);padding-left:12px;margin:8px 0;color:var(--muted)}
+    .post-content a{color:var(--green)}.post-content code{background:rgba(255,255,255,.07);border-radius:4px;padding:1px 5px;font-family:"JetBrains Mono",monospace;font-size:12px}
+    .post-content table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13px}
+    .post-content table td,.post-content table th{border:1px solid var(--border);padding:7px 10px}
+    .post-content table th{background:rgba(255,255,255,.04);font-weight:700;color:var(--text)}
     .post-content.expanded{display:block}
     .post-actions{display:flex;align-items:center;gap:8px;padding-top:14px;border-top:1px solid var(--faint);flex-wrap:wrap}
     .action-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .2s;font-family:"Inter",sans-serif}
@@ -87,20 +97,51 @@
     .comment-submit{background:var(--green);color:#000;font-weight:700;font-size:13px;padding:9px 16px;border:none;border-radius:8px;cursor:pointer;font-family:"Inter",sans-serif}
     .dir-long{color:var(--green);font-weight:700}.dir-short{color:var(--red);font-weight:700}.dir-neutral{color:var(--muted);font-weight:700}
     .empty{text-align:center;padding:60px 20px;color:var(--muted)}.empty-icon{font-size:48px;margin-bottom:16px}.empty h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px}
-    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
-    .modal-bg.open{display:flex}
-    .modal{background:var(--panel);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto}
-    .modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel);z-index:1}
-    .modal-title{font-size:16px;font-weight:700}
-    .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
-    .modal-body{padding:24px}
+    /* ── Rich editor overlay ── */
+    .editor-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px}
+    .editor-overlay.open{display:flex}
+    .editor-wrap{background:#0f1724;border:1px solid var(--border2);border-radius:18px;width:100%;max-width:860px;display:flex;flex-direction:column;min-height:80vh}
+    .editor-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#0f1724;z-index:10;border-radius:18px 18px 0 0}
+    .editor-hdr-title{font-size:15px;font-weight:800;color:var(--text)}
+    .editor-close{background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;padding:4px}
+    .editor-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:16px 24px;border-bottom:1px solid var(--border)}
+    .e-field{display:flex;flex-direction:column;gap:5px}
+    .e-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
+    .e-input{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 12px;font-size:13px;font-family:"Inter",sans-serif;outline:none;transition:border-color .2s}
+    .e-input:focus{border-color:var(--green)}
+    .e-input option{background:#161f2a}
+    .editor-title-row{padding:12px 24px;border-bottom:1px solid var(--border)}
+    .editor-title-input{width:100%;background:transparent;border:none;color:var(--text);font-size:20px;font-weight:700;font-family:"Inter",sans-serif;outline:none;placeholder-color:var(--muted)}
+    .editor-title-input::placeholder{color:var(--muted);font-weight:400}
+    /* Quill toolbar overrides */
+    .ql-toolbar{background:#161f2a !important;border:none !important;border-bottom:1px solid var(--border) !important;padding:10px 16px !important}
+    .ql-toolbar button,.ql-toolbar .ql-picker-label,.ql-toolbar .ql-picker-item{color:#8b95b3 !important;stroke:#8b95b3 !important;fill:#8b95b3 !important}
+    .ql-toolbar button:hover,.ql-toolbar button.ql-active{color:#00e5a0 !important;stroke:#00e5a0 !important}
+    .ql-toolbar .ql-fill{fill:#8b95b3 !important}
+    .ql-toolbar button:hover .ql-fill,.ql-toolbar button.ql-active .ql-fill{fill:#00e5a0 !important}
+    .ql-toolbar .ql-stroke{stroke:#8b95b3 !important}
+    .ql-toolbar button:hover .ql-stroke,.ql-toolbar button.ql-active .ql-stroke{stroke:#00e5a0 !important}
+    .ql-toolbar .ql-picker-options{background:#161f2a !important;border-color:var(--border) !important;color:var(--text) !important}
+    .ql-container{background:#0f1724;border:none !important;flex:1;font-family:"Inter",sans-serif;font-size:14px;color:var(--text);min-height:380px}
+    .ql-editor{min-height:380px;color:var(--text) !important;line-height:1.75;padding:20px 24px !important}
+    .ql-editor.ql-blank::before{color:var(--muted) !important;font-style:normal !important}
+    .ql-editor img{max-width:100%;border-radius:8px;margin:8px 0;cursor:pointer}
+    .ql-editor h1,.ql-editor h2,.ql-editor h3{color:var(--text);font-weight:700}
+    .ql-editor blockquote{border-left:3px solid var(--green);padding-left:12px;color:var(--muted);margin:10px 0}
+    .ql-editor a{color:var(--green)}
+    .ql-editor table{border-collapse:collapse;width:100%;margin:12px 0}
+    .ql-editor table td,.ql-editor table th{border:1px solid var(--border);padding:8px 12px;font-size:13px}
+    .ql-editor table th{background:rgba(255,255,255,.04);font-weight:700}
+    .editor-img-bar{display:flex;align-items:center;gap:10px;padding:10px 24px;border-top:1px solid var(--border);background:#0f1724}
+    .img-upload-btn{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px dashed var(--border2);color:var(--muted);font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;cursor:pointer;transition:all .2s}
+    .img-upload-btn:hover{border-color:var(--green);color:var(--green)}
+    .img-upload-input{display:none}
+    .img-upload-status{font-size:11px;color:var(--muted)}
+    .editor-footer{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--border);background:#0f1724;border-radius:0 0 18px 18px}
+    /* legacy field for modal */
     .field{margin-bottom:18px}
     .field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px}
-    .field input,.field select,.field textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 14px;font-size:14px;font-family:"Inter",sans-serif;outline:none;transition:border-color .2s;resize:vertical}
-    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green)}
-    .field select option{background:var(--panel2)}
     .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
     footer{border-top:1px solid var(--border);padding:32px 5%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:40px}
     .fl{font-size:14px;font-weight:900}.fl span{color:var(--green)}
     .fc{font-size:11px;color:var(--faint)}
@@ -138,10 +179,6 @@
           <span class="nav-drop-icon">💡</span>
           <div><div class="nav-drop-label">Trade Ideas</div><div class="nav-drop-sub">Community trade setups</div></div>
         </a>
-        <a href="/blog-posts" class="nav-drop-item">
-          <span class="nav-drop-icon">📊</span>
-          <div><div class="nav-drop-label">Market Analysis</div><div class="nav-drop-sub">Admin chart updates</div></div>
-        </a>
       </div>
     </div>
     <a href="/backtest">Backtest</a>
@@ -166,34 +203,56 @@
 {% endif %}
 
 <div class="section-tabs">
-  <a href="/blog-posts" class="s-tab {% if section=='blog' %}active{% endif %}">📊 Chart Updates</a>
-  <a href="/ideas" class="s-tab {% if section=='ideas' %}active{% endif %}">💡 Trade Ideas</a>
+  <a href="/ideas" class="s-tab active">💡 Trade Ideas</a>
 </div>
 
 <div class="feed" id="feed">
   <div class="empty"><div class="empty-icon">⏳</div><h3>Loading…</h3></div>
 </div>
 
-<div class="modal-bg" id="postModal">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="modalTitle">Post</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
+<!-- Rich Editor Overlay -->
+<div class="editor-overlay" id="editorOverlay">
+  <div class="editor-wrap">
+    <div class="editor-hdr">
+      <div class="editor-hdr-title">💡 Share Trade Idea</div>
+      <button class="editor-close" onclick="closeEditor()">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="field"><label>Title</label><input id="f_title" placeholder="e.g. XAUUSD Short — 4H OB Rejection" maxlength="200"/></div>
-      <div class="field-row" id="ideaFields">
-        <div class="field"><label>Instrument</label><input id="f_instrument" placeholder="XAUUSD" maxlength="20"/></div>
-        <div class="field"><label>Direction</label><select id="f_direction"><option value="Long">Long 📈</option><option value="Short">Short 📉</option><option value="Neutral">Neutral ↔</option></select></div>
+    <!-- Meta row: Instrument / Direction / (summary) -->
+    <div class="editor-meta">
+      <div class="e-field">
+        <span class="e-label">Instrument</span>
+        <input class="e-input" id="f_instrument" placeholder="XAUUSD" maxlength="20"/>
       </div>
-      <div class="field" id="blogTagField" style="display:none"><label>Category</label><select id="f_tag"><option value="Chart Update">Chart Update</option><option value="XAUUSD">XAUUSD</option><option value="Forex">Forex</option><option value="SMC Analysis">SMC Analysis</option><option value="Education">Education</option><option value="Weekly Outlook">Weekly Outlook</option></select></div>
-      <div class="field"><label>Summary</label><input id="f_excerpt" placeholder="One line summary"/></div>
-      <div class="field"><label>Full Analysis</label><textarea id="f_content" rows="8" placeholder="Describe your analysis, entry reasons, key levels, targets…"></textarea></div>
-      <div class="field"><label>Chart Image URL (optional)</label><input id="f_image" placeholder="https://…"/></div>
+      <div class="e-field">
+        <span class="e-label">Direction</span>
+        <select class="e-input" id="f_direction">
+          <option value="Long">Long 📈</option>
+          <option value="Short">Short 📉</option>
+          <option value="Neutral">Neutral ↔</option>
+        </select>
+      </div>
+      <div class="e-field">
+        <span class="e-label">Summary (one line)</span>
+        <input class="e-input" id="f_excerpt" placeholder="e.g. Bullish into 4H gap, 4R setup"/>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-g" onclick="closeModal()">Cancel</button>
-      <button class="btn-p" onclick="submitPost()" id="submitBtn">Post</button>
+    <!-- Title row -->
+    <div class="editor-title-row">
+      <input class="editor-title-input" id="f_title" placeholder="Trade idea title — e.g. XAUUSD Weekly Outlook Oct 12" maxlength="200"/>
+    </div>
+    <!-- Quill rich editor -->
+    <div id="quillEditor"></div>
+    <!-- Image upload bar -->
+    <div class="editor-img-bar">
+      <label class="img-upload-btn" for="imgFileInput">
+        📎 Insert Image(s)
+        <input class="img-upload-input" type="file" id="imgFileInput" accept="image/*" multiple/>
+      </label>
+      <span class="img-upload-status" id="imgUploadStatus">Upload PNG, JPG, or WEBP — multiple allowed</span>
+    </div>
+    <div class="editor-footer">
+      <button class="btn-g" onclick="closeEditor()">Cancel</button>
+      <button class="btn-p" onclick="submitPost()" id="submitBtn">Publish Idea</button>
     </div>
   </div>
 </div>
@@ -352,35 +411,98 @@ async function deletePost(id){
   await fetch(ep,{method:'DELETE'});document.getElementById(`post-${id}`).remove();
 }
 
+// ── Rich Editor (Quill) ──────────────────────────────────────────────────
+let quill = null;
+
+function initQuill(){
+  if(quill) return;
+  quill = new Quill('#quillEditor', {
+    theme: 'snow',
+    placeholder: 'Write your full analysis here… paste chart images, add levels, describe your entry, targets and invalidation.',
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ color: [] }, { background: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['blockquote', 'code-block'],
+        ['link'],
+        ['clean']
+      ]
+    }
+  });
+}
+
 function openModal(){
   if(!isLoggedIn){window.location.href='/login';return;}
-  const isIdea=SECTION==='ideas';
-  document.getElementById('modalTitle').textContent=isIdea?'Share Trade Idea':'Write Chart Update';
-  document.getElementById('ideaFields').style.display=isIdea?'grid':'none';
-  document.getElementById('blogTagField').style.display=isIdea?'none':'block';
-  document.getElementById('postModal').classList.add('open');
+  initQuill();
+  document.getElementById('editorOverlay').classList.add('open');
 }
-function closeModal(){
-  document.getElementById('postModal').classList.remove('open');
-  ['f_title','f_excerpt','f_content','f_image','f_instrument'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+
+function closeEditor(){
+  document.getElementById('editorOverlay').classList.remove('open');
+  ['f_title','f_excerpt','f_instrument'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  if(quill) quill.setContents([]);
+  document.getElementById('imgUploadStatus').textContent='Upload PNG, JPG, or WEBP — multiple allowed';
 }
+
+// close on backdrop click
+document.getElementById('editorOverlay').addEventListener('click', e=>{
+  if(e.target === document.getElementById('editorOverlay')) closeEditor();
+});
+
+// ── Image upload handler ───────────────────────────────────────────────
+document.getElementById('imgFileInput').addEventListener('change', async function(){
+  const files = Array.from(this.files);
+  if(!files.length) return;
+  const status = document.getElementById('imgUploadStatus');
+  status.textContent = `Uploading ${files.length} image(s)…`;
+  let done = 0;
+  for(const file of files){
+    const fd = new FormData();
+    fd.append('image', file);
+    try{
+      const r = await fetch('/api/ideas/upload-image', {method:'POST', body: fd});
+      const d = await r.json();
+      if(d.url && quill){
+        const range = quill.getSelection(true);
+        quill.insertEmbed(range ? range.index : quill.getLength(), 'image', d.url);
+        quill.setSelection((range ? range.index : quill.getLength()) + 1);
+      }
+      done++;
+      status.textContent = `Uploaded ${done}/${files.length}…`;
+    }catch(err){
+      status.textContent = `Failed to upload ${file.name}`;
+    }
+  }
+  status.textContent = `${done} image(s) inserted into the editor`;
+  this.value = '';
+});
 
 async function submitPost(){
-  const title=document.getElementById('f_title').value.trim();
-  const content=document.getElementById('f_content').value.trim();
-  if(!title||!content){alert('Title and analysis are required');return;}
-  const btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Posting…';
+  const title = document.getElementById('f_title').value.trim();
+  const content = quill ? quill.root.innerHTML.trim() : '';
+  if(!title){ alert('Please add a title'); return; }
+  if(!quill || quill.getText().trim().length < 10){ alert('Please write some analysis'); return; }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Publishing…';
   try{
-    const isIdea=SECTION==='ideas';
-    const payload=isIdea?{title,content,excerpt:document.getElementById('f_excerpt').value.trim(),instrument:document.getElementById('f_instrument').value.trim()||'XAUUSD',direction:document.getElementById('f_direction').value,image_url:document.getElementById('f_image').value.trim()||null}:{title,content,excerpt:document.getElementById('f_excerpt').value.trim(),tag:document.getElementById('f_tag').value,image_url:document.getElementById('f_image').value.trim()||null};
-    const ep=isIdea?'/api/ideas':'/api/blog-posts';
-    const r=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    const p=await r.json();if(p.error){alert(p.error);return;}
-    closeModal();loadFeed();
-  }finally{btn.disabled=false;btn.textContent='Post';}
+    const payload = {
+      title,
+      content,
+      excerpt: document.getElementById('f_excerpt').value.trim(),
+      instrument: document.getElementById('f_instrument').value.trim() || 'XAUUSD',
+      direction: document.getElementById('f_direction').value,
+    };
+    const r = await fetch('/api/ideas', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const p = await r.json();
+    if(p.error){ alert(p.error); return; }
+    closeEditor();
+    loadFeed();
+  }finally{
+    btn.disabled = false; btn.textContent = 'Publish Idea';
+  }
 }
-
-document.getElementById('postModal').addEventListener('click',e=>{if(e.target===document.getElementById('postModal'))closeModal();});
 
 function copyLink(id){
   const url=`${window.location.origin}/ideas?idea=${id}`;
@@ -539,6 +661,6 @@ document.addEventListener('click', e => {
 })();
 </script>
 <!-- ── END CONTACT PANEL ──────────────────────── -->
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 </body>
 </html>

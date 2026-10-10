@@ -811,10 +811,6 @@ ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL","nikhiljha97@yahoo.com")
 def is_admin():
     return current_user.is_authenticated and current_user.email == ADMIN_EMAIL
 
-@app.route("/blog-posts")
-def blog_posts_page():
-    return render_template("community.html", section="blog")
-
 @app.route("/ideas")
 def ideas_page():
     return render_template("community.html", section="ideas")
@@ -898,11 +894,28 @@ def get_ideas():
     uid = current_user.id if current_user.is_authenticated else None
     return jsonify([i.to_dict(uid) for i in ideas])
 
+@app.route("/api/ideas/upload-image", methods=["POST"])
+@login_required
+def upload_idea_image():
+    """Upload a single image for the rich editor; returns {url}."""
+    if "image" not in request.files:
+        return jsonify({"error": "No image"}), 400
+    try:
+        url = _upload_image(request.files["image"])
+        return jsonify({"url": url})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/ideas", methods=["POST"])
 @login_required
 def create_idea():
     d = request.json
-    idea = TradeIdea(author_id=current_user.id,title=d.get("title",""),instrument=d.get("instrument","").upper(),direction=d.get("direction","Neutral"),content=d.get("content",""),image_url=d.get("image_url"))
+    content_html = d.get("content", "")
+    # Extract first <img src="..."> from HTML as the preview image_url
+    import re as _re
+    first_img = _re.search(r'<img[^>]+src=["\']([^"\']+)["\']', content_html)
+    preview_img = first_img.group(1) if first_img else d.get("image_url")
+    idea = TradeIdea(author_id=current_user.id,title=d.get("title",""),instrument=d.get("instrument","").upper(),direction=d.get("direction","Neutral"),content=content_html,image_url=preview_img)
     db.session.add(idea); db.session.commit()
     try:
         _send_idea_notifications(idea, current_user)
