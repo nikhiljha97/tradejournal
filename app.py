@@ -972,14 +972,103 @@ def create_idea():
         print(f"Notification error: {e}")
     return jsonify(idea.to_dict(current_user.id))
 
+def _ai_idea_summary(idea):
+    """Call Groq to get a structured trade summary. Returns a dict or None on failure."""
+    from html.parser import HTMLParser
+    class _Strip(HTMLParser):
+        def __init__(self): super().__init__(); self._p = []
+        def handle_data(self, d): self._p.append(d)
+        def text(self): return " ".join(self._p)
+    s = _Strip(); s.feed(idea.content or ""); plain = " ".join(s.text().split())[:4000]
+    prompt = (
+        f"You are a professional trading analyst. Read the trade plan below and return ONLY valid JSON:\n\n"
+        f'{{"bias":"Bullish or Bearish","entry":"price or range","tp":"take-profit price","sl":"stop-loss price",'
+        f'"invalidation":"one sentence on what invalidates the setup","confidence":"percentage 40-85%",'
+        f'"confidence_reasoning":"2-3 sentences on R:R, setup type win-rate, statistical basis"}}\n\n'
+        f"Instrument: {idea.instrument}\nDirection: {idea.direction}\n\nTrade plan:\n{plain}\n\n"
+        f"Return ONLY the JSON. No markdown, no extra text."
+    )
+    try:
+        from groq import Groq
+        import json as _j
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
+        resp = client.chat.completions.create(
+            model="qwen/qwen3.8-27b", max_tokens=500, temperature=0.2,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw = resp.choices[0].message.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.strip()
+        return _j.loads(raw)
+    except Exception as e:
+        print(f"AI summary for email failed: {e}")
+        return None
+
 def _send_idea_notifications(idea, author):
     import threading
     def send():
         try:
             dir_emoji = "Bullish" if idea.direction=="Long" else "Bearish" if idea.direction=="Short" else "Neutral"
-            dir_icon  = "📈" if idea.direction=="Long" else "📉" if idea.direction=="Short" else "↔"
-            bg_color  = "rgba(0,229,160,.1)" if idea.direction=="Long" else "rgba(255,71,87,.1)" if idea.direction=="Short" else "rgba(90,112,128,.15)"
-            txt_color = "#00e5a0" if idea.direction=="Long" else "#ff4757" if idea.direction=="Short" else "#5a7080"
+            dir_icon  = "Long" if idea.direction=="Long" else "Short" if idea.direction=="Short" else "Neutral"
+            dir_label = "Bullish (Long)" if idea.direction=="Long" else "Bearish (Short)" if idea.direction=="Short" else "Neutral"
+            badge_bg  = "#d1fae5" if idea.direction=="Long" else "#fee2e2" if idea.direction=="Short" else "#f3f4f6"
+            badge_txt = "#065f46" if idea.direction=="Long" else "#991b1b" if idea.direction=="Short" else "#374151"
+            bias_color= "#00a86b" if idea.direction=="Long" else "#dc2626" if idea.direction=="Short" else "#6b7280"
+
+            # Generate AI summary once — used in every subscriber email
+            ai = _ai_idea_summary(idea)
+
+            # Canonical post URL
+            post_slug = re.sub(r"[^a-z0-9]+", "-", idea.title.lower()).strip("-")
+            post_url  = f"{_SITE_URL}/ideas/{idea.id}/{post_slug}"
+
+            # Plain-text excerpt from HTML
+            from html.parser import HTMLParser
+            class _Strip(HTMLParser):
+                def __init__(self): super().__init__(); self._p = []
+                def handle_data(self, d): self._p.append(d)
+                def text(self): return " ".join(self._p)
+            s = _Strip(); s.feed(idea.content or "")
+            plain_preview = " ".join(s.text().split())[:220]
+            if len(" ".join(s.text().split())) > 220: plain_preview += "..."
+
+            # Build AI summary HTML block
+            if ai:
+                conf_pct = int(str(ai.get("confidence","0%")).replace("%","").strip() or "0")
+                conf_bar_width = min(max(conf_pct, 0), 100)
+                ai_block = (
+                    f'<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px 20px;margin:20px 0">'
+                    f'<div style="font-size:11px;font-weight:700;color:#065f46;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px">AI Trade Summary</div>'
+                    f'<table style="width:100%;border-collapse:collapse;margin-bottom:12px"><tr>'
+                    f'<td style="padding:8px 10px;background:#fff;border:1px solid #d1fae5;border-radius:6px 0 0 6px;text-align:center">'
+                    f'<div style="font-size:10px;color:#6b7280;margin-bottom:2px">BIAS</div>'
+                    f'<div style="font-size:14px;font-weight:800;color:{bias_color}">{ai.get("bias","N/A")}</div></td>'
+                    f'<td style="padding:8px 10px;background:#fff;border:1px solid #d1fae5;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;text-align:center">'
+                    f'<div style="font-size:10px;color:#6b7280;margin-bottom:2px">ENTRY</div>'
+                    f'<div style="font-size:14px;font-weight:800;color:#111827">{ai.get("entry","N/A")}</div></td>'
+                    f'<td style="padding:8px 10px;background:#fff;border:1px solid #d1fae5;border-top:1px solid #d1fae5;border-bottom:1px solid #d1fae5;text-align:center">'
+                    f'<div style="font-size:10px;color:#6b7280;margin-bottom:2px">TP</div>'
+                    f'<div style="font-size:14px;font-weight:800;color:#059669">{ai.get("tp","N/A")}</div></td>'
+                    f'<td style="padding:8px 10px;background:#fff;border:1px solid #d1fae5;border-radius:0 6px 6px 0;text-align:center">'
+                    f'<div style="font-size:10px;color:#6b7280;margin-bottom:2px">SL</div>'
+                    f'<div style="font-size:14px;font-weight:800;color:#dc2626">{ai.get("sl","N/A")}</div></td>'
+                    f'</tr></table>'
+                    f'<div style="margin-bottom:10px"><span style="font-size:11px;font-weight:700;color:#374151">Invalidation: </span>'
+                    f'<span style="font-size:12px;color:#6b7280">{ai.get("invalidation","N/A")}</span></div>'
+                    f'<div style="margin-bottom:6px;display:flex;justify-content:space-between">'
+                    f'<span style="font-size:11px;font-weight:700;color:#374151">Confidence</span>'
+                    f'<span style="font-size:11px;font-weight:700;color:{bias_color}">{ai.get("confidence","N/A")}</span></div>'
+                    f'<div style="height:6px;background:#d1fae5;border-radius:3px;overflow:hidden;margin-bottom:10px">'
+                    f'<div style="height:100%;width:{conf_bar_width}%;background:#00a86b;border-radius:3px"></div></div>'
+                    f'<div style="font-size:11px;color:#6b7280;line-height:1.6">{ai.get("confidence_reasoning","")}</div>'
+                    f'<div style="font-size:10px;color:#9ca3af;margin-top:10px;font-style:italic">AI analysis only. Not financial advice.</div>'
+                    f'</div>'
+                )
+            else:
+                ai_block = ""
+
             subscribers = User.query.filter_by(idea_notifications=True).all()
             for user in subscribers:
                 if user.id == author.id:
@@ -988,27 +1077,35 @@ def _send_idea_notifications(idea, author):
                     user.notif_token = secrets.token_urlsafe(32)
                     db.session.commit()
                 unsub_url = f"{_SITE_URL}/unsubscribe/{user.notif_token}"
-                preview   = (idea.content or "")[:200] + ("..." if len(idea.content or "") > 200 else "")
-                dir_label = "Bullish (Long)" if idea.direction=="Long" else "Bearish (Short)" if idea.direction=="Short" else "Neutral"
-                badge_bg  = "#d1fae5" if idea.direction=="Long" else "#fee2e2" if idea.direction=="Short" else "#f3f4f6"
-                badge_txt = "#065f46" if idea.direction=="Long" else "#991b1b" if idea.direction=="Short" else "#374151"
                 html_body = _email_wrap(
                     f'<p style="font-size:11px;font-weight:700;color:#00a86b;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">New Trade Idea</p>'
-                    f'<h2>{idea.title}</h2>'
-                    f'<div style="margin-bottom:16px">'
+                    f'<h2 style="margin:0 0 10px;font-size:20px;color:#111827">{idea.title}</h2>'
+                    f'<div style="margin-bottom:14px">'
                     f'<span style="background:#ecfdf5;color:#065f46;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px;margin-right:6px">{idea.instrument}</span>'
-                    f'<span style="background:{badge_bg};color:{badge_txt};font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px">{dir_icon} {dir_emoji}</span>'
+                    f'<span style="background:{badge_bg};color:{badge_txt};font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px">{dir_icon} &mdash; {dir_emoji}</span>'
                     f'</div>'
-                    f'<p>{preview}</p>'
-                    f'<a href="{_SITE_URL}/ideas" class="btn">View Trade Idea</a>'
+                    f'<p style="color:#374151;font-size:14px;line-height:1.7">{plain_preview}</p>'
+                    f'{ai_block}'
+                    f'<a href="{post_url}" class="btn" style="display:inline-block;background:#00a86b;color:#fff;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;text-decoration:none;margin:4px 0">Read Full Analysis</a>'
                     f'<p class="muted" style="margin-top:20px">Posted by <strong>{author.username}</strong> on TradeJournal &mdash; '
                     f'<a href="{unsub_url}" style="color:#6b7280">Unsubscribe</a></p>'
                 )
                 text_body = (
                     f"New Trade Idea on TradeJournal\n\n"
                     f"{idea.title}\n{idea.instrument} — {dir_label}\n\n"
-                    f"{preview}\n\n"
-                    f"View it here: {_SITE_URL}/ideas\n\n"
+                    f"{plain_preview}\n\n"
+                )
+                if ai:
+                    text_body += (
+                        f"--- AI SUMMARY ---\n"
+                        f"Bias: {ai.get('bias','N/A')}\n"
+                        f"Entry: {ai.get('entry','N/A')} | TP: {ai.get('tp','N/A')} | SL: {ai.get('sl','N/A')}\n"
+                        f"Invalidation: {ai.get('invalidation','N/A')}\n"
+                        f"Confidence: {ai.get('confidence','N/A')}\n"
+                        f"{ai.get('confidence_reasoning','')}\n\n"
+                    )
+                text_body += (
+                    f"Read the full analysis: {post_url}\n\n"
                     f"Posted by {author.username}\n"
                     f"Unsubscribe: {unsub_url}"
                 )
