@@ -1,0 +1,16 @@
+# Exclude everything that doesn't need to be in the container.
+# Smaller build context = faster upload to Render's builder.
+
+.git
+.gitignore
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.log
+.DS_Store
+static/uploads/
+node_modules/
+*.md
