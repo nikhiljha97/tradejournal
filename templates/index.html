@@ -349,7 +349,13 @@
             </select>
           </div>
         </div>
-        <div class="field"><label>Lot size</label><input type="number" step="any" min="0" id="f_lots" class="num" oninput="recalc()"></div>
+        <div class="field">
+          <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span>Lot size</span>
+            <button type="button" onclick="openLotCalc()" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;border:1px solid var(--green);background:rgba(0,229,160,.08);color:var(--green);cursor:pointer;letter-spacing:.03em">⚡ Calc</button>
+          </label>
+          <input type="number" step="any" min="0" id="f_lots" class="num" oninput="recalc()">
+        </div>
 
         <p class="form-section">Prices</p>
         <div class="row3">
@@ -617,6 +623,259 @@ document.addEventListener('click', e => {
 })();
 </script>
 <!-- ── END CONTACT PANEL ──────────────────────── -->
+
+<!-- ── LOT SIZE CALCULATOR DRAWER ─────────────── -->
+<style>
+#lc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;opacity:0;pointer-events:none;transition:opacity .25s}
+#lc-overlay.lc-open{opacity:1;pointer-events:all}
+#lc-drawer{position:fixed;top:0;right:0;height:100%;width:380px;max-width:95vw;background:var(--panel,#111820);border-left:1px solid var(--border,#1c2b3a);z-index:8001;transform:translateX(110%);transition:transform .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;display:flex;flex-direction:column}
+#lc-drawer.lc-open{transform:translateX(0)}
+.lc-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border,#1c2b3a);flex-shrink:0}
+.lc-hdr h3{font-size:15px;font-weight:800;color:#fff;margin:0}
+.lc-close{background:none;border:none;color:var(--muted,#5a7080);font-size:20px;cursor:pointer;line-height:1;padding:0}
+.lc-body{padding:20px;flex:1}
+.lc-use{width:100%;padding:13px;background:var(--green,#00e5a0);color:#000;font-weight:800;font-size:14px;border:none;border-radius:10px;cursor:pointer;margin-top:16px;letter-spacing:.02em}
+.lc-use:hover{opacity:.88}
+/* reuse rsk-* classes from blog calc */
+.lc-body .rsk-wrap{background:transparent;border:none;border-radius:0;padding:0;margin:0;max-width:100%}
+.lc-body .rsk-row{margin-bottom:14px}
+.lc-body .rsk-lbl{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted,#5a7080);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.lc-body .rsk-lbl span{color:var(--text,#d4dde8);font-weight:800;font-size:13px;text-transform:none;letter-spacing:0}
+.lc-body .rsk-slider{width:100%;-webkit-appearance:none;appearance:none;height:3px;border-radius:2px;background:var(--border,#1c2b3a);outline:none;cursor:pointer;margin:6px 0}
+.lc-body .rsk-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--green,#00e5a0);cursor:pointer}
+.lc-body .rsk-input{width:100%;background:rgba(0,0,0,.25);color:var(--text,#d4dde8);border:1px solid var(--border,#1c2b3a);border-radius:8px;padding:8px 12px;font-size:15px;font-weight:700;font-family:inherit;outline:none;box-sizing:border-box}
+.lc-body .rsk-input:focus{border-color:var(--green,#00e5a0)}
+.lc-body .rsk-select{width:100%;background:rgba(0,0,0,.25);color:var(--text,#d4dde8);border:1px solid var(--border,#1c2b3a);border-radius:8px;padding:8px 12px;font-size:14px;font-weight:600;font-family:inherit;outline:none;cursor:pointer}
+.lc-body .rsk-toggle{display:flex;background:rgba(0,0,0,.2);border-radius:8px;padding:3px;gap:3px;margin-bottom:12px}
+.lc-body .rsk-toggle button{flex:1;padding:6px 0;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted,#5a7080);transition:.15s;font-family:inherit}
+.lc-body .rsk-toggle button.rsk-act{background:var(--green,#00e5a0);color:#000}
+.lc-body .rsk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.lc-body .rsk-card{background:rgba(0,0,0,.2);border:1px solid var(--border,#1c2b3a);border-radius:10px;padding:12px}
+.lc-body .rsk-card-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted,#5a7080);margin-bottom:3px}
+.lc-body .rsk-card-val{font-size:18px;font-weight:800}
+.lc-body .rsk-card-sub{font-size:10px;color:var(--muted,#5a7080);margin-top:2px}
+.lc-body .rsk-bar{grid-column:1/-1}
+.lc-body .rsk-warn{background:rgba(224,80,80,.08);border:1px solid rgba(224,80,80,.25);border-radius:8px;padding:8px 12px;font-size:11px;color:#e05050;margin-top:6px;display:none}
+.lc-body .rsk-check{border-left:3px solid var(--green,#00e5a0);background:rgba(0,0,0,.15);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:10px;font-size:11px;color:var(--muted,#5a7080);line-height:1.7}
+.lc-body .rsk-check strong{color:var(--text,#d4dde8)}
+</style>
+
+<div id="lc-overlay" onclick="closeLotCalc()"></div>
+<div id="lc-drawer">
+  <div class="lc-hdr">
+    <h3>⚡ Lot Size Calculator</h3>
+    <button class="lc-close" onclick="closeLotCalc()">✕</button>
+  </div>
+  <div class="lc-body">
+    <div class="rsk-wrap">
+      <div class="rsk-row">
+        <div class="rsk-lbl">Instrument</div>
+        <select class="rsk-select" id="lc_inst">
+          <option value="XAUUSD">XAUUSD — Gold</option>
+          <option value="EURUSD">EUR/USD</option>
+          <option value="GBPUSD">GBP/USD</option>
+          <option value="USDJPY">USD/JPY</option>
+          <option value="GBPJPY">GBP/JPY</option>
+          <option value="AUDUSD">AUD/USD</option>
+          <option value="USDCAD">USD/CAD</option>
+          <option value="NQ">NQ — Nasdaq Futures</option>
+          <option value="ES">ES — S&amp;P 500 Futures</option>
+          <option value="YM">YM — Dow Futures</option>
+          <option value="BTCUSD">BTC/USD</option>
+          <option value="ETHUSD">ETH/USD</option>
+        </select>
+      </div>
+      <div class="rsk-row">
+        <div class="rsk-lbl">Account Balance <span id="lc_bal_l">$10,000</span></div>
+        <input class="rsk-input" type="number" id="lc_bal" value="10000" min="100" max="2000000" step="500"/>
+      </div>
+      <div class="rsk-row">
+        <div class="rsk-lbl">Risk per Trade <span id="lc_pct_l">1.00%</span></div>
+        <input class="rsk-slider" type="range" id="lc_pct" min="0.1" max="5" step="0.1" value="1"/>
+      </div>
+      <div class="rsk-row">
+        <div class="rsk-lbl">Stop Loss Distance <span id="lc_sl_l">20 pips</span></div>
+        <input class="rsk-input" type="number" id="lc_sl" value="20" min="1" max="50000" step="1"/>
+      </div>
+      <div class="rsk-row">
+        <div class="rsk-lbl">Take Profit Mode</div>
+        <div class="rsk-toggle">
+          <button id="lc_btn_pct" class="rsk-act" onclick="lcMode('pct')">% of Balance</button>
+          <button id="lc_btn_rr" onclick="lcMode('rr')">R:R Ratio</button>
+        </div>
+        <div id="lc_pct_row">
+          <div class="rsk-lbl">Take Profit <span id="lc_tp_pct_l">2.00% of balance</span></div>
+          <input class="rsk-slider" type="range" id="lc_tp_pct" min="0.1" max="20" step="0.1" value="2"/>
+        </div>
+        <div id="lc_rr_row" style="display:none">
+          <div class="rsk-lbl">R:R Ratio <span id="lc_tp_rr_l">2.0 : 1</span></div>
+          <input class="rsk-slider" type="range" id="lc_tp_rr" min="0.5" max="10" step="0.5" value="2"/>
+        </div>
+      </div>
+      <div class="rsk-grid">
+        <div class="rsk-card rsk-bar">
+          <div class="rsk-card-lbl">Lot Size</div>
+          <div class="rsk-card-val" id="lc_lot" style="color:var(--green,#00e5a0)">—</div>
+          <div class="rsk-card-sub" id="lc_lot_sub">—</div>
+          <div class="rsk-warn" id="lc_warn_min">Below 0.01 lots — reduce stop or increase balance.</div>
+          <div class="rsk-warn" id="lc_warn_frac">Futures need whole contracts. Round to nearest integer.</div>
+        </div>
+        <div class="rsk-card">
+          <div class="rsk-card-lbl">$ at Risk</div>
+          <div class="rsk-card-val" id="lc_risk_val" style="color:#e05050">—</div>
+          <div class="rsk-card-sub" id="lc_risk_sub">—</div>
+        </div>
+        <div class="rsk-card">
+          <div class="rsk-card-lbl">$ at Target</div>
+          <div class="rsk-card-val" id="lc_tp_val" style="color:var(--green,#00e5a0)">—</div>
+          <div class="rsk-card-sub" id="lc_tp_sub">—</div>
+        </div>
+        <div class="rsk-card">
+          <div class="rsk-card-lbl">R:R</div>
+          <div class="rsk-card-val" id="lc_rr_val">—</div>
+          <div class="rsk-card-sub" id="lc_rr_sub">—</div>
+        </div>
+        <div class="rsk-card">
+          <div class="rsk-card-lbl">TP Distance</div>
+          <div class="rsk-card-val" id="lc_tpdist">—</div>
+          <div class="rsk-card-sub" id="lc_tpdist_sub">—</div>
+        </div>
+      </div>
+      <div class="rsk-check" id="lc_check"></div>
+    </div>
+    <button class="lc-use" id="lc_use_btn" onclick="useLotSize()">Use this lot size</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var lcMode_val = 'pct';
+  var lcLastLots = 0;
+
+  var LC_CFG = {
+    XAUUSD:{pipVal:1.0, unit:'pip',   isFut:false, defSL:200},
+    EURUSD:{pipVal:10.0,unit:'pip',   isFut:false, defSL:30},
+    GBPUSD:{pipVal:10.0,unit:'pip',   isFut:false, defSL:35},
+    USDJPY:{pipVal:9.09,unit:'pip',   isFut:false, defSL:30},
+    GBPJPY:{pipVal:9.09,unit:'pip',   isFut:false, defSL:40},
+    AUDUSD:{pipVal:10.0,unit:'pip',   isFut:false, defSL:25},
+    USDCAD:{pipVal:10.0,unit:'pip',   isFut:false, defSL:25},
+    NQ:    {pipVal:20.0,unit:'pt',    isFut:true,  defSL:20},
+    ES:    {pipVal:50.0,unit:'pt',    isFut:true,  defSL:10},
+    YM:    {pipVal:5.0, unit:'pt',    isFut:true,  defSL:50},
+    BTCUSD:{pipVal:1.0, unit:'$ move',isFut:false, defSL:500},
+    ETHUSD:{pipVal:1.0, unit:'$ move',isFut:false, defSL:50},
+  };
+
+  function f(n,d){return n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});}
+
+  function lcRun(){
+    var bal  = Math.max(100, parseFloat(document.getElementById('lc_bal').value)||10000);
+    var rpct = parseFloat(document.getElementById('lc_pct').value);
+    var sl   = Math.max(1,   parseFloat(document.getElementById('lc_sl').value)||20);
+    var inst = document.getElementById('lc_inst').value;
+    var cfg  = LC_CFG[inst] || LC_CFG.XAUUSD;
+    var dRisk = bal*(rpct/100);
+    var lots  = dRisk/(sl*cfg.pipVal);
+    lcLastLots = lots;
+    var dTP,tpPips,rr;
+    if(lcMode_val==='pct'){
+      var tpPct=parseFloat(document.getElementById('lc_tp_pct').value);
+      dTP=bal*(tpPct/100); tpPips=lots>0?dTP/(lots*cfg.pipVal):0; rr=dRisk>0?dTP/dRisk:0;
+      document.getElementById('lc_tp_pct_l').textContent=f(tpPct,2)+'% of balance';
+    } else {
+      rr=parseFloat(document.getElementById('lc_tp_rr').value);
+      dTP=dRisk*rr; tpPips=sl*rr;
+      document.getElementById('lc_tp_rr_l').textContent=f(rr,1)+' : 1';
+    }
+    var unit=cfg.unit, lotLabel=cfg.isFut?'contract':'lot';
+    document.getElementById('lc_pct_l').textContent=f(rpct,2)+'%';
+    document.getElementById('lc_bal_l').textContent='$'+f(bal,0);
+    document.getElementById('lc_sl_l').textContent=f(sl,0)+' '+unit+(sl!==1?'s':'');
+    var lotDisp=lots<0.001?'< 0.001':f(lots,2);
+    document.getElementById('lc_lot').textContent=lotDisp+' '+(lots!==1?lotLabel+'s':lotLabel);
+    document.getElementById('lc_lot_sub').textContent=cfg.isFut?
+      '$'+f(cfg.pipVal,0)+' per pt/contract':
+      f(lots*10,1)+' mini · '+f(lots*100,0)+' micro';
+    document.getElementById('lc_warn_min').style.display=(!cfg.isFut&&lots<0.01)?'block':'none';
+    document.getElementById('lc_warn_frac').style.display=(cfg.isFut&&lots%1!==0)?'block':'none';
+    document.getElementById('lc_risk_val').textContent='-$'+f(dRisk,2);
+    document.getElementById('lc_risk_sub').textContent=f(rpct,2)+'% of $'+f(bal,0);
+    document.getElementById('lc_tp_val').textContent='+$'+f(dTP,2);
+    document.getElementById('lc_tp_sub').textContent=f((dTP/bal)*100,2)+'% of balance';
+    var rrE=document.getElementById('lc_rr_val');
+    rrE.textContent='1 : '+f(rr,1);
+    rrE.style.color=rr>=2?'var(--green)':rr>=1?'#d68910':'#e05050';
+    document.getElementById('lc_rr_sub').textContent=rr>=2?'Healthy':rr>=1?'Minimal':'Below break-even';
+    document.getElementById('lc_tpdist').textContent=f(tpPips,0)+' '+unit+(tpPips!==1?'s':'');
+    document.getElementById('lc_tpdist_sub').textContent='at '+f(lots,2)+' '+lotLabel;
+    var col,msg,chk=document.getElementById('lc_check');
+    if(rpct>2){col='#e05050';msg='<strong>Risky for prop firms.</strong> Three losers = '+f(rpct*3,2)+'% drawdown.';}
+    else if(rpct>1){col='#d68910';msg='<strong>Caution.</strong> Two losers and you approach most daily loss limits.';}
+    else{col='var(--green)';msg='<strong>Prop firm safe.</strong> Three losers only costs '+f(rpct*3,2)+'% — within FTMO / Funded Next daily limits.';}
+    chk.style.borderLeftColor=col; chk.innerHTML=msg;
+    document.getElementById('lc_use_btn').textContent='Use '+f(Math.max(0,lots),2)+' lots';
+  }
+
+  window.lcMode=function(m){
+    lcMode_val=m;
+    document.getElementById('lc_btn_pct').classList.toggle('rsk-act',m==='pct');
+    document.getElementById('lc_btn_rr').classList.toggle('rsk-act',m==='rr');
+    document.getElementById('lc_pct_row').style.display=m==='pct'?'':'none';
+    document.getElementById('lc_rr_row').style.display=m==='rr'?'':'none';
+    lcRun();
+  };
+
+  window.openLotCalc=function(){
+    // Auto-populate instrument from trade form
+    var inst=(document.getElementById('f_instrument')||{}).value||'';
+    inst=inst.toUpperCase().replace('/','');
+    if(LC_CFG[inst]){
+      document.getElementById('lc_inst').value=inst;
+      // Auto-compute SL distance from entry/stop fields
+      var entry=parseFloat((document.getElementById('f_entry')||{}).value)||0;
+      var stop=parseFloat((document.getElementById('f_stop')||{}).value)||0;
+      if(entry>0&&stop>0){
+        var dist=Math.abs(entry-stop);
+        // Convert to pips for forex (multiply by 10000), keep as-is for gold/futures
+        if(inst==='XAUUSD'||inst.includes('NQ')||inst.includes('ES')||inst.includes('YM')||inst.includes('BTC')||inst.includes('ETH')){
+          document.getElementById('lc_sl').value=Math.round(dist)||LC_CFG[inst].defSL;
+        } else {
+          document.getElementById('lc_sl').value=Math.round(dist*10000)||LC_CFG[inst].defSL;
+        }
+      } else {
+        document.getElementById('lc_sl').value=LC_CFG[inst].defSL;
+      }
+    }
+    lcRun();
+    document.getElementById('lc-overlay').classList.add('lc-open');
+    document.getElementById('lc-drawer').classList.add('lc-open');
+  };
+
+  window.closeLotCalc=function(){
+    document.getElementById('lc-overlay').classList.remove('lc-open');
+    document.getElementById('lc-drawer').classList.remove('lc-open');
+  };
+
+  window.useLotSize=function(){
+    var lots=Math.max(0,lcLastLots);
+    var el=document.getElementById('f_lots');
+    if(el){el.value=parseFloat(lots.toFixed(2));el.dispatchEvent(new Event('input'));}
+    closeLotCalc();
+  };
+
+  ['lc_bal','lc_pct','lc_sl','lc_tp_pct','lc_tp_rr'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',lcRun);
+  });
+  document.getElementById('lc_inst').addEventListener('change',function(){
+    var cfg=LC_CFG[this.value];
+    if(cfg)document.getElementById('lc_sl').value=cfg.defSL;
+    lcRun();
+  });
+  lcRun();
+})();
+</script>
+<!-- ── END LOT SIZE CALCULATOR DRAWER ─────────── -->
 
 </body>
 </html>
