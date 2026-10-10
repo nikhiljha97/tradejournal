@@ -202,5 +202,116 @@
     <a href="/register">Sign Up Free</a>
   </p>
 </footer>
+
+<!-- ── AI SUMMARIZER BUTTON ── -->
+<style>
+  @keyframes pulse-ring{0%{transform:scale(.8);opacity:.7}70%{transform:scale(1.5);opacity:0}100%{transform:scale(1.5);opacity:0}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  #ai-fab{position:fixed;left:24px;bottom:32px;z-index:5000;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px}
+  #ai-fab-ring{position:absolute;width:56px;height:56px;border-radius:50%;background:rgba(0,229,160,.35);animation:pulse-ring 2s ease-out infinite}
+  #ai-fab-btn{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#00e5a0,#00a87a);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(0,229,160,.5);animation:bob 2.5s ease-in-out infinite;position:relative;z-index:1}
+  #ai-fab-label{font-size:10px;font-weight:700;color:var(--green);letter-spacing:.06em;text-align:center;text-transform:uppercase;background:var(--panel);padding:3px 8px;border-radius:4px;border:1px solid rgba(0,229,160,.3);white-space:nowrap}
+  #ai-drawer{position:fixed;left:0;bottom:0;width:100%;max-width:520px;background:var(--panel);border:1px solid var(--border);border-bottom:none;border-radius:16px 16px 0 0;padding:24px 24px 28px;z-index:6000;transform:translateY(110%);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:0 -8px 40px rgba(0,0,0,.6)}
+  #ai-drawer.open{transform:translateY(0)}
+  .ai-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .ai-block{flex:1;min-width:120px;background:var(--faint);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .ai-block-label{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .ai-block-val{font-size:15px;font-weight:800;color:#fff}
+  .ai-block-val.bull{color:var(--green)}.ai-block-val.bear{color:#ff5757}
+  .ai-conf-bar{height:6px;background:var(--border);border-radius:3px;margin-top:8px;overflow:hidden}
+  .ai-conf-fill{height:100%;background:linear-gradient(90deg,#f59e0b,var(--green));border-radius:3px;transition:width .6s ease}
+  #ai-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1}
+  #ai-close:hover{color:var(--text)}
+</style>
+
+<div id="ai-fab" onclick="toggleAI()">
+  <div id="ai-fab-ring"></div>
+  <button id="ai-fab-btn" title="AI Summary">&#129302;</button>
+  <div id="ai-fab-label">Summarise for me</div>
+</div>
+
+<div id="ai-drawer">
+  <button id="ai-close" onclick="toggleAI()">&times;</button>
+  <div style="font-size:13px;font-weight:700;color:var(--green);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px">&#129302; AI Trade Summary</div>
+  <div id="ai-body">
+    <div id="ai-loading" style="text-align:center;padding:20px 0;color:var(--muted);font-size:14px">
+      <div style="font-size:28px;margin-bottom:10px">&#8987;</div>
+      Analysing trade plan...
+    </div>
+    <div id="ai-result" style="display:none">
+      <div class="ai-row">
+        <div class="ai-block">
+          <div class="ai-block-label">Weekly Bias</div>
+          <div class="ai-block-val" id="ai-bias"></div>
+        </div>
+        <div class="ai-block">
+          <div class="ai-block-label">Entry</div>
+          <div class="ai-block-val" id="ai-entry"></div>
+        </div>
+        <div class="ai-block">
+          <div class="ai-block-label">TP</div>
+          <div class="ai-block-val" id="ai-tp" style="color:var(--green)"></div>
+        </div>
+        <div class="ai-block">
+          <div class="ai-block-label">SL</div>
+          <div class="ai-block-val" id="ai-sl" style="color:#ff5757"></div>
+        </div>
+      </div>
+      <div class="ai-block" style="margin-bottom:12px">
+        <div class="ai-block-label">Invalidation</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.6;margin-top:4px" id="ai-inval"></div>
+      </div>
+      <div class="ai-block">
+        <div class="ai-block-label" style="display:flex;justify-content:space-between"><span>Confidence</span><span id="ai-conf-pct" style="color:var(--green)"></span></div>
+        <div class="ai-conf-bar" style="margin-top:8px"><div class="ai-conf-fill" id="ai-conf-bar" style="width:0%"></div></div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px" id="ai-conf-reason"></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:12px;text-align:center">AI analysis only. Not financial advice. Verify all levels independently.</div>
+    </div>
+    <div id="ai-error" style="display:none;text-align:center;padding:16px;color:#ff5757;font-size:13px"></div>
+  </div>
+</div>
+
+<script>
+var _aiLoaded = false;
+var _drawerOpen = false;
+var IDEA_ID = {{ idea.id }};
+
+function toggleAI(){
+  _drawerOpen = !_drawerOpen;
+  document.getElementById('ai-drawer').classList.toggle('open', _drawerOpen);
+  if(_drawerOpen && !_aiLoaded) fetchSummary();
+}
+
+async function fetchSummary(){
+  try{
+    const r = await fetch('/api/ideas/' + IDEA_ID + '/summarize');
+    const d = await r.json();
+    document.getElementById('ai-loading').style.display = 'none';
+    if(!d.ok){
+      document.getElementById('ai-error').style.display='block';
+      document.getElementById('ai-error').textContent = 'Could not generate summary. Try again later.';
+      return;
+    }
+    _aiLoaded = true;
+    const biasEl = document.getElementById('ai-bias');
+    biasEl.textContent = d.bias || 'N/A';
+    biasEl.className = 'ai-block-val ' + ((d.bias||'').toLowerCase().includes('bull') ? 'bull' : 'bear');
+    document.getElementById('ai-entry').textContent = d.entry || 'N/A';
+    document.getElementById('ai-tp').textContent = d.tp || 'N/A';
+    document.getElementById('ai-sl').textContent = d.sl || 'N/A';
+    document.getElementById('ai-inval').textContent = d.invalidation || 'N/A';
+    const pct = parseInt((d.confidence||'0').replace('%',''));
+    document.getElementById('ai-conf-pct').textContent = d.confidence || '';
+    document.getElementById('ai-conf-reason').textContent = d.confidence_reasoning || '';
+    setTimeout(()=>{ document.getElementById('ai-conf-bar').style.width = pct + '%'; }, 200);
+    document.getElementById('ai-result').style.display = 'block';
+  }catch(e){
+    document.getElementById('ai-loading').style.display = 'none';
+    document.getElementById('ai-error').style.display = 'block';
+    document.getElementById('ai-error').textContent = 'Network error. Please try again.';
+  }
+}
+</script>
 </body>
 </html>

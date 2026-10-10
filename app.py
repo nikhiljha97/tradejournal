@@ -1142,6 +1142,59 @@ def delete_idea(iid):
     db.session.delete(idea); db.session.commit()
     return jsonify({"ok":True})
 
+@app.route("/api/ideas/<int:iid>/summarize", methods=["GET"])
+def summarize_idea(iid):
+    """Call Groq to produce a 4-point trade summary for an idea post."""
+    idea = TradeIdea.query.get_or_404(iid)
+    # Strip HTML to plain text for the prompt
+    from html.parser import HTMLParser
+    class _Strip(HTMLParser):
+        def __init__(self): super().__init__(); self._p = []
+        def handle_data(self, d): self._p.append(d)
+        def text(self): return " ".join(self._p)
+    s = _Strip(); s.feed(idea.content or ""); plain = " ".join(s.text().split())
+    plain = plain[:4000]  # Groq token budget
+
+    prompt = f"""You are a professional trading analyst. Read the following trade plan and return ONLY valid JSON with these exact keys:
+
+{{
+  "bias": "one word: Bullish or Bearish",
+  "entry": "entry price as a number or range",
+  "tp": "take-profit price as a number or range",
+  "sl": "stop-loss price as a number",
+  "invalidation": "one sentence: what price action would invalidate this trade setup",
+  "confidence": "a percentage between 40-85%",
+  "confidence_reasoning": "2-3 sentences: explain the confidence using R:R ratio, historical win-rate for this setup type (OB/FVG/BOS etc), and any statistical basis such as expected value. Be specific about the setup quality."
+}}
+
+Trade plan content:
+{plain}
+
+Instrument: {idea.instrument}
+Direction: {idea.direction}
+
+Return ONLY the JSON object. No markdown, no explanation outside the JSON."""
+
+    try:
+        from groq import Groq
+        client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
+        resp = client.chat.completions.create(
+            model="qwen/qwen3.8-27b",
+            max_tokens=600,
+            temperature=0.2,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        raw = resp.choices[0].message.content.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"): raw = raw[4:]
+            raw = raw.strip()
+        import json as _json2
+        parsed = _json2.loads(raw)
+        return jsonify({"ok": True, **parsed})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 @app.route("/api/ideas/<int:iid>/like", methods=["POST"])
 @login_required
 def like_idea(iid):
