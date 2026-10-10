@@ -509,6 +509,14 @@ def public_prices():
 
     return jsonify(prices)
 
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
 @app.route("/blog")
 def blog_index():
     return render_template("blog.html", posts=sorted(POSTS, key=lambda p: p["date"], reverse=True), post=None)
