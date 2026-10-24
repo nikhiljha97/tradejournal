@@ -222,8 +222,11 @@ def _db_retry(fn, *args, **kwargs):
         return fn(*args, **kwargs)
     except _OpErr as e:
         msg = str(e).lower()
-        if any(kw in msg for kw in ("ssl", "connection", "closed", "broken")):
-            db.session.remove()
+        if any(kw in msg for kw in ("ssl", "connection", "closed", "broken", "bad record")):
+            try:
+                db.session.remove()   # may itself throw if rollback on dead conn fails — ignore
+            except Exception:
+                pass
             time.sleep(0.3)
             return fn(*args, **kwargs)
         raise
