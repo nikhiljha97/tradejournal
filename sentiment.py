@@ -2,7 +2,7 @@
 Sentiment engine v2 — neural models only, no lexicon.
 
 Priority chain:
-  1. GROQ_API_KEY → Groq llama-3.3-70b-versatile  (online LLM, best nuance + phrase attribution)
+  1. GROQ_API_KEY → Groq openai/gpt-oss-20b  (1000 t/s, fast + accurate for real-time sentiment)
   2. Offline       → FinBERT × Hartmann ensemble + trading-context signal boost
        ProsusAI/finbert                           : financial sentiment (pos/neg/neutral)
        j-hartmann/emotion-english-distilroberta   : 7 Ekman emotions
@@ -30,22 +30,34 @@ KNOWN_SETUPS = [
 ]
 
 GROQ_SYSTEM = (
-    "You are a trading psychology analyst AND setup classifier for futures and forex traders. "
-    "Analyze in-trade journal notes for psychological state AND identify trading setups mentioned. "
-    "Return ONLY valid JSON, no markdown, no prose.\n\n"
+    "You are an elite trading psychology coach and setup classifier for professional SMC/ICT traders.\n"
+    "Analyze in-trade journal notes for psychological state, plan quality, and setup context.\n"
+    "Return ONLY valid JSON — no markdown, no prose, no code fences.\n\n"
     "Schema:\n"
-    '{"emotions":["emotion1"],"score":0.0,"label":"3-5 word label",'
-    '"summary":"1 honest sentence ≤20 words",'
-    '"phrases":[{"phrase":"exact text","emotion":"which emotion"}],'
-    '"setups":["Setup Name"],'
-    '"setup_notes":"brief note on timeframe/context if mentioned"}\n\n'
+    '{\n'
+    '  "emotions": ["emotion1"],\n'
+    '  "score": 0.0,\n'
+    '  "label": "3-5 word label",\n'
+    '  "summary": "1 honest sentence 15-25 words describing mindset",\n'
+    '  "phrases": [{"phrase": "exact quote", "emotion": "emotion"}],\n'
+    '  "setups": ["Setup Name"],\n'
+    '  "setup_notes": "timeframe/context brief",\n'
+    '  "trade_readiness": 7,\n'
+    '  "coaching_tip": "1 specific actionable tip under 20 words",\n'
+    '  "violations": []\n'
+    '}\n\n'
     "Rules:\n"
-    f"- emotions: 0-4 from: {', '.join(KNOWN_EMOTIONS)}\n"
-    "- score: -1.0=revenge/tilt/FOMO/fear-driven  0=neutral  1.0=disciplined/patient/calm\n"
-    "- phrases: 1-3 exact quotes. [] if no notes.\n"
-    f"- setups: identify any from {KNOWN_SETUPS} OR extract custom ones (e.g. '4H OB', '15min FVG', 'Weekly OB')\n"
-    "- setup_notes: if trader mentions a timeframe (4H, 15min, 1H etc) with a setup, note it briefly (e.g. '4H FVG tap, 15min OB entry')\n"
-    "- Very short/empty text: score 0, [] emotions, label 'No notes', [] setups"
+    f"- emotions: 0-4 items from: {', '.join(KNOWN_EMOTIONS)}\n"
+    "- score: -1.0=revenge/tilt/FOMO/fear  0=neutral  1.0=disciplined/patient/calm\n"
+    "- label: 3-5 words, sentence case, captures the dominant state\n"
+    "- phrases: 1-3 EXACT verbatim quotes from the text that reveal psychology. [] if nothing notable.\n"
+    f"- setups: identify from {KNOWN_SETUPS} OR extract custom (e.g. '4H OB', '15min FVG', 'Weekly BOS')\n"
+    "- setup_notes: mention timeframe + setup context briefly (e.g. '4H OB confluence, 5min MSS entry')\n"
+    "- trade_readiness: integer 0-10. Score based on: plan clarity (0-4pts), emotional state (0-3pts), risk awareness (0-3pts). 8+ = ready, 5-7 = proceed carefully, <5 = do not trade\n"
+    "- coaching_tip: the single most important thing this trader should improve. Be specific. Not generic.\n"
+    "- violations: list any rule violations detected (e.g. 'no stop loss mentioned', 'trading out of session', 'sizing up after loss', 'no defined target'). [] if clean.\n"
+    "- If text is very short (<10 words) or empty: score 0, emotions [], label 'No notes', trade_readiness 0, coaching_tip 'Add notes before trading', violations [], setups []\n"
+    "- CRITICAL: respond only with the JSON object. Nothing before or after it."
 )
 
 # Hartmann Ekman label → trading emotion + minimum confidence threshold
@@ -133,8 +145,8 @@ def _groq(notes: str) -> dict:
     from groq import Groq
     client = Groq(api_key=os.environ["GROQ_API_KEY"])
     resp = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        max_tokens=600, temperature=0.1,
+        model="openai/gpt-oss-20b",
+        max_tokens=700, temperature=0.1,
         messages=[
             {"role":"system","content":GROQ_SYSTEM},
             {"role":"user","content":f"Analyze these trading notes:\n\n{notes}"},
@@ -153,16 +165,22 @@ def _groq(notes: str) -> dict:
         if isinstance(s, str) and s.strip():
             extracted_setups.append(s.strip())
     setup_notes = str(data.get("setup_notes", ""))[:200]
+    trade_readiness = int(max(0, min(10, data.get("trade_readiness", 0) or 0)))
+    coaching_tip = str(data.get("coaching_tip", ""))[:200]
+    violations = [str(v)[:100] for v in data.get("violations", []) if v][:5]
 
     return {
-        "emotions":     emotions,
-        "score":        _clamp(data.get("score", 0.0)),
-        "label":        str(data.get("label",""))[:100],
-        "summary":      str(data.get("summary",""))[:300],
-        "phrases":      phrases,
-        "source":       "groq",
-        "setups":       extracted_setups,
-        "setup_notes":  setup_notes,
+        "emotions":        emotions,
+        "score":           _clamp(data.get("score", 0.0)),
+        "label":           str(data.get("label",""))[:100],
+        "summary":         str(data.get("summary",""))[:300],
+        "phrases":         phrases,
+        "source":          "groq",
+        "setups":          extracted_setups,
+        "setup_notes":     setup_notes,
+        "trade_readiness": trade_readiness,
+        "coaching_tip":    coaching_tip,
+        "violations":      violations,
     }
 
 
@@ -238,8 +256,8 @@ def analyze(notes: str) -> dict:
     if os.environ.get("GROQ_API_KEY", "").strip():
         try:
             return _groq(notes)
-        except Exception:
-            pass   # fall through to offline on any error
+        except Exception as e:
+            return _empty("error", "Groq error", str(e)[:200])
     # Only attempt offline if models were pre-loaded successfully
     # (avoids surfacing 'No module named transformers' when the library isn't installed)
     if not _offline_ready:

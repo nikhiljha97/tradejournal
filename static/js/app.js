@@ -923,22 +923,31 @@ async function previewSentiment() {
       $('sentPreview').innerHTML=`<span style="color:var(--red)">${s.summary}</span>`;
       return;
     }
-    let html = `<b style="color:var(--${s.score>=0?'green':'red'})">${s.label}</b> (${s.score>0?'+':''}${s.score})<br>
-       <span style="color:var(--muted)">${s.summary||''}${s.emotions?.length?' · '+s.emotions.join(', '):''}</span>`;
+    const scoreColor = s.score >= 0.4 ? 'var(--green)' : s.score <= -0.3 ? 'var(--red)' : 'var(--yellow,#f5a623)';
+    const readiness = s.trade_readiness ?? 0;
+    const readinessColor = readiness >= 8 ? 'var(--green)' : readiness >= 5 ? 'var(--yellow,#f5a623)' : 'var(--red)';
+    const readinessBar = readiness > 0
+      ? `<span style="display:inline-flex;gap:2px;vertical-align:middle;margin-left:4px">${Array.from({length:10},(_,i)=>`<span style="width:7px;height:7px;border-radius:1px;background:${i<readiness?readinessColor:'var(--faint,#444)'}"></span>`).join('')}</span>`
+      : '';
+
+    let html = `<div style="margin-bottom:4px"><b style="color:${scoreColor}">${s.label}</b> <span style="color:var(--muted);font-size:12px">(score ${s.score>0?'+':''}${s.score})</span></div>`;
+    html += `<div style="color:var(--muted);font-size:12px;margin-bottom:4px">${s.summary||''}</div>`;
+    if(s.emotions?.length) html += `<div style="font-size:11px;color:var(--muted);margin-bottom:4px">Emotions: ${s.emotions.join(' · ')}</div>`;
+    if(readiness > 0) html += `<div style="font-size:11px;margin-bottom:4px">Trade readiness: <b style="color:${readinessColor}">${readiness}/10</b>${readinessBar}</div>`;
+    if(s.coaching_tip) html += `<div style="font-size:11px;color:var(--muted);border-left:2px solid ${scoreColor};padding-left:6px;margin-bottom:4px">Coach: ${s.coaching_tip}</div>`;
+    if(s.violations?.length) html += `<div style="font-size:11px;color:var(--red);margin-bottom:4px">⚠ ${s.violations.join(' · ')}</div>`;
 
     // Auto-apply extracted setup tags
     if(s.setups?.length) {
       const added = [];
       s.setups.forEach(tag => {
-        if(selectedTags.has(tag)) return; // already selected
+        if(selectedTags.has(tag)) return;
         selectedTags.add(tag);
-        // Try to find existing toggle button
         const existing = [...document.querySelectorAll('#setupTags .toggle')]
           .find(el => el.dataset.tag === tag);
         if(existing) {
           existing.classList.add('on');
         } else {
-          // Create new custom tag button
           const el = document.createElement('span');
           el.className = 'toggle on';
           el.dataset.tag = tag;
@@ -952,8 +961,8 @@ async function previewSentiment() {
         added.push(tag);
       });
       if(added.length) {
-        html += `<br><span style="color:var(--green);font-size:11px">🏷 Auto-tagged: ${added.join(', ')}</span>`;
-        if(s.setup_notes) html += `<br><span style="color:var(--faint);font-size:11px">${s.setup_notes}</span>`;
+        html += `<div style="font-size:11px;color:var(--green)">Tagged: ${added.join(', ')}</div>`;
+        if(s.setup_notes) html += `<div style="font-size:11px;color:var(--faint)">${s.setup_notes}</div>`;
       }
     }
     $('sentPreview').innerHTML = html;

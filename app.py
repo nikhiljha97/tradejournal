@@ -594,7 +594,7 @@ RULES:
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="qwen/qwen3.8-27b",
+            model="openai/gpt-oss-20b",
             max_tokens=450,
             temperature=0.3,
             messages=messages,
@@ -1036,7 +1036,7 @@ def _ai_idea_summary(idea):
         import json as _j
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="qwen/qwen3.8-27b", max_tokens=500, temperature=0.2,
+            model="openai/gpt-oss-20b", max_tokens=500, temperature=0.2,
             messages=[{"role": "user", "content": prompt}],
         )
         raw = resp.choices[0].message.content.strip()
@@ -1327,7 +1327,7 @@ Return ONLY the JSON object. No markdown, no explanation outside the JSON."""
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="qwen/qwen3.8-27b",
+            model="openai/gpt-oss-20b",
             max_tokens=600,
             temperature=0.2,
             messages=[{"role": "user", "content": prompt}],
@@ -1677,6 +1677,32 @@ def sentiment_endpoint():
 def engine_status():
     return jsonify({"groq":sent.groq_available(),"offline_ready":sent.offline_ready(),"status":sent.engine_status()})
 
+@app.route("/api/health")
+def health_check():
+    """Public health endpoint for uptime monitoring. Returns 200 if all systems operational."""
+    import time
+    start = time.time()
+    checks = {}
+
+    # DB check
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(db.text("SELECT 1"))
+        checks["db"] = "ok"
+    except Exception as e:
+        checks["db"] = f"error: {str(e)[:60]}"
+
+    # Groq check (key present, not tested live to avoid API cost)
+    checks["groq_key"] = "ok" if sent.groq_available() else "missing"
+    checks["groq_model"] = "openai/gpt-oss-20b"
+
+    # App version / build
+    checks["latency_ms"] = round((time.time() - start) * 1000, 1)
+    checks["status"] = "healthy" if checks["db"] == "ok" else "degraded"
+
+    status_code = 200 if checks["status"] == "healthy" else 503
+    return jsonify(checks), status_code
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template("404.html"), 404
@@ -1768,7 +1794,7 @@ RULES:
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY",""))
         resp = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             max_tokens=800,
             temperature=0.3,
             messages=[
@@ -1834,7 +1860,7 @@ Focus on: streak effects, session timing, emotion-to-loss correlation, RR discip
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY",""))
         resp = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             max_tokens=1200,
             temperature=0.2,
             messages=[

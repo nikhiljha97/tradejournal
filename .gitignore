@@ -7,3 +7,4 @@ static/uploads/ideas/*
 !static/uploads/ideas/*.jpeg
 !static/uploads/ideas/*.gif
 !static/uploads/ideas/*.webp
+.env
