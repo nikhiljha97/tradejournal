@@ -613,7 +613,7 @@ RULES:
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model="qwen/qwen3.8-27b",
             max_tokens=450,
             temperature=0.3,
             messages=messages,
@@ -1055,7 +1055,7 @@ def _ai_idea_summary(idea):
         import json as _j
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="openai/gpt-oss-20b", max_tokens=500, temperature=0.2,
+            model="qwen/qwen3.8-27b", max_tokens=500, temperature=0.2,
             messages=[{"role": "user", "content": prompt}],
         )
         raw = resp.choices[0].message.content.strip()
@@ -1346,7 +1346,7 @@ Return ONLY the JSON object. No markdown, no explanation outside the JSON."""
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model="qwen/qwen3.8-27b",
             max_tokens=600,
             temperature=0.2,
             messages=[{"role": "user", "content": prompt}],
@@ -1813,7 +1813,7 @@ RULES:
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY",""))
         resp = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="qwen/qwen3.8-27b",
             max_tokens=800,
             temperature=0.3,
             messages=[
@@ -1879,7 +1879,7 @@ Focus on: streak effects, session timing, emotion-to-loss correlation, RR discip
         from groq import Groq
         client = Groq(api_key=os.environ.get("GROQ_API_KEY",""))
         resp = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="qwen/qwen3.8-27b",
             max_tokens=1200,
             temperature=0.2,
             messages=[

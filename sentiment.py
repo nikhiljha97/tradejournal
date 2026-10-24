@@ -145,7 +145,7 @@ def _groq(notes: str) -> dict:
     from groq import Groq
     client = Groq(api_key=os.environ["GROQ_API_KEY"])
     resp = client.chat.completions.create(
-        model="openai/gpt-oss-20b",
+        model="qwen/qwen3.8-27b",
         max_tokens=700, temperature=0.1,
         messages=[
             {"role":"system","content":GROQ_SYSTEM},
