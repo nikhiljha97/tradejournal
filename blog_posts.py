@@ -183,7 +183,7 @@ POSTS = [
   <li>Read your last five psychology notes — are the same words appearing before your losses?</li>
 </ol>
 <p>Gold trading rewards patience and structure above almost everything else. Your journal is the tool that keeps you honest about whether you're actually being patient and structured — or just telling yourself you are.</p>
-"""
+""",
     "faq": [
       {"q": "What is the pip value of XAUUSD?", "a": "XAUUSD has a pip value of $1 per pip per standard lot (1.0 lots = 100 troy ounces). A $1 price move on 1.0 lot equals $100 profit or loss. For a mini lot (0.1) the pip value is $0.10, and for a micro lot (0.01) it is $0.01. This differs from EURUSD, where 1 pip equals $10 per standard lot."},
       {"q": "How do I calculate lot size for XAUUSD?", "a": "Use: lot size = dollar risk divided by (stop loss in pips × pip value). For XAUUSD the pip value is $1 per standard lot. On a $10,000 account risking 1% ($100) with a 200-pip stop: lot size = $100 / (200 × $1) = 0.50 lots. If the trade hits your stop you lose exactly $100."},
