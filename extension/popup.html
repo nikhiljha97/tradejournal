@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TradeJournal</title>
+<style>
+/* ── Reset ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#07090d;color:#d4dde8;width:360px;min-height:480px;font-size:13px}
+
+/* ── Header ── */
+.hdr{background:#111820;border-bottom:1px solid #1c2b3a;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:14px;font-weight:800;letter-spacing:-.01em;color:#fff}
+.logo span{color:#00e5a0}
+.user-pill{font-size:10px;font-weight:600;color:#00e5a0;background:#0a1f14;border:1px solid #00e5a020;border-radius:20px;padding:2px 8px;cursor:pointer}
+
+/* ── Auth screen ── */
+.auth-screen{padding:32px 20px;text-align:center}
+.auth-screen h2{font-size:16px;font-weight:700;margin-bottom:8px;color:#fff}
+.auth-screen p{font-size:12px;color:#5a7080;line-height:1.6;margin-bottom:20px}
+.btn-primary{display:inline-block;background:#00a86b;color:#fff;font-weight:700;font-size:13px;padding:10px 24px;border-radius:8px;text-decoration:none;border:none;cursor:pointer;width:100%}
+.btn-primary:hover{background:#00c97a}
+.btn-secondary{display:inline-block;background:#1c2b3a;color:#8aa0b0;font-weight:600;font-size:12px;padding:8px 16px;border-radius:8px;border:1px solid #2a3f55;cursor:pointer;width:100%;margin-top:8px}
+.btn-secondary:hover{background:#22354a}
+
+/* ── Tabs ── */
+.tabs{display:flex;background:#0c1218;border-bottom:1px solid #1c2b3a}
+.tab{flex:1;padding:10px 0;text-align:center;font-size:11px;font-weight:700;color:#5a7080;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.tab.active{color:#00e5a0;border-bottom-color:#00e5a0}
+.tab:hover:not(.active){color:#8aa0b0}
+
+/* ── Panel ── */
+.panel{padding:16px;display:none}
+.panel.active{display:block}
+
+/* ── Form elements ── */
+.form-row{margin-bottom:12px}
+label{font-size:10px;font-weight:700;color:#5a7080;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px}
+input,select,textarea{width:100%;background:#111820;border:1px solid #1c2b3a;color:#d4dde8;border-radius:6px;padding:8px 10px;font-size:12px;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:#00a86b33}
+select option{background:#111820}
+textarea{resize:vertical;min-height:60px;font-family:inherit}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+/* ── Lot calc result ── */
+.calc-result{background:#0a1f14;border:1px solid #00e5a020;border-radius:10px;padding:14px;margin-top:14px;display:none}
+.calc-result .main{font-size:26px;font-weight:800;color:#00e5a0;text-align:center;line-height:1}
+.calc-result .sub{font-size:10px;color:#5a7080;text-align:center;margin-top:4px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.calc-item{background:#111820;border-radius:6px;padding:8px 10px}
+.calc-item .lbl{font-size:9px;font-weight:700;color:#5a7080;text-transform:uppercase;letter-spacing:.06em}
+.calc-item .val{font-size:13px;font-weight:700;color:#d4dde8;margin-top:2px}
+
+/* ── Direction buttons ── */
+.dir-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dir-btn{padding:8px;border-radius:6px;border:1px solid #1c2b3a;background:#111820;color:#5a7080;font-size:11px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s}
+.dir-btn.active-buy{background:#0a2318;border-color:#00c97a;color:#00e5a0}
+.dir-btn.active-sell{background:#200f0f;border-color:#ef4444;color:#f87171}
+
+/* ── Status badges ── */
+.outcome-btns{display:flex;gap:6px;flex-wrap:wrap}
+.outcome-btn{padding:5px 10px;border-radius:6px;border:1px solid #1c2b3a;background:#111820;color:#5a7080;font-size:10px;font-weight:700;cursor:pointer;transition:all .15s}
+.outcome-btn.win{border-color:#00c97a;color:#00e5a0;background:#0a2318}
+.outcome-btn.loss{border-color:#ef4444;color:#f87171;background:#200f0f}
+.outcome-btn.be{border-color:#f59e0b;color:#fbbf24;background:#1a1400}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:12px;left:50%;transform:translateX(-50%) translateY(60px);background:#00a86b;color:#fff;font-size:12px;font-weight:700;padding:10px 20px;border-radius:8px;opacity:0;transition:all .3s;white-space:nowrap;z-index:999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:#dc2626}
+
+/* ── Misc ── */
+.divider{height:1px;background:#1c2b3a;margin:12px 0}
+.muted{color:#5a7080;font-size:11px}
+.green{color:#00e5a0}
+.red{color:#f87171}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="hdr">
+  <div class="logo">Trade<span>·</span>Journal</div>
+  <div id="userPill" class="user-pill" style="display:none" onclick="handleLogout()">Logout</div>
+</div>
+
+<!-- Auth screen (shown when not logged in) -->
+<div id="authScreen" class="auth-screen" style="display:none">
+  <div style="font-size:40px;margin-bottom:12px">🔐</div>
+  <h2>Connect Your Account</h2>
+  <p>Open your TradeJournal dashboard to link the extension, then click the extension icon again.</p>
+  <a href="https://backtesting-journalmytrades.com" target="_blank" class="btn-primary">Open TradeJournal</a>
+  <button class="btn-secondary" onclick="retryAuth()">Retry Connection</button>
+</div>
+
+<!-- Main app (shown when logged in) -->
+<div id="mainApp" style="display:none">
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="calc" onclick="switchTab('calc')">Lot Calc</div>
+    <div class="tab" data-tab="log" onclick="switchTab('log')">Log Trade</div>
+  </div>
+
+  <!-- Lot Calculator Panel -->
+  <div class="panel active" id="panel-calc">
+    <div class="form-row">
+      <label>Instrument</label>
+      <select id="calcInstrument" onchange="onCalcChange()">
+        <option value="">Loading...</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="form-row">
+        <label>Account Size ($)</label>
+        <input type="number" id="accountSize" placeholder="10000" min="100" oninput="onCalcChange()"/>
+      </div>
+      <div class="form-row">
+        <label>Risk %</label>
+        <input type="number" id="riskPct" placeholder="1" min="0.1" max="10" step="0.1" oninput="onCalcChange()"/>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="form-row">
+        <label>Entry Price</label>
+        <input type="number" id="entryPrice" placeholder="1.08500" step="any" oninput="onCalcChange()"/>
+      </div>
+      <div class="form-row">
+        <label>Stop Loss</label>
+        <input type="number" id="stopPrice" placeholder="1.08000" step="any" oninput="onCalcChange()"/>
+      </div>
+    </div>
+
+    <div id="calcResult" class="calc-result">
+      <div class="main" id="resultLots">0.00</div>
+      <div class="sub">Lots (Standard)</div>
+      <div class="calc-grid">
+        <div class="calc-item">
+          <div class="lbl">Dollar Risk</div>
+          <div class="val" id="resultRisk">$0</div>
+        </div>
+        <div class="calc-item">
+          <div class="lbl">Stop (pips)</div>
+          <div class="val" id="resultPips">0</div>
+        </div>
+        <div class="calc-item">
+          <div class="lbl">Pip Value/lot</div>
+          <div class="val" id="resultPipVal">$0</div>
+        </div>
+        <div class="calc-item">
+          <div class="lbl">Mini Lots</div>
+          <div class="val" id="resultMini">0.00</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Trade Panel -->
+  <div class="panel" id="panel-log">
+    <div class="form-row">
+      <label>Instrument</label>
+      <select id="logInstrument">
+        <option value="">Select...</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Direction</label>
+      <div class="dir-btns">
+        <button class="dir-btn" id="btnBuy" onclick="setDirection('Buy')">LONG</button>
+        <button class="dir-btn" id="btnSell" onclick="setDirection('Sell')">SHORT</button>
+      </div>
+    </div>
+    <div class="row3">
+      <div class="form-row">
+        <label>Entry</label>
+        <input type="number" id="logEntry" step="any" placeholder="0.00"/>
+      </div>
+      <div class="form-row">
+        <label>Stop</label>
+        <input type="number" id="logStop" step="any" placeholder="0.00"/>
+      </div>
+      <div class="form-row">
+        <label>Target</label>
+        <input type="number" id="logTarget" step="any" placeholder="0.00"/>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="form-row">
+        <label>Lots</label>
+        <input type="number" id="logLots" step="0.01" placeholder="0.01"/>
+      </div>
+      <div class="form-row">
+        <label>Date</label>
+        <input type="date" id="logDate"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Outcome</label>
+      <div class="outcome-btns">
+        <button class="outcome-btn" id="outcomeWin" onclick="setOutcome('win')">Win</button>
+        <button class="outcome-btn" id="outcomeLoss" onclick="setOutcome('loss')">Loss</button>
+        <button class="outcome-btn" id="outcomeBE" onclick="setOutcome('be')">B/E</button>
+        <button class="outcome-btn" id="outcomeOpen" onclick="setOutcome('open')">Open</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="form-row">
+        <label>Exit Price</label>
+        <input type="number" id="logExit" step="any" placeholder="optional"/>
+      </div>
+      <div class="form-row">
+        <label>P&amp;L ($)</label>
+        <input type="number" id="logPnl" step="any" placeholder="optional"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Notes</label>
+      <textarea id="logNotes" placeholder="Describe your setup, mindset, confluences..."></textarea>
+    </div>
+    <button class="btn-primary" onclick="submitTrade()">Log Trade</button>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>

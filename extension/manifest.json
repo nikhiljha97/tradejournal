@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "TradeJournal",
+  "version": "1.0.0",
+  "description": "Log trades and calculate lot sizes directly from TradingView",
+  "permissions": ["storage", "activeTab"],
+  "host_permissions": [
+    "https://backtesting-journalmytrades.com/*",
+    "http://localhost:5000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://backtesting-journalmytrades.com/*",
+        "http://localhost:5000/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

@@ -161,7 +161,7 @@ def check_groq_api() -> dict:
     code, body = _post_json(
         "https://api.groq.com/openai/v1/chat/completions",
         {
-            "model": "openai/gpt-oss-20b",
+            "model": "qwen/qwen3.8-27b",
             "max_tokens": 5,
             "messages": [{"role": "user", "content": "say ok"}],
         },

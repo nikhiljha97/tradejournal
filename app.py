@@ -1,7 +1,7 @@
 """
 TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 """
-import os, json, uuid, re, time, requests as http_requests
+import os, json, uuid, re, time, hmac, hashlib, requests as http_requests
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, Response
 from sqlalchemy import text
 from blog_posts import POSTS, get_post
@@ -360,6 +360,37 @@ def _save_trade(data):
         commission=data.get("commission") or 0.0, order_type=data.get("order_type","MARKET"),
         setups=json.dumps(data.get("setups") or []), notes=data.get("notes"),
         import_source=data.get("import_source","manual"),
+        emotions=json.dumps(data.get("emotions") or []),
+        sentiment_label=data.get("sentiment_label"),
+        sentiment_score=data.get("sentiment_score"),
+        sentiment_summary=data.get("sentiment_summary"),
+        sentiment_phrases=json.dumps(data.get("sentiment_phrases") or []),
+        sentiment_source=data.get("sentiment_source","none"),
+        image_url=data.get("image_url"),
+    )
+    db.session.add(t)
+    db.session.flush()
+    return t
+
+def _save_trade_for(data, user_id: int):
+    """Like _save_trade but accepts an explicit user_id (used by ext API, no flask-login)."""
+    from datetime import datetime, timezone
+    data = {k: (None if v == "" else v) for k, v in data.items()}
+    t = Trade(
+        user_id=user_id,
+        trade_date=data.get("trade_date"), entry_time=data.get("entry_time"),
+        exit_time=data.get("exit_time"), duration_minutes=data.get("duration_minutes"),
+        instrument=data.get("instrument"), session=data.get("session"),
+        direction=data.get("direction"), lots=data.get("lots"),
+        contracts=data.get("contracts"), entry_price=data.get("entry_price"),
+        stop_price=data.get("stop_price"), target_price=data.get("target_price"),
+        exit_price=data.get("exit_price"), stop_pips=data.get("stop_pips"),
+        target_pips=data.get("target_pips"), dollar_risk=data.get("dollar_risk"),
+        planned_risk_usd=data.get("planned_risk_usd"), planned_rr=data.get("planned_rr"),
+        realized_pnl=data.get("realized_pnl"), realized_r=data.get("realized_r"),
+        commission=data.get("commission") or 0.0, order_type=data.get("order_type","MARKET"),
+        setups=json.dumps(data.get("setups") or []), notes=data.get("notes"),
+        import_source=data.get("import_source","extension"),
         emotions=json.dumps(data.get("emotions") or []),
         sentiment_label=data.get("sentiment_label"),
         sentiment_score=data.get("sentiment_score"),
@@ -1510,7 +1541,8 @@ def home():
             sessions=SESSIONS, setup_tags=SETUP_TAGS,
             instruments=list(INSTRUMENT_PIP.keys()),
             ai_available=sent.groq_available(),
-            username=current_user.username)
+            username=current_user.username,
+            ext_token=_ext_make_token(current_user.id))
     return render_template("landing.html")
 
 @app.route("/app")
@@ -1520,7 +1552,8 @@ def index():
         sessions=SESSIONS, setup_tags=SETUP_TAGS,
         instruments=list(INSTRUMENT_PIP.keys()),
         ai_available=sent.groq_available(),
-        username=current_user.username)
+        username=current_user.username,
+        ext_token=_ext_make_token(current_user.id))
 
 @app.route("/api/trades", methods=["GET"])
 @login_required
@@ -1716,7 +1749,7 @@ def health_check():
 
     # Groq check (key present, not tested live to avoid API cost)
     checks["groq_key"] = "ok" if sent.groq_available() else "missing"
-    checks["groq_model"] = "openai/gpt-oss-20b"
+    checks["groq_model"] = "qwen/qwen3.8-27b"
 
     # App version / build
     checks["latency_ms"] = round((time.time() - start) * 1000, 1)
@@ -1724,6 +1757,96 @@ def health_check():
 
     status_code = 200 if checks["status"] == "healthy" else 503
     return jsonify(checks), status_code
+
+# ── Chrome Extension Auth ────────────────────────────────────────────────────
+
+def _ext_make_token(user_id: int) -> str:
+    """Generate a time-bound (24h, rolling daily) HMAC token for ext auth."""
+    day = int(time.time()) // 86400
+    msg = f"{user_id}:{day}".encode()
+    key = app.config["SECRET_KEY"].encode()
+    sig = hmac.new(key, msg, hashlib.sha256).hexdigest()
+    return f"{user_id}:{day}:{sig}"
+
+def _ext_verify_token(token: str):
+    """Return User or None."""
+    try:
+        parts = token.split(":")
+        if len(parts) != 3:
+            return None
+        user_id_str, day_str, sig = parts
+        now_day = int(time.time()) // 86400
+        if int(day_str) not in (now_day, now_day - 1):
+            return None
+        msg = f"{user_id_str}:{day_str}".encode()
+        key = app.config["SECRET_KEY"].encode()
+        expected = hmac.new(key, msg, hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(sig, expected):
+            return None
+        return User.query.get(int(user_id_str))
+    except Exception:
+        return None
+
+def _ext_auth():
+    """Extract and verify Bearer token from request. Returns User or None."""
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return None
+    return _ext_verify_token(auth[7:].strip())
+
+
+# ── Extension API Routes ─────────────────────────────────────────────────────
+
+@app.route("/api/ext/me")
+def ext_me():
+    user = _ext_auth()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    return jsonify({"id": user.id, "username": user.username, "email": user.email})
+
+
+@app.route("/api/ext/instruments")
+def ext_instruments():
+    user = _ext_auth()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    return jsonify({"instruments": sorted(INSTRUMENT_PIP.keys()), "pip_values": INSTRUMENT_PIP})
+
+
+@app.route("/api/ext/trades", methods=["POST"])
+def ext_log_trade():
+    user = _ext_auth()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    payload = request.get_json(force=True) or {}
+    payload["user_id"] = user.id
+
+    # Derive fields (pips, dollar risk, etc.)
+    payload = _compute_derived(payload)
+
+    # Run sentiment if notes provided
+    s = sent.analyze(payload.get("notes", ""))
+    manual_setups = set(payload.get("setups") or [])
+    llm_setups    = set(s.get("setups") or [])
+    payload.update({
+        "sentiment_label":  s["label"],
+        "sentiment_score":  s["score"],
+        "sentiment_summary":s["summary"],
+        "sentiment_phrases":s["phrases"],
+        "sentiment_source": s["source"],
+        "emotions": sorted(set(payload.get("emotions") or []) | set(s.get("emotions") or [])),
+        "setups":   sorted(manual_setups | llm_setups),
+    })
+
+    try:
+        t = _save_trade_for(payload, user.id)
+        db.session.commit()
+        return jsonify({"id": t.id, "sentiment": s, "trade": t.to_dict()}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)[:200]}), 500
+
 
 @app.errorhandler(404)
 def page_not_found(e):
