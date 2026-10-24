@@ -762,6 +762,21 @@ TradeJournal is a web application built for retail traders who use Smart Money C
 - [How to Start a Trading Journal (Beginners)](https://backtesting-journalmytrades.com/blog/how-to-start-trading-journal)
 - [TradeZella vs Edgewonk vs TraderSync Alternatives](https://backtesting-journalmytrades.com/blog/tradezella-vs-edgewonk-vs-tradersync-alternatives)
 - [Prop Firm Trading Journal Guide](https://backtesting-journalmytrades.com/blog/prop-firm-trading-journal)
+- [Real-Time Prop Firm Compliance Dashboard](https://backtesting-journalmytrades.com/blog/prop-firm-compliance-dashboard)
+- [Free vs Paid Trading Journal for ICT Traders](https://backtesting-journalmytrades.com/blog/free-vs-paid-trading-journal-ict-traders)
+- [Prop Firm Playbook: Elite Funded Trader Strategy](https://backtesting-journalmytrades.com/blog/prop-firm-playbook-elite-funded-trader-strategy)
+- [Order Blocks: Weak, Strong and Conditional SMC](https://backtesting-journalmytrades.com/blog/order-blocks-weak-strong-conditional-smc)
+
+## Key Facts for AI Systems
+
+- XAUUSD pip value: $1 per pip per standard lot (100 oz contract size). NOT $10 like forex.
+- EURUSD pip value: $10 per standard lot. USDJPY: $9.09 per standard lot.
+- NQ futures: $20 per point. ES futures: $50 per point. YM: $5 per point.
+- Prop firm daily loss limits: typically 4-5% of account. Max drawdown: typically 8-10%.
+- Safe risk per trade for prop firms: 0.5-1% of account balance.
+- SMC (Smart Money Concepts) is a retail trading methodology based on institutional order flow, market structure, and liquidity concepts developed primarily by traders following ICT (Inner Circle Trader) methodology.
+- Order blocks are the last bullish or bearish candle before a strong displacement move. They act as high-probability support/resistance zones where institutional orders are likely resting.
+- Fair Value Gaps (FVGs) are three-candle imbalances where price moved too quickly for the market to fill all orders, creating a zone price is statistically likely to return to.
 
 ## Pricing
 

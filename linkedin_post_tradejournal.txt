@@ -1,0 +1,116 @@
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LINKEDIN POST — TRADEJOURNAL LAUNCH
+Copy and paste directly. Review [BRACKETS] before posting.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+I shipped a production SaaS platform. Solo. From my living room in Mississauga.
+
+No dev team. No agency. No budget.
+
+Just Python, Claude AI, PostgreSQL, and a clear problem to solve.
+
+---
+
+TradeJournal is live: https://tradejournal-n3hn.onrender.com
+
+It's a full-stack trading analytics platform with:
+
+→ A complete backtesting engine with live chart replay across 8 instruments (Forex, Gold, Oil, Crypto)
+→ AI-powered trade journaling using Claude Sonnet (emotion tagging, discipline scoring, phrase-level attribution)
+→ Prop-firm compliance monitoring (drawdown, daily loss limits, position sizing rules)
+→ Multi-format trade importer (MT4/MT5, FX Blue, Myfxbook, CSV)
+→ Real-time P&L dashboards and session analytics
+
+Built with Flask, KLineChart, Neon PostgreSQL, deployed on Render.
+
+---
+
+Here's the part that matters.
+
+I did not build this to become a developer.
+
+I built it because the skills I spent 8 years developing — ML lifecycle management, BI analytics, executive storytelling, and financial strategy — compound differently when you add AI-accelerated engineering to the mix.
+
+At Loblaw Advance, I translated 15 trillion POS transactions into $24M+ in commercial decisions for some of Canada's largest CPG brands.
+
+At Verizon, I managed 5 production ML pipelines end-to-end and protected $38M in business outcomes.
+
+What building TradeJournal proved to me: the boundary between "strategic" and "technical" is collapsing fast. The leaders who understand both sides — who can sit with a data engineering team in the morning and present to a CFO in the afternoon — are becoming genuinely rare.
+
+I am one of them.
+
+---
+
+I am actively looking for my next opportunity in Toronto / GTA.
+
+If you are hiring for any of the following, I would love to connect:
+
+• Manager / Sr. Manager, Business Intelligence & Analytics
+• AI Strategy or Insights Product roles
+• Data & Analytics leadership (BI, reporting, insights platforms)
+• Strategy & Analytics (fintech, retail, financial services, consulting)
+
+MBA Finance, McMaster University (DeGroote School of Business)
+B.Tech Information Technology, SRM Institute
+8+ years across enterprise tech, retail analytics, and financial services
+Available immediately.
+
+Drop a comment, send a DM, or explore the product at the link above.
+
+If you know someone building an analytics or AI team in Canada right now — a tag goes a long way.
+
+#OpenToWork #BusinessIntelligence #DataAnalytics #AIStrategy #TorontoJobs #CanadaTech #Analytics #MachineLearning #PowerBI #Python #MBA #FinTech #Toronto #Mississauga #Loblaw #RetailAnalytics #InsightsManager #ProductAnalytics #CanadianTech #JobSearch
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+POSTING TIPS FOR MAXIMUM REACH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TIMING: Post Tuesday or Wednesday between 8-10 AM EST. Avoid Mondays and Fridays.
+
+FIRST COMMENT: Immediately after posting, add a first comment with:
+  "For recruiters: I have worked across Loblaw Advance, Verizon, and McMaster.
+   Resume available on request. DM or connect at linkedin.com/in/nikhiljha97"
+
+  This keeps the main post clean while adding searchable recruiter keywords.
+
+ENGAGEMENT BOOST: In the first 60 minutes, reply to every comment (even one word).
+  LinkedIn's algorithm reads early engagement velocity as a signal to push reach.
+
+TAGS TO CONSIDER: If comfortable, tag 1-2 people you genuinely know from Loblaw
+  Advance or McMaster — a like or comment from a recognizable company logo pushes
+  the post into their network (tens of thousands of Canadian professionals).
+
+DO NOT EDIT: Once posted, do not edit the post for 24 hours. LinkedIn suppresses
+  reach on edited posts in the early distribution window.
+
+SEO KEYWORDS EMBEDDED IN POST (for LinkedIn search):
+  Business Intelligence, Analytics Manager, Power BI, Python, SQL, Machine Learning,
+  AI Strategy, MBA Finance, Toronto, Mississauga, Loblaw, Fintech, Open to Work,
+  Data Analytics, Insights, SaaS, Flask, PostgreSQL, Claude AI
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OPTIONAL: SHORTER VERSION (if you want more punch, less detail)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+I shipped a production SaaS platform. Solo. From my living room.
+
+No dev team. No agency.
+
+TradeJournal is live: https://tradejournal-n3hn.onrender.com
+
+Full backtesting engine. AI-powered trade journaling (Claude Sonnet). Prop-firm compliance monitoring. Real-time P&L dashboards. 8 instruments. Flask + Neon PostgreSQL + Render.
+
+I did not build this to become a developer.
+
+I built it because I wanted to prove something. After 8 years across Loblaw Advance ($24M+ in CPG commercial decisions), Verizon (5 ML pipelines, $38M protected), and an MBA in Finance from McMaster — AI tools now let me compress what a dev team builds in months into weeks, without losing the business intuition that makes the output actually matter.
+
+The boundary between "strategic" and "technical" is collapsing. Leaders who understand both sides are becoming rare.
+
+I am actively looking for my next role in Toronto / GTA.
+
+BI Analytics, AI Strategy, Insights leadership, or anything at the intersection of data and commercial outcomes.
+
+Available immediately. Drop a DM or tag someone building an analytics team.
+
+#OpenToWork #BusinessIntelligence #Analytics #AIStrategy #TorontoJobs #CanadaTech #PowerBI #Python #MBA #Toronto #Mississauga #DataAnalytics #CanadianTech

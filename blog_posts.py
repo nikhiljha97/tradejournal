@@ -184,6 +184,12 @@ POSTS = [
 </ol>
 <p>Gold trading rewards patience and structure above almost everything else. Your journal is the tool that keeps you honest about whether you're actually being patient and structured — or just telling yourself you are.</p>
 """
+    "faq": [
+      {"q": "What is the pip value of XAUUSD?", "a": "XAUUSD has a pip value of $1 per pip per standard lot (1.0 lots = 100 troy ounces). A $1 price move on 1.0 lot equals $100 profit or loss. For a mini lot (0.1) the pip value is $0.10, and for a micro lot (0.01) it is $0.01. This differs from EURUSD, where 1 pip equals $10 per standard lot."},
+      {"q": "How do I calculate lot size for XAUUSD?", "a": "Use: lot size = dollar risk divided by (stop loss in pips × pip value). For XAUUSD the pip value is $1 per standard lot. On a $10,000 account risking 1% ($100) with a 200-pip stop: lot size = $100 / (200 × $1) = 0.50 lots. If the trade hits your stop you lose exactly $100."},
+      {"q": "What session is best for trading XAUUSD?", "a": "The London/New York overlap (1:00 PM to 4:00 PM GMT) produces the highest volume and most directional gold moves. The London Open (8:00 AM GMT) is also key for stop hunts and liquidity grabs. The Asian session (midnight to 8:00 AM GMT) is typically range-bound and avoided by most SMC traders."},
+      {"q": "How do I import XAUUSD trades from MT5?", "a": "In MetaTrader 5, go to View > Terminal > Account History, right-click and choose Save as Detailed Report (HTML). Import that HTML file into your trading journal. A proper journal automatically detects XAUUSD and applies the 100 oz/lot contract size for accurate P&L and R calculations."},
+    ],
   },
   {
     "slug": "trading-psychology-journal",
@@ -255,7 +261,13 @@ POSTS = [
 <p>The hardest decision in trading is recognising when you should not be at the charts. Your journal makes this objective. Set a rule based on your data — for example, "if I am down more than 2R before noon, I close the platform for the day." This is not a guess. It is a rule derived from observing what happens to your afternoon sessions after a difficult morning.</p>
 <p>Many traders find that their worst losing streaks share a common thread: they kept trading after a clear signal from their own data that the session was not going their way. The journal gives you the permission to stop — because stopping becomes a rule rather than a surrender.</p>
 <p>Psychology journaling is not about becoming a robot. It is about understanding your own patterns well enough to work with them instead of against them. The traders who improve fastest are not the ones with the best strategies — they are the ones who build the most accurate picture of themselves.</p>
-"""
+""",
+    "faq": [
+      {"q": "How do I stop revenge trading?", "a": "Track every trade with psychology notes, then set a data-based rule such as no trades for 60 minutes after any loss. When you can show yourself that every time you noted 'frustrated' your next trade lost an average of $47, that evidence becomes a circuit breaker. Willpower alone rarely works long-term; your own statistics do."},
+      {"q": "What is trading tilt?", "a": "Trading tilt is the state of making emotional decisions after a loss, usually involving larger position sizes, more trades, or abandoning your strategy to recover losses. The clearest objective signal is unconsciously increasing your dollar risk per trade after consecutive losses. Comparing your average position size over your last 10 trades against your baseline reveals tilt without relying on self-assessment."},
+      {"q": "How does journaling reduce FOMO in trading?", "a": "A trading journal reveals FOMO patterns by showing which trades you entered after the move had already happened and what their average R outcome was. When your data shows late entries produced a negative average R across 30 trades, the evidence replaces the urge. Most traders find data-based rules, such as 'no entry more than 10 pips from the setup level', more effective than discipline alone."},
+      {"q": "How long does it take to fix trading psychology through journaling?", "a": "Most traders who journal consistently for 60 to 90 days eliminate one or two major psychology patterns. The process requires at least 50 trades with honest psychology notes before AI or manual analysis can surface reliable patterns. Dollar impact from fixing one major pattern, such as revenge trading or premature exits, typically exceeds any strategy improvement made in the same period."},
+    ],
   },
 ]
 
@@ -317,7 +329,13 @@ POSTS += [
   <li>Check the AI pattern analysis — your top cost pattern will surprise you</li>
 </ol>
 <p>That's it. No setup fee, no onboarding call, no credit card form. Just your trades, analysed.</p>
-"""
+""",
+    "faq": [
+      {"q": "Is TradeJournal really free forever?", "a": "Yes. TradeJournal is free forever with no credit card required, no trade limits, and no features locked behind a paid tier. There is no trial that expires. AI psychology analysis, MT5 import, prop firm tracking, and unlimited trade logging are all available to every user at no cost."},
+      {"q": "What is the best free trading journal app in 2026?", "a": "The best free trading journal app is one that has automatic P&L calculation with correct instrument math, real R multiple tracking, broker import from MT5 or CSV, and psychology analysis. TradeJournal covers all of these for XAUUSD, forex pairs, NQ/ES futures, and crypto with no paid tier, no trade limit, and no credit card required."},
+      {"q": "Why not just use an Excel spreadsheet as a trading journal?", "a": "Excel trading journal templates require manually entering every trade, manually calculating R multiples, and manually building charts. After a week of active trading with 20 or more trades you will have 100 cells to update. The friction kills the habit. A dedicated app with broker import and automatic calculation removes that friction entirely, which is why traders who use apps journal more consistently than those using spreadsheets."},
+      {"q": "Can I import MT5 trades into a free trading journal?", "a": "Yes. Export your MT5 trade history via View > Terminal > Account History > Save as Detailed Report (HTML), then import the file into TradeJournal. The import takes under two minutes and automatically calculates P&L with correct pip math for each instrument including XAUUSD, EURUSD, and JPY pairs."},
+    ],
   },
   {
     "slug": "what-to-write-in-trading-journal",
@@ -399,7 +417,13 @@ POSTS += [
 
 <h2>Using AI to Analyse Your Journal Notes</h2>
 <p>Writing honest psychology notes is powerful on its own. But AI can take it further — reading your notes across 50+ trades and identifying which emotional states correlate with your losses, which setups actually have edge, and which behaviours cost you the most in dollar terms. That is pattern detection you cannot do manually, and it removes the bias of reviewing your own work with your own blind spots. After 30 days of consistent entries, an AI analysis of your notes will usually surface one pattern that costs you significantly more than any other. That single insight, corrected, tends to move the needle more than weeks of strategy work.</p>
-"""
+""",
+    "faq": [
+      {"q": "What should you write in a trading journal?", "a": "Write six things for every trade: the setup (what technical reason made you consider it), the entry trigger (what confirmed entry), your exact stop loss level and dollar risk, your profit target, your emotional state at entry, and a post-trade review of what happened and what you would change. Generic notes like 'entered long, hit TP' produce zero actionable insight over time."},
+      {"q": "How detailed should trading journal entries be?", "a": "At minimum, write one sentence describing the specific setup (not just 'order block' but which OB, on which timeframe, with what confirmation), one sentence on your emotional state and confidence level at entry, and one sentence post-trade on what you would change. Two to four sentences per trade is sufficient for meaningful pattern analysis across 50 or more trades."},
+      {"q": "How often should you review your trading journal?", "a": "Review your journal weekly, not just after individual trades. The daily review catches immediate mistakes. The weekly review reveals patterns across 5 to 20 trades that are invisible day-to-day. Specifically check which emotional states correlated with losses, whether your setup distribution matches your plan, and whether your average R is trending up or down."},
+      {"q": "What is the difference between a trade log and a trading journal?", "a": "A trade log records what happened: entry price, exit price, profit or loss. A trading journal records why it happened: what you were thinking at entry, whether you followed your rules, what you would change. The log is data. The journal is insight. Only the journal reveals the psychology patterns that cause most trading losses."},
+    ],
   },
   {
     "slug": "how-to-start-trading-journal",

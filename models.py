@@ -148,6 +148,8 @@ class User(db.Model):
     notif_token         = db.Column(db.String(100), nullable=True)
     email_verified      = db.Column(db.Boolean, default=False, nullable=False)
     verification_token  = db.Column(db.String(100), nullable=True, unique=True)
+    telegram_chat_id    = db.Column(db.BigInteger, nullable=True, unique=True)
+    telegram_link_token = db.Column(db.String(100), nullable=True, unique=True)
     created_at    = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Flask-Login required

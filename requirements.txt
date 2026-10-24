@@ -23,3 +23,4 @@ cloudinary==1.46.2
 resend==2.48.0
 yfinance==1.7.0
 flask-compress==1.25
+pyTelegramBotAPI==4.22.1

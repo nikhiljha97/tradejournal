@@ -240,6 +240,10 @@ def analyze(notes: str) -> dict:
             return _groq(notes)
         except Exception:
             pass   # fall through to offline on any error
+    # Only attempt offline if models were pre-loaded successfully
+    # (avoids surfacing 'No module named transformers' when the library isn't installed)
+    if not _offline_ready:
+        return _empty("none", "No notes", "")
     try:
         return _offline(notes)
     except Exception as e:
