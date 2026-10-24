@@ -147,13 +147,25 @@ def _groq(notes: str) -> dict:
     resp = client.chat.completions.create(
         model="openai/gpt-oss-20b",
         max_tokens=700, temperature=0.1,
+        response_format={"type": "json_object"},
         messages=[
             {"role":"system","content":GROQ_SYSTEM},
             {"role":"user","content":f"Analyze these trading notes:\n\n{notes}"},
         ],
     )
-    raw  = resp.choices[0].message.content.strip()
-    raw  = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    content = resp.choices[0].message.content
+    if not content:
+        # Some reasoning models return None content; fall back to a stub
+        raise ValueError("Model returned empty content — try again")
+    raw = content.strip()
+    # Strip markdown fences
+    raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    # If model added prose before/after JSON, extract the first {...} block
+    if not raw.startswith("{"):
+        start = raw.find("{")
+        end   = raw.rfind("}")
+        if start != -1 and end != -1:
+            raw = raw[start:end+1]
     data = json.loads(raw)
     emotions = [e for e in data.get("emotions",[]) if e in KNOWN_EMOTIONS]
     phrases  = [p for p in data.get("phrases",[])
