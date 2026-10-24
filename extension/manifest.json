@@ -3,7 +3,7 @@
   "name": "TradeJournal",
   "version": "1.0.0",
   "description": "Log trades and calculate lot sizes directly from TradingView",
-  "permissions": ["storage", "activeTab"],
+  "permissions": ["storage", "activeTab", "tabs"],
   "host_permissions": [
     "https://backtesting-journalmytrades.com/*",
     "http://localhost:5000/*"
