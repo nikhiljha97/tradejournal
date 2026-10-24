@@ -8,7 +8,21 @@ let pipValues          = {};
 let selectedDirection  = "";
 let selectedOutcome    = "";
 let currentUser        = null;
-let capturedScreenshot = null;   // base64 dataUrl of the attached chart screenshot
+let capturedScreenshot = null;
+let riskMode           = "pct";   // "pct" | "fixed"
+let _sentTimer         = null;
+
+// Pip size per instrument (price movement = 1 pip)
+const PIP_SIZE = {
+  XAUUSD: 0.1,   XAGUSD: 0.01,
+  BTCUSD: 1.0,   ETHUSD: 0.1,
+  US30:   1.0,   NAS100: 1.0,   US500: 0.1,   UK100: 1.0,   GER40: 1.0,
+};
+function getPipSize(sym) {
+  if (PIP_SIZE[sym] !== undefined) return PIP_SIZE[sym];
+  if (sym.endsWith("JPY")) return 0.01;
+  return 0.0001;
+}
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
@@ -39,9 +53,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Restore saved prefs
-  chrome.storage.local.get(["accountSize", "riskPct"], (p) => {
+  chrome.storage.local.get(["accountSize","riskPct","riskFixed","riskMode"], (p) => {
     if (p.accountSize) document.getElementById("accountSize").value = p.accountSize;
     if (p.riskPct)     document.getElementById("riskPct").value     = p.riskPct;
+    if (p.riskFixed)   document.getElementById("riskFixed").value   = p.riskFixed;
+    if (p.riskMode === "fixed") {
+      document.getElementById("riskFixedMode").click();
+    }
   });
 });
 
@@ -57,9 +75,27 @@ function wireEvents() {
   document.getElementById("userPill").addEventListener("click", handleLogout);
 
   // Lot calc inputs
-  ["calcInstrument","accountSize","riskPct","entryPrice","stopPrice"].forEach(id => {
+  ["calcInstrument","accountSize","riskPct","riskFixed","entryPrice","stopPrice","tpPrice"].forEach(id => {
     document.getElementById(id).addEventListener("input", onCalcChange);
     document.getElementById(id).addEventListener("change", onCalcChange);
+  });
+
+  // Risk mode toggle
+  document.getElementById("riskPctMode").addEventListener("click", () => {
+    riskMode = "pct";
+    document.getElementById("riskPctMode").classList.add("active");
+    document.getElementById("riskFixedMode").classList.remove("active");
+    document.getElementById("riskPctRow").style.display  = "";
+    document.getElementById("riskFixedRow").style.display = "none";
+    onCalcChange();
+  });
+  document.getElementById("riskFixedMode").addEventListener("click", () => {
+    riskMode = "fixed";
+    document.getElementById("riskFixedMode").classList.add("active");
+    document.getElementById("riskPctMode").classList.remove("active");
+    document.getElementById("riskFixedRow").style.display = "";
+    document.getElementById("riskPctRow").style.display   = "none";
+    onCalcChange();
   });
 
   // Direction buttons
@@ -74,6 +110,16 @@ function wireEvents() {
 
   // Submit trade
   document.getElementById("submitTradeBtn").addEventListener("click", submitTrade);
+
+  // Live sentiment on notes input (debounced 1.2s)
+  document.getElementById("logNotes").addEventListener("input", () => {
+    clearTimeout(_sentTimer);
+    const text = document.getElementById("logNotes").value.trim();
+    if (text.length < 10) { hideSentiment(); return; }
+    document.getElementById("sentPreview").style.display = "block";
+    document.getElementById("sentLoading").style.display = "inline";
+    _sentTimer = setTimeout(() => analyzeSentiment(text), 1200);
+  });
 
   // Screenshot: capture visible tab
   document.getElementById("captureBtn").addEventListener("click", captureChart);
@@ -165,51 +211,68 @@ function populateInstruments(list) {
 // ── Lot Calculator ────────────────────────────────────────────────────────────
 function onCalcChange() {
   const instrument  = document.getElementById("calcInstrument").value;
-  const accountSize = parseFloat(document.getElementById("accountSize").value);
-  const riskPct     = parseFloat(document.getElementById("riskPct").value);
+  const accountSize = parseFloat(document.getElementById("accountSize").value) || 10000;
   const entryPrice  = parseFloat(document.getElementById("entryPrice").value);
   const stopPrice   = parseFloat(document.getElementById("stopPrice").value);
+  const tpPrice     = parseFloat(document.getElementById("tpPrice").value);
 
-  if (!isNaN(accountSize)) chrome.storage.local.set({ accountSize });
-  if (!isNaN(riskPct))     chrome.storage.local.set({ riskPct });
+  // Dollar risk from whichever mode is active
+  let dollarRisk;
+  if (riskMode === "fixed") {
+    dollarRisk = parseFloat(document.getElementById("riskFixed").value) || 100;
+  } else {
+    const pct  = parseFloat(document.getElementById("riskPct").value) || 1;
+    dollarRisk = accountSize * (pct / 100);
+    // sync fixed box so switching modes feels consistent
+    document.getElementById("riskFixed").value = dollarRisk.toFixed(0);
+  }
+
+  // Save prefs
+  chrome.storage.local.set({ accountSize, riskMode,
+    riskPct:   parseFloat(document.getElementById("riskPct").value)   || 1,
+    riskFixed: parseFloat(document.getElementById("riskFixed").value) || 100,
+  });
 
   const result = document.getElementById("calcResult");
-  if (!instrument || isNaN(accountSize) || isNaN(riskPct) || isNaN(entryPrice) || isNaN(stopPrice)) {
+  if (!instrument || isNaN(entryPrice) || isNaN(stopPrice) || entryPrice === stopPrice) {
     result.style.display = "none";
     return;
   }
 
-  const pipVal     = pipValues[instrument] || 10.0;
-  const dollarRisk = accountSize * (riskPct / 100);
-  const priceDiff  = Math.abs(entryPrice - stopPrice);
+  const pipVal  = pipValues[instrument] || 10.0;
+  const pipSize = getPipSize(instrument);
+  const stopPips = Math.abs(entryPrice - stopPrice) / pipSize;
+  const lots     = dollarRisk / (stopPips * pipVal);
 
-  let pipDistance;
-  if (["US30","NAS100","UK100","GER40","US500"].includes(instrument)) {
-    pipDistance = priceDiff;
-  } else if (instrument.endsWith("JPY")) {
-    pipDistance = priceDiff * 100;
-  } else if (["XAUUSD","XAGUSD","BTCUSD","ETHUSD"].includes(instrument)) {
-    pipDistance = priceDiff * 100;
+  // TP & RR
+  const hasTP   = !isNaN(tpPrice) && tpPrice > 0;
+  const tpPips  = hasTP ? Math.abs(tpPrice - entryPrice) / pipSize : 0;
+  const rr      = hasTP && stopPips > 0 ? (tpPips / stopPips) : 0;
+
+  result.style.display = "block";
+  document.getElementById("resultLots").textContent   = lots.toFixed(2);
+  document.getElementById("resultRisk").textContent   = "$" + dollarRisk.toFixed(0);
+  document.getElementById("resultPips").textContent   = stopPips.toFixed(1);
+  document.getElementById("resultTPPips").textContent = hasTP ? tpPips.toFixed(1) : "—";
+  document.getElementById("resultPipVal").textContent = "$" + pipVal.toFixed(2);
+  document.getElementById("resultMini").textContent   = (lots * 10).toFixed(2);
+  document.getElementById("resultMicro").textContent  = (lots * 100).toFixed(1);
+
+  const rrEl = document.getElementById("resultRR");
+  if (hasTP && rr > 0) {
+    rrEl.style.display = "block";
+    document.getElementById("rrVal").textContent = "1:" + rr.toFixed(2);
   } else {
-    pipDistance = priceDiff * 10000;
+    rrEl.style.display = "none";
   }
 
-  if (!pipDistance) { result.style.display = "none"; return; }
-
-  const lots = dollarRisk / (pipDistance * pipVal);
-  result.style.display = "block";
-  document.getElementById("resultLots").textContent  = lots.toFixed(2);
-  document.getElementById("resultRisk").textContent  = "$" + dollarRisk.toFixed(0);
-  document.getElementById("resultPips").textContent  = pipDistance.toFixed(1);
-  document.getElementById("resultPipVal").textContent = "$" + pipVal.toFixed(2);
-  document.getElementById("resultMini").textContent  = (lots * 10).toFixed(2);
-
-  // Auto-fill log form
-  if (lots > 0 && lots < 10000) {
-    document.getElementById("logLots").value      = lots.toFixed(2);
+  // Auto-fill log trade form
+  if (lots > 0 && lots < 100000) {
+    document.getElementById("logLots").value       = lots.toFixed(2);
     document.getElementById("logInstrument").value = instrument;
     document.getElementById("logEntry").value      = entryPrice;
     document.getElementById("logStop").value       = stopPrice;
+    if (hasTP) document.getElementById("logTarget").value = tpPrice;
   }
 }
 
@@ -230,24 +293,127 @@ function setOutcome(outcome) {
   document.getElementById("outcomeOpen").className = "outcome-btn" + (outcome === "open" ? " open-active" : "");
 }
 
+// ── Sentiment preview ─────────────────────────────────────────────────────────
+const POSITIVE_EMOTIONS = new Set([
+  "discipline","patience","confidence","calm","conviction","satisfaction"
+]);
+
+async function analyzeSentiment(text) {
+  const resp = await apiRequest("POST", "/api/ext/sentiment", { text });
+  document.getElementById("sentLoading").style.display = "none";
+  if (!resp || resp.status !== 200 || resp.data.error) return;
+  renderSentiment(resp.data);
+}
+
+function renderSentiment(s) {
+  const readiness = s.trade_readiness ?? 0;
+  const score     = s.score          ?? 0;
+  const emotions  = s.emotions       || [];
+  const tip       = s.coaching_tip   || "";
+  const violations = s.violations    || [];
+
+  // Show box
+  document.getElementById("sentPreview").style.display = "block";
+
+  // Label + score colour
+  const scoreColor = score >= 0.4 ? "#00e5a0" : score <= -0.3 ? "#f87171" : "#f59e0b";
+  const labelEl = document.getElementById("sentLabel");
+  labelEl.textContent = s.label || "";
+  labelEl.style.color = scoreColor;
+  labelEl.style.borderColor = scoreColor + "44";
+
+  // Trade readiness bar
+  const barColor = readiness >= 8 ? "#00e5a0" : readiness >= 5 ? "#f59e0b" : "#ef4444";
+  document.getElementById("sentReadiness").textContent = readiness + "/10";
+  document.getElementById("sentReadiness").style.color = barColor;
+  const bar = document.getElementById("sentReadinessBar");
+  bar.style.width      = (readiness * 10) + "%";
+  bar.style.background = barColor;
+
+  // Emotions chips
+  const emotionsEl = document.getElementById("sentEmotions");
+  emotionsEl.innerHTML = "";
+  emotions.forEach(em => {
+    const chip = document.createElement("span");
+    chip.className = "sent-chip " + (POSITIVE_EMOTIONS.has(em) ? "pos" : "neg");
+    chip.textContent = em;
+    emotionsEl.appendChild(chip);
+  });
+
+  // Coaching tip
+  const tipEl = document.getElementById("sentTip");
+  if (tip) {
+    tipEl.textContent = "💡 " + tip;
+    tipEl.style.display = "block";
+  } else {
+    tipEl.style.display = "none";
+  }
+
+  // Violations
+  const violEl = document.getElementById("sentViolations");
+  if (violations.length > 0) {
+    violEl.style.display = "block";
+    violEl.innerHTML = violations.map(v =>
+      `<div class="sent-viol-item">${v}</div>`
+    ).join("");
+  } else {
+    violEl.style.display = "none";
+  }
+}
+
+function hideSentiment() {
+  document.getElementById("sentPreview").style.display = "none";
+  document.getElementById("sentLoading").style.display = "none";
+}
+
 // ── Screenshot helpers ────────────────────────────────────────────────────────
 async function captureChart() {
   const btn = document.getElementById("captureBtn");
-  btn.textContent = "Capturing...";
-  btn.disabled    = true;
+  btn.innerHTML = '<span class="ss-icon">📷</span> Capturing...';
+  btn.disabled  = true;
 
-  const resp = await new Promise(resolve =>
-    chrome.runtime.sendMessage({ type: "CAPTURE_TAB" }, resolve)
-  );
+  try {
+    // Find the actual browser tab (lastFocusedWindow avoids grabbing the popup's own window)
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    if (!tab) throw new Error("No active browser tab found");
 
-  btn.innerHTML  = '<span class="ss-icon">📷</span> Capture Chart';
-  btn.disabled   = false;
+    const dataUrl = await new Promise((resolve, reject) => {
+      chrome.tabs.captureVisibleTab(
+        tab.windowId,
+        { format: "jpeg", quality: 85 },
+        (url) => {
+          if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+          else resolve(url);
+        }
+      );
+    });
 
-  if (resp?.dataUrl) {
-    setScreenshot(resp.dataUrl);
-  } else {
-    showToast(resp?.error || "Capture failed", true);
+    const resized = await resizeDataUrl(dataUrl, 1200, 0.82);
+    setScreenshot(resized);
+  } catch (err) {
+    showToast("Capture failed — use Upload instead", true);
+    console.error("[TJ capture]", err.message);
+  } finally {
+    btn.innerHTML = '<span class="ss-icon">📷</span> Capture Chart';
+    btn.disabled  = false;
   }
+}
+
+function resizeDataUrl(dataUrl, maxWidth, quality) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = img.width > maxWidth ? maxWidth / img.width : 1;
+      const w = Math.round(img.width  * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => resolve(dataUrl);  // fallback: use original
+    img.src = dataUrl;
+  });
 }
 
 function setScreenshot(dataUrl) {
@@ -320,6 +486,7 @@ function resetLogForm() {
   document.getElementById("logDate").value = todayStr();
   selectedDirection = ""; selectedOutcome = "";
   clearScreenshot();
+  hideSentiment();
   document.getElementById("btnBuy").className  = "dir-btn";
   document.getElementById("btnSell").className = "dir-btn";
   ["outcomeWin","outcomeLoss","outcomeBE","outcomeOpen"].forEach(id => {

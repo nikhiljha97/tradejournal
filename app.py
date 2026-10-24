@@ -1813,6 +1813,15 @@ def ext_instruments():
     return jsonify({"instruments": sorted(INSTRUMENT_PIP.keys()), "pip_values": INSTRUMENT_PIP})
 
 
+@app.route("/api/ext/sentiment", methods=["POST"])
+def ext_sentiment():
+    user = _ext_auth()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    text = (request.get_json(force=True) or {}).get("text", "")
+    return jsonify(sent.analyze(text))
+
+
 @app.route("/api/ext/trades", methods=["POST"])
 def ext_log_trade():
     user = _ext_auth()

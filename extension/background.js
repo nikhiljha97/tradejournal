@@ -38,29 +38,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (type === "CAPTURE_TAB") {
-    // Capture the visible tab and compress to JPEG (max 1200px wide)
-    chrome.tabs.captureVisibleTab(null, { format: "jpeg", quality: 82 }, (dataUrl) => {
+    // Capture the active tab as JPEG — service workers have no DOM so we
+    // skip resizing here and let the popup (which has DOM) handle it.
+    chrome.tabs.captureVisibleTab(null, { format: "jpeg", quality: 85 }, (dataUrl) => {
       if (chrome.runtime.lastError || !dataUrl) {
         sendResponse({ error: chrome.runtime.lastError?.message || "Capture failed" });
         return;
       }
-      // Resize in an OffscreenCanvas to cap at 1200px wide (saves upload bandwidth)
-      const img = new Image();
-      img.onload = () => {
-        const MAX_W = 1200;
-        const scale = img.width > MAX_W ? MAX_W / img.width : 1;
-        const w = Math.round(img.width  * scale);
-        const h = Math.round(img.height * scale);
-        const canvas = new OffscreenCanvas(w, h);
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, w, h);
-        canvas.convertToBlob({ type: "image/jpeg", quality: 0.82 }).then(blob => {
-          const reader = new FileReader();
-          reader.onloadend = () => sendResponse({ dataUrl: reader.result });
-          reader.readAsDataURL(blob);
-        });
-      };
-      img.src = dataUrl;
+      sendResponse({ dataUrl });
     });
     return true;
   }

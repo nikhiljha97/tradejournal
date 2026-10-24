@@ -102,17 +102,30 @@ textarea{resize:none;height:64px;font-family:inherit}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 
+/* ── Risk mode toggle ── */
+.risk-toggle{display:flex;gap:6px}
+.rtoggle{
+  flex:1;padding:7px 10px;border-radius:6px;
+  border:1px solid #1c2b3a;background:#111820;
+  color:#5a7080;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;
+}
+.rtoggle.active{border-color:#00a86b55;color:#00e5a0;background:#0a2318}
+
 /* ── Lot calc result ── */
 .calc-result{
   background:#0a1f14;border:1px solid #00e5a020;
-  border-radius:10px;padding:14px;margin-top:14px;display:none;
+  border-radius:10px;padding:14px;margin-top:10px;
 }
-.calc-result .main{font-size:26px;font-weight:800;color:#00e5a0;text-align:center;line-height:1}
-.calc-result .sub{font-size:10px;color:#5a7080;text-align:center;margin-top:4px}
-.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
-.calc-item{background:#111820;border-radius:6px;padding:8px 10px}
-.calc-item .lbl{font-size:9px;font-weight:700;color:#5a7080;text-transform:uppercase;letter-spacing:.06em}
-.calc-item .val{font-size:13px;font-weight:700;color:#d4dde8;margin-top:2px}
+.cr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calc-result .main{font-size:28px;font-weight:800;color:#00e5a0;line-height:1}
+.calc-result .sub{font-size:10px;color:#5a7080;margin-top:3px}
+.cr-rr{text-align:right}
+.rr-val{font-size:18px;font-weight:800;color:#f59e0b}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.calc-item{background:#111820;border-radius:6px;padding:7px 9px}
+.calc-item .lbl{font-size:9px;font-weight:700;color:#5a7080;text-transform:uppercase;letter-spacing:.05em}
+.calc-item .val{font-size:12px;font-weight:700;color:#d4dde8;margin-top:2px}
+.val.green{color:#00e5a0}
 
 /* ── Direction buttons ── */
 .dir-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -135,6 +148,41 @@ textarea{resize:none;height:64px;font-family:inherit}
 .outcome-btn.loss{border-color:#ef4444;color:#f87171;background:#200f0f}
 .outcome-btn.be{border-color:#f59e0b;color:#fbbf24;background:#1a1400}
 .outcome-btn.open-active{border-color:#6366f1;color:#a5b4fc;background:#0f0f1f}
+
+/* ── Sentiment preview ── */
+.sent-box{
+  background:#0c1521;border:1px solid #1c2b3a;border-radius:8px;
+  padding:10px 12px;margin-bottom:12px;font-size:11px;
+}
+.sent-header{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.sent-title{font-size:9px;font-weight:700;color:#5a7080;text-transform:uppercase;letter-spacing:.08em;flex:1}
+.sent-loading{font-size:9px;color:#5a7080;font-style:italic}
+.sent-label{font-size:10px;font-weight:700;color:#8aa0b0;
+  background:#111820;border-radius:4px;padding:2px 7px;border:1px solid #1c2b3a}
+.sent-section{margin-bottom:8px}
+.sent-row-label{display:flex;justify-content:space-between;margin-bottom:4px}
+.sent-row-label span{font-size:10px;color:#8aa0b0;font-weight:600}
+.sent-score{font-weight:800}
+.sent-bar-track{height:5px;background:#1c2b3a;border-radius:3px;overflow:hidden}
+.sent-bar-fill{height:100%;border-radius:3px;transition:width .5s,background .5s}
+.sent-emotions{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.sent-chip{
+  font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;
+  background:#111820;border:1px solid #1c2b3a;color:#8aa0b0;text-transform:capitalize;
+}
+.sent-chip.pos{border-color:#00c97a44;color:#00e5a0;background:#0a2318}
+.sent-chip.neg{border-color:#ef444444;color:#f87171;background:#200f0f}
+.sent-tip{
+  font-size:10px;color:#d4dde8;line-height:1.5;
+  border-left:2px solid #f59e0b;padding-left:7px;margin-bottom:6px;
+  background:#1a140033;border-radius:0 4px 4px 0;padding:5px 8px 5px 8px;
+}
+.sent-violations{margin-top:4px}
+.sent-viol-item{
+  font-size:10px;color:#f87171;padding:2px 0;
+  display:flex;gap:5px;align-items:flex-start;
+}
+.sent-viol-item::before{content:"⚠";font-size:9px;flex-shrink:0;margin-top:1px}
 
 /* ── Screenshot ── */
 .ss-row{display:flex;gap:8px;margin-bottom:8px}
@@ -200,41 +248,72 @@ textarea{resize:none;height:64px;font-family:inherit}
     <div class="panel active" id="panel-calc">
       <div class="form-row">
         <label>Instrument</label>
-        <select id="calcInstrument">
-          <option value="">Loading...</option>
-        </select>
+        <select id="calcInstrument"><option value="">Loading...</option></select>
       </div>
+
+      <!-- Risk mode toggle -->
+      <div class="form-row">
+        <label>Risk Mode</label>
+        <div class="risk-toggle">
+          <button class="rtoggle active" id="riskPctMode">% of Account</button>
+          <button class="rtoggle" id="riskFixedMode">Fixed $</button>
+        </div>
+      </div>
+
       <div class="row2">
         <div class="form-row">
           <label>Account Size ($)</label>
-          <input type="number" id="accountSize" placeholder="10000" min="100"/>
+          <input type="number" id="accountSize" value="10000" min="100"/>
         </div>
-        <div class="form-row">
+        <div class="form-row" id="riskPctRow">
           <label>Risk %</label>
-          <input type="number" id="riskPct" placeholder="1" min="0.1" max="10" step="0.1"/>
+          <input type="number" id="riskPct" value="1" min="0.1" max="20" step="0.1"/>
+        </div>
+        <div class="form-row" id="riskFixedRow" style="display:none">
+          <label>Risk $ (Fixed)</label>
+          <input type="number" id="riskFixed" value="100" min="1" step="1"/>
         </div>
       </div>
-      <div class="row2">
+
+      <div class="row3">
         <div class="form-row">
-          <label>Entry Price</label>
-          <input type="number" id="entryPrice" placeholder="1.08500" step="any"/>
+          <label>Entry</label>
+          <input type="number" id="entryPrice" placeholder="0.00" step="any"/>
         </div>
         <div class="form-row">
           <label>Stop Loss</label>
-          <input type="number" id="stopPrice" placeholder="1.08000" step="any"/>
+          <input type="number" id="stopPrice" placeholder="0.00" step="any"/>
+        </div>
+        <div class="form-row">
+          <label>Take Profit</label>
+          <input type="number" id="tpPrice" placeholder="optional" step="any"/>
         </div>
       </div>
-      <div id="calcResult" class="calc-result">
-        <div class="main" id="resultLots">0.00</div>
-        <div class="sub">Lots (Standard)</div>
+
+      <!-- Result -->
+      <div id="calcResult" class="calc-result" style="display:none">
+        <div class="cr-top">
+          <div>
+            <div class="main" id="resultLots">0.00</div>
+            <div class="sub">Standard Lots</div>
+          </div>
+          <div class="cr-rr" id="resultRR" style="display:none">
+            <div class="rr-val" id="rrVal">1:0</div>
+            <div class="sub">R:R Ratio</div>
+          </div>
+        </div>
         <div class="calc-grid">
           <div class="calc-item">
             <div class="lbl">Dollar Risk</div>
-            <div class="val" id="resultRisk">$0</div>
+            <div class="val green" id="resultRisk">$0</div>
           </div>
           <div class="calc-item">
             <div class="lbl">Stop (pips)</div>
             <div class="val" id="resultPips">0</div>
+          </div>
+          <div class="calc-item">
+            <div class="lbl">TP (pips)</div>
+            <div class="val" id="resultTPPips">—</div>
           </div>
           <div class="calc-item">
             <div class="lbl">Pip Value/lot</div>
@@ -243,6 +322,10 @@ textarea{resize:none;height:64px;font-family:inherit}
           <div class="calc-item">
             <div class="lbl">Mini Lots</div>
             <div class="val" id="resultMini">0.00</div>
+          </div>
+          <div class="calc-item">
+            <div class="lbl">Micro Lots</div>
+            <div class="val" id="resultMicro">0.00</div>
           </div>
         </div>
       </div>
@@ -309,6 +392,35 @@ textarea{resize:none;height:64px;font-family:inherit}
       <div class="form-row">
         <label>Notes</label>
         <textarea id="logNotes" placeholder="Setup, mindset, confluences..."></textarea>
+      </div>
+
+      <!-- Live sentiment preview -->
+      <div id="sentPreview" class="sent-box" style="display:none">
+        <div class="sent-header">
+          <span class="sent-title">AI Psychology</span>
+          <span class="sent-loading" id="sentLoading" style="display:none">analyzing…</span>
+          <span class="sent-label" id="sentLabel"></span>
+        </div>
+
+        <!-- Trade readiness bar -->
+        <div class="sent-section">
+          <div class="sent-row-label">
+            <span>Trade Readiness</span>
+            <span class="sent-score" id="sentReadiness">—</span>
+          </div>
+          <div class="sent-bar-track">
+            <div class="sent-bar-fill" id="sentReadinessBar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- Emotions -->
+        <div id="sentEmotions" class="sent-emotions"></div>
+
+        <!-- Coaching tip -->
+        <div id="sentTip" class="sent-tip" style="display:none"></div>
+
+        <!-- Violations -->
+        <div id="sentViolations" class="sent-violations" style="display:none"></div>
       </div>
 
       <!-- Screenshot attachment -->
