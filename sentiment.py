@@ -147,7 +147,6 @@ def _groq(notes: str) -> dict:
     resp = client.chat.completions.create(
         model="openai/gpt-oss-20b",
         max_tokens=700, temperature=0.1,
-        response_format={"type": "json_object"},
         messages=[
             {"role":"system","content":GROQ_SYSTEM},
             {"role":"user","content":f"Analyze these trading notes:\n\n{notes}"},
