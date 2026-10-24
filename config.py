@@ -15,16 +15,18 @@ class Config:
     # pool_pre_ping tests the connection before use and reconnects if closed.
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
-        "pool_recycle": 180,      # recycle every 3 min (Neon closes idle at ~5 min)
-        "pool_size": 5,
+        "pool_recycle": 60,       # recycle every 60s — Neon drops SSL ~5min idle but free tier is aggressive
+        "pool_size": 3,           # keep pool small on free tier (512MB RAM)
         "max_overflow": 2,
-        "pool_timeout": 30,
+        "pool_timeout": 20,
+        "pool_reset_on_return": "rollback",   # clean state on return; prevents stale TX contamination
         "connect_args": {
-            "connect_timeout": 10,
+            "connect_timeout": 8,
             "keepalives": 1,
-            "keepalives_idle": 30,    # send keepalive after 30s idle
-            "keepalives_interval": 5, # retry every 5s
-            "keepalives_count": 3,    # drop connection after 3 failed keepalives
+            "keepalives_idle": 20,    # send keepalive after 20s idle (tighter than before)
+            "keepalives_interval": 5,
+            "keepalives_count": 3,
+            "sslmode": "require",     # explicit SSL mode prevents silent fallback
         },
     }
 

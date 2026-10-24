@@ -1,7 +1,7 @@
 """
 TradeJournal — Flask app with auth, multi-tenancy, Cloudinary image storage.
 """
-import os, json, uuid, re, requests as http_requests
+import os, json, uuid, re, time, requests as http_requests
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, Response
 from sqlalchemy import text
 from blog_posts import POSTS, get_post
@@ -213,17 +213,36 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 def uid():
     return current_user.id
 
+def _db_retry(fn, *args, **kwargs):
+    """Run fn(); on SSL/stale-connection OperationalError, discard the pool
+    connection, wait briefly, and retry once.  Covers the gap between
+    pool_pre_ping and the actual execute that Neon SSL errors fall into."""
+    from sqlalchemy.exc import OperationalError as _OpErr
+    try:
+        return fn(*args, **kwargs)
+    except _OpErr as e:
+        msg = str(e).lower()
+        if any(kw in msg for kw in ("ssl", "connection", "closed", "broken")):
+            db.session.remove()
+            time.sleep(0.3)
+            return fn(*args, **kwargs)
+        raise
+
 def _get_settings():
-    s = Settings.query.filter_by(user_id=uid()).first()
-    if not s:
-        s = Settings(user_id=uid())
-        db.session.add(s)
-        db.session.commit()
-    return s.to_dict()
+    def _query():
+        s = Settings.query.filter_by(user_id=uid()).first()
+        if not s:
+            s = Settings(user_id=uid())
+            db.session.add(s)
+            db.session.commit()
+        return s.to_dict()
+    return _db_retry(_query)
 
 def _get_trades():
-    return [t.to_dict() for t in Trade.query.filter_by(user_id=uid()).order_by(
-        Trade.trade_date.asc(), Trade.entry_time.asc(), Trade.id.asc()).all()]
+    def _query():
+        return [t.to_dict() for t in Trade.query.filter_by(user_id=uid()).order_by(
+            Trade.trade_date.asc(), Trade.entry_time.asc(), Trade.id.asc()).all()]
+    return _db_retry(_query)
 
 def _num(v):
     if v is None or v == "": return None
