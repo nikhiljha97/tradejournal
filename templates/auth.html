@@ -32,10 +32,85 @@
       --green: #00e5a0; --green-dim: #004d38; --red: #ff4757; --gold: #f0c040;
     }
     html, body { min-height: 100vh; background: var(--bg); color: var(--text);
-      font-family: "Inter", sans-serif; display: flex; align-items: center;
-      justify-content: center; -webkit-font-smoothing: antialiased; }
+      font-family: "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
 
-    .auth-wrap { width: 100%; max-width: 420px; padding: 24px; }
+    body { display: grid; grid-template-columns: 1fr 420px 1fr; min-height: 100vh;
+      align-items: start; gap: 0; }
+
+    .auth-wrap { width: 100%; padding: 24px; grid-column: 2; align-self: center;
+      min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+
+    /* Side panels */
+    .side-panel { padding: 28px 18px; display: flex; flex-direction: column; gap: 12px;
+      align-self: stretch; border-right: 1px solid var(--border); min-height: 100vh;
+      position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+    .side-panel.right { border-right: none; border-left: 1px solid var(--border); }
+
+    .panel-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+      color: var(--faint); text-transform: uppercase; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+      animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.8)} }
+
+    .mkt-card { background: var(--panel); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 16px; }
+    .mkt-card-title { font-size: 10px; color: var(--faint); text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 10px; }
+
+    /* Fear & Greed gauge */
+    .fg-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .fg-score { font-size: 42px; font-weight: 800; line-height: 1; }
+    .fg-label { font-size: 13px; font-weight: 600; }
+    .fg-bar-bg { width: 100%; height: 6px; border-radius: 3px; margin-top: 4px;
+      background: linear-gradient(90deg,#ff4757 0%,#ffa502 35%,#f0c040 55%,#2ed573 80%,#00e5a0 100%); }
+    .fg-needle { width: 10px; height: 10px; border-radius: 50%; background: #fff;
+      border: 2px solid #0b0f14; margin-top: -8px; transform: translateX(-50%);
+      position: relative; box-shadow: 0 0 6px rgba(255,255,255,0.4); }
+
+    /* Price rows */
+    .price-row { display: flex; justify-content: space-between; align-items: center;
+      padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .price-row:last-child { border-bottom: none; }
+    .price-sym { font-size: 12px; font-weight: 600; color: var(--text); }
+    .price-sub { font-size: 10px; color: var(--faint); }
+    .price-val { text-align: right; }
+    .price-num { font-size: 13px; font-weight: 700; font-family: "JetBrains Mono", monospace; }
+    .price-chg { font-size: 11px; font-weight: 600; }
+    .up   { color: #00e5a0; }
+    .down { color: #ff4757; }
+    .flat { color: var(--faint); }
+
+    /* Sentiment bar */
+    .sent-pair { display: flex; align-items: center; gap: 8px; padding: 5px 0;
+      border-bottom: 1px solid var(--border); }
+    .sent-pair:last-child { border-bottom: none; }
+    .sent-name { font-size: 11px; font-weight: 700; width: 62px; flex-shrink: 0; }
+    .sent-bar-wrap { flex: 1; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .sent-bar { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+    .sent-pct { font-size: 10px; color: var(--faint); width: 28px; text-align: right; flex-shrink: 0; }
+    .bias-pill { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.04em; width: 36px; text-align: center;
+      flex-shrink: 0; }
+    .bias-bull { background: rgba(0,229,160,0.15); color: var(--green); }
+    .bias-bear { background: rgba(255,71,87,0.15); color: var(--red); }
+    .bias-neut { background: rgba(240,192,64,0.12); color: var(--gold); }
+
+    /* Sessions */
+    .session-row { display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .session-row:last-child { border-bottom: none; }
+    .sess-name { font-size: 12px; color: var(--text); }
+    .sess-time { font-size: 10px; color: var(--faint); font-family: monospace; }
+    .sess-dot  { width: 7px; height: 7px; border-radius: 50%; }
+    .sess-open  { background: var(--green); box-shadow: 0 0 5px var(--green); }
+    .sess-closed { background: var(--faint); }
+
+    @media (max-width: 1024px) {
+      body { grid-template-columns: 1fr; }
+      .side-panel { display: none; }
+      .auth-wrap { grid-column: 1; min-height: 100vh; }
+    }
 
     .brand { text-align: center; margin-bottom: 32px; }
     .brand-icon { font-size: 32px; color: var(--green); display: block; margin-bottom: 8px; }
@@ -122,6 +197,39 @@
   </style>
 </head>
 <body>
+
+<!-- LEFT PANEL: Fear & Greed + Crypto/Gold prices -->
+<aside class="side-panel" id="leftPanel">
+  <div class="panel-title"><span class="live-dot"></span> Market Pulse</div>
+
+  <div class="mkt-card">
+    <div class="mkt-card-title">Crypto Fear &amp; Greed Index</div>
+    <div class="fg-wrap">
+      <div class="fg-score" id="fgScore" style="color:var(--faint)">—</div>
+      <div class="fg-label" id="fgLabel" style="color:var(--faint)">Loading…</div>
+      <div class="fg-bar-bg" style="position:relative">
+        <div class="fg-needle" id="fgNeedle" style="left:50%"></div>
+      </div>
+      <div style="font-size:10px;color:var(--faint);margin-top:6px" id="fgUpdated"></div>
+    </div>
+  </div>
+
+  <div class="mkt-card">
+    <div class="mkt-card-title">Live Prices</div>
+    <div id="priceRows">
+      <div class="price-row"><div><div class="price-sym">BTC</div><div class="price-sub">Bitcoin</div></div><div class="price-val"><div class="price-num flat">—</div><div class="price-chg flat">—</div></div></div>
+      <div class="price-row"><div><div class="price-sym">ETH</div><div class="price-sub">Ethereum</div></div><div class="price-val"><div class="price-num flat">—</div><div class="price-chg flat">—</div></div></div>
+      <div class="price-row"><div><div class="price-sym">XAU/USD</div><div class="price-sub">Gold Spot</div></div><div class="price-val"><div class="price-num flat" id="goldPrice">—</div><div class="price-chg flat" id="goldChg">—</div></div></div>
+    </div>
+  </div>
+
+  <div class="mkt-card" style="font-size:11px;color:var(--faint);line-height:1.6">
+    <div class="mkt-card-title">Market Wisdom</div>
+    <div id="quoteText" style="color:var(--text);font-style:italic">"Loading…"</div>
+    <div id="quoteAuthor" style="margin-top:6px;color:var(--faint)"></div>
+  </div>
+</aside>
+
 <div class="auth-wrap">
   <div class="brand">
     <span class="brand-icon">◈</span>
@@ -226,7 +334,45 @@
       <div class="feat-sub">Your data, isolated from others</div></div>
   </div>
   {% endif %}
-</div>
+</div><!-- /auth-wrap -->
+
+<!-- RIGHT PANEL: Forex sentiment + sessions -->
+<aside class="side-panel right" id="rightPanel">
+  <div class="panel-title"><span class="live-dot"></span> Trader Sentiment</div>
+
+  <div class="mkt-card">
+    <div class="mkt-card-title">Pair Bias (24h momentum)</div>
+    <div id="sentRows">
+      {% for sym in ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','XAU/USD'] %}
+      <div class="sent-pair">
+        <div class="sent-name">{{ sym }}</div>
+        <div class="sent-bar-wrap"><div class="sent-bar" id="bar_{{ loop.index }}" style="width:50%;background:var(--faint)"></div></div>
+        <div class="sent-pct" id="pct_{{ loop.index }}">—</div>
+        <div class="bias-pill bias-neut" id="pill_{{ loop.index }}">—</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mkt-card">
+    <div class="mkt-card-title">Trading Sessions (your local time)</div>
+    <div id="sessionRows">
+      <div class="session-row"><div style="display:flex;align-items:center;gap:8px"><div class="sess-dot" id="dot_sydney"></div><div class="sess-name">Sydney</div></div><div class="sess-time" id="time_sydney">—</div></div>
+      <div class="session-row"><div style="display:flex;align-items:center;gap:8px"><div class="sess-dot" id="dot_tokyo"></div><div class="sess-name">Tokyo</div></div><div class="sess-time" id="time_tokyo">—</div></div>
+      <div class="session-row"><div style="display:flex;align-items:center;gap:8px"><div class="sess-dot" id="dot_london"></div><div class="sess-name">London</div></div><div class="sess-time" id="time_london">—</div></div>
+      <div class="session-row"><div style="display:flex;align-items:center;gap:8px"><div class="sess-dot" id="dot_ny"></div><div class="sess-name">New York</div></div><div class="sess-time" id="time_ny">—</div></div>
+    </div>
+  </div>
+
+  <div class="mkt-card">
+    <div class="mkt-card-title">DXY Strength Index</div>
+    <div id="dxyWrap" style="text-align:center">
+      <div style="font-size:32px;font-weight:800;color:var(--faint)" id="dxyVal">—</div>
+      <div style="font-size:11px;color:var(--faint);margin-top:2px" id="dxyChg">US Dollar Index</div>
+      <div style="font-size:10px;color:var(--faint);margin-top:8px">Higher = USD stronger vs majors</div>
+    </div>
+  </div>
+</aside>
 
 <script>
   const MODE = "{{ mode }}";
@@ -372,6 +518,203 @@
     } catch(e) {}
     showSuccess('Verification email sent — check your inbox.');
   }
+</script>
+
+<script>
+// ── Live Market Data Panels ─────────────────────────────────────────────────
+
+const QUOTES = [
+  { q: "The trend is your friend until the end.", a: "Ed Seykota" },
+  { q: "Risk comes from not knowing what you are doing.", a: "Warren Buffett" },
+  { q: "Cut your losses, let your winners run.", a: "Trading Maxim" },
+  { q: "The goal of a successful trader is to make the best trades. Money is secondary.", a: "Alexander Elder" },
+  { q: "Plan the trade and trade the plan.", a: "Trading Maxim" },
+  { q: "In this business, if you're good, you're right 6 times out of 10.", a: "Peter Lynch" },
+  { q: "The market can remain irrational longer than you can remain solvent.", a: "John M. Keynes" },
+  { q: "Do not anticipate and move without market confirmation.", a: "Jesse Livermore" },
+  { q: "Amateurs focus on profits. Professionals focus on risk.", a: "Trading Maxim" },
+  { q: "The most important organ for trading is the stomach, not the brain.", a: "Peter Lynch" },
+];
+
+function rotateQuote() {
+  const q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  const qt = document.getElementById('quoteText');
+  const qa = document.getElementById('quoteAuthor');
+  if (qt) qt.textContent = '“' + q.q + '”';
+  if (qa) qa.textContent = '— ' + q.a;
+}
+
+// ── Fear & Greed ────────────────────────────────────────────────────────────
+async function loadFearGreed() {
+  const r = await fetch('https://api.alternative.me/fng/?limit=1');
+  const d = await r.json();
+  const item = d.data[0];
+  const val = parseInt(item.value);
+  const label = item.value_classification;
+  const ts = parseInt(item.timestamp) * 1000;
+  const color = val >= 75 ? '#00e5a0' : val >= 55 ? '#2ed573' : val >= 45 ? '#f0c040' : val >= 25 ? '#ffa502' : '#ff4757';
+  const sc = document.getElementById('fgScore');
+  const lb = document.getElementById('fgLabel');
+  const nd = document.getElementById('fgNeedle');
+  const up = document.getElementById('fgUpdated');
+  if (sc) { sc.textContent = val; sc.style.color = color; }
+  if (lb) { lb.textContent = label; lb.style.color = color; }
+  if (nd) nd.style.left = val + '%';
+  if (up) up.textContent = 'Updated ' + new Date(ts).toLocaleDateString(undefined, { month:'short', day:'numeric' });
+}
+
+// ── Crypto Prices ───────────────────────────────────────────────────────────
+async function loadCrypto() {
+  const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
+  const d = await r.json();
+  const rows = document.querySelectorAll('#priceRows .price-row');
+  if (!rows.length) return;
+  updatePriceRow(rows[0], fmtPrice(d.bitcoin.usd), d.bitcoin.usd_24h_change);
+  updatePriceRow(rows[1], fmtPrice(d.ethereum.usd), d.ethereum.usd_24h_change);
+}
+
+function updatePriceRow(row, price, chgPct) {
+  const numEl = row.querySelector('.price-num');
+  const chgEl = row.querySelector('.price-chg');
+  if (!numEl || !chgEl) return;
+  const cls = chgPct > 0 ? 'up' : chgPct < 0 ? 'down' : 'flat';
+  numEl.textContent = '$' + price;
+  numEl.className = 'price-num ' + cls;
+  chgEl.textContent = (chgPct > 0 ? '+' : '') + chgPct.toFixed(2) + '%';
+  chgEl.className = 'price-chg ' + cls;
+}
+
+function fmtPrice(n) {
+  if (n >= 10000) return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ── Forex + Gold via Frankfurter ────────────────────────────────────────────
+async function loadForex() {
+  // Use 3-day-ago as "yesterday" to avoid weekend/holiday gaps
+  const ref = new Date(Date.now() - 86400000 * 3);
+  const refDate = ref.toISOString().split('T')[0];
+
+  const [rNow, rRef] = await Promise.all([
+    fetch('https://api.frankfurter.app/latest?from=USD&to=EUR,GBP,JPY,AUD,CAD').then(r => r.json()),
+    fetch('https://api.frankfurter.app/' + refDate + '?from=USD&to=EUR,GBP,JPY,AUD,CAD').then(r => r.json()),
+  ]);
+
+  // EUR/USD, GBP/USD: base is quote currency (invert)
+  // USD/JPY, USD/CAD: USD is base (direct)
+  const PAIRS = [
+    { idx:1, key:'EUR', invert:true  },
+    { idx:2, key:'GBP', invert:true  },
+    { idx:3, key:'JPY', invert:false },
+    { idx:4, key:'AUD', invert:true  },
+    { idx:5, key:'CAD', invert:false },
+  ];
+
+  PAIRS.forEach(p => {
+    const now = p.invert ? 1/rNow.rates[p.key] : rNow.rates[p.key];
+    const ref = p.invert ? 1/rRef.rates[p.key] : rRef.rates[p.key];
+    // For USD/JPY & USD/CAD: rising means USD stronger, which is bullish USD not bullish pair
+    // Normalize so positive chg = bullish for the LEFT currency in the pair name
+    const rawChg = (now - ref) / ref * 100;
+    setBiasBar(p.idx, rawChg);
+  });
+
+  // DXY approximation: DXY heavily weighted to EUR/USD inverse
+  const eurusd = 1 / rNow.rates.EUR;
+  const eurusdRef = 1 / rRef.rates.EUR;
+  const dxy = (1 / eurusd) * 107.0;
+  const dxyRef = (1 / eurusdRef) * 107.0;
+  const dxyChg = (dxy - dxyRef) / dxyRef * 100;
+  const dxyEl = document.getElementById('dxyVal');
+  const dxyChgEl = document.getElementById('dxyChg');
+  if (dxyEl) {
+    dxyEl.textContent = dxy.toFixed(2);
+    dxyEl.style.color = dxy > 104 ? '#ff4757' : dxy > 100 ? '#f0c040' : '#00e5a0';
+  }
+  if (dxyChgEl) {
+    dxyChgEl.textContent = (dxyChg > 0 ? '+' : '') + dxyChg.toFixed(2) + '% (3d change)';
+  }
+}
+
+async function loadGold() {
+  // Frankfurter supports XAU (gold) natively
+  const ref = new Date(Date.now() - 86400000 * 3);
+  const refDate = ref.toISOString().split('T')[0];
+  const [rNow, rRef] = await Promise.all([
+    fetch('https://api.frankfurter.app/latest?from=XAU&to=USD').then(r => r.json()),
+    fetch('https://api.frankfurter.app/' + refDate + '?from=XAU&to=USD').then(r => r.json()),
+  ]);
+  const xau = rNow.rates?.USD;
+  const xauRef = rRef.rates?.USD;
+  if (!xau) return;
+
+  const rows = document.querySelectorAll('#priceRows .price-row');
+  if (rows[2]) {
+    const chgPct = xauRef ? (xau - xauRef) / xauRef * 100 : 0;
+    updatePriceRow(rows[2], fmtPrice(xau), chgPct);
+  }
+
+  // XAU/USD bias bar (idx 6)
+  if (xauRef) {
+    const chgPct = (xau - xauRef) / xauRef * 100;
+    setBiasBar(6, chgPct);
+  }
+}
+
+function setBiasBar(idx, chgPct) {
+  const clamped = Math.max(-5, Math.min(5, chgPct));
+  const barPct = 50 + (clamped / 5) * 50;
+  const isBull = chgPct > 0.1;
+  const isBear = chgPct < -0.1;
+  const barEl  = document.getElementById('bar_' + idx);
+  const pctEl  = document.getElementById('pct_' + idx);
+  const pillEl = document.getElementById('pill_' + idx);
+  if (barEl) { barEl.style.width = barPct + '%'; barEl.style.background = isBull ? '#00e5a0' : isBear ? '#ff4757' : '#f0c040'; }
+  if (pctEl) { pctEl.textContent = (chgPct > 0 ? '+' : '') + chgPct.toFixed(2) + '%'; }
+  if (pillEl) {
+    pillEl.textContent = isBull ? 'BULL' : isBear ? 'BEAR' : 'NEUT';
+    pillEl.className = 'bias-pill ' + (isBull ? 'bias-bull' : isBear ? 'bias-bear' : 'bias-neut');
+  }
+}
+
+// ── Trading Sessions ────────────────────────────────────────────────────────
+function updateSessions() {
+  const utcH = new Date().getUTCHours();
+  const utcM = new Date().getUTCMinutes();
+  const utcTotal = utcH * 60 + utcM;
+
+  const SESSIONS = [
+    { id:'sydney', open:22*60, close:7*60,  fmt:'22:00–07:00 UTC', wraps:true },
+    { id:'tokyo',  open:0*60,  close:9*60,  fmt:'00:00–09:00 UTC', wraps:false },
+    { id:'london', open:8*60,  close:16*60, fmt:'08:00–16:00 UTC', wraps:false },
+    { id:'ny',     open:13*60, close:22*60, fmt:'13:00–22:00 UTC', wraps:false },
+  ];
+
+  SESSIONS.forEach(s => {
+    const isOpen = s.wraps
+      ? (utcTotal >= s.open || utcTotal < s.close)
+      : (utcTotal >= s.open && utcTotal < s.close);
+    const dot  = document.getElementById('dot_'  + s.id);
+    const time = document.getElementById('time_' + s.id);
+    if (dot)  dot.className  = 'sess-dot ' + (isOpen ? 'sess-open' : 'sess-closed');
+    if (time) time.textContent = s.fmt + (isOpen ? ' • Open' : ' • Closed');
+  });
+}
+
+// ── Boot ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  rotateQuote();
+  setInterval(rotateQuote, 15000);
+
+  updateSessions();
+  setInterval(updateSessions, 30000);
+
+  // Fire all API calls with independent error containment
+  loadFearGreed().catch(() => {});
+  loadCrypto().catch(() => {});
+  loadForex().catch(() => {});
+  loadGold().catch(() => {});
+});
 </script>
 </body>
 </html>
