@@ -27,28 +27,29 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0b0f14; --panel: #131920; --border: #1e2d3d; --border2: #2a3d52;
-      --text: #d0d8e4; --muted: #6b7c93; --faint: #3d4f63;
-      --green: #00e5a0; --green-dim: #004d38; --red: #ff4757; --gold: #f0c040;
+      --bg: #080c12; --panel: #0f1720; --border: #1a2840; --border2: #253a56;
+      --text: #f0f4ff; --muted: #8fa4bf; --faint: #4a6080;
+      --green: #00ffb3; --green-dim: #003d28; --red: #ff3b52; --gold: #ffd44a;
     }
     html, body { min-height: 100vh; background: var(--bg); color: var(--text);
       font-family: "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
 
     body { display: grid; grid-template-columns: 1fr 420px 1fr;
-      grid-template-rows: 44px 1fr; min-height: 100vh; align-items: start; gap: 0; }
+      grid-template-rows: 48px 1fr; min-height: 100vh; align-items: start; gap: 0; }
 
     /* ── Scrolling ticker ── */
-    .ticker-wrap { grid-column: 1/-1; background: #0d1520;
-      border-bottom: 1px solid var(--border); overflow: hidden;
-      display: flex; align-items: center; height: 44px; position: sticky; top: 0; z-index: 50; }
+    .ticker-wrap { grid-column: 1/-1; background: #0a1118;
+      border-bottom: 1px solid rgba(0,255,179,0.15); overflow: hidden;
+      display: flex; align-items: center; height: 48px; position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 1px 12px rgba(0,0,0,0.4); }
     .ticker-inner { display: flex; white-space: nowrap; will-change: transform; }
     @keyframes scrollTicker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-    .ticker-running { animation: scrollTicker 45s linear infinite; }
-    .ticker-item { display: inline-flex; align-items: center; gap: 8px;
-      padding: 0 28px; font-size: 13.5px; font-weight: 600; color: var(--text);
+    .ticker-running { animation: scrollTicker 40s linear infinite; }
+    .ticker-item { display: inline-flex; align-items: center; gap: 9px;
+      padding: 0 30px; font-size: 14px; font-weight: 700; color: var(--text);
       letter-spacing: 0.01em; }
-    .ticker-quote { font-style: italic; color: #a0b4c8; font-size: 13px; font-weight: 500; }
-    .ticker-sep { color: var(--border2); font-size: 18px; line-height: 1; }
+    .ticker-quote { font-style: italic; color: #c8d8ec; font-size: 14px; font-weight: 500; }
+    .ticker-sep { color: var(--border2); font-size: 20px; line-height: 1; }
 
     .auth-wrap { width: 100%; padding: 24px; grid-column: 2; align-self: center;
       min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
@@ -59,39 +60,39 @@
       position: sticky; top: 0; height: 100vh; overflow-y: auto; }
     .side-panel.right { border-right: none; border-left: 1px solid var(--border); }
 
-    .panel-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
-      color: var(--faint); text-transform: uppercase; margin-bottom: 4px;
+    .panel-title { font-size: 11px; font-weight: 800; letter-spacing: 0.12em;
+      color: var(--green); text-transform: uppercase; margin-bottom: 4px;
       display: flex; align-items: center; gap: 6px; }
-    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green);
-      animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(0.8)} }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+      animation: pulse 1.5s infinite; box-shadow: 0 0 6px var(--green); }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(0.7)} }
 
     .mkt-card { background: var(--panel); border: 1px solid var(--border);
       border-radius: 10px; padding: 14px 16px; }
-    .mkt-card-title { font-size: 10px; color: var(--faint); text-transform: uppercase;
-      letter-spacing: 0.08em; margin-bottom: 10px; }
+    .mkt-card-title { font-size: 11px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.1em; font-weight: 700; margin-bottom: 10px; }
 
     /* Fear & Greed gauge */
     .fg-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
     .fg-score { font-size: 42px; font-weight: 800; line-height: 1; }
     .fg-label { font-size: 13px; font-weight: 600; }
     .fg-bar-bg { width: 100%; height: 6px; border-radius: 3px; margin-top: 4px;
-      background: linear-gradient(90deg,#ff4757 0%,#ffa502 35%,#f0c040 55%,#2ed573 80%,#00e5a0 100%); }
+      background: linear-gradient(90deg,#ff3b52 0%,#ffa502 35%,#ffd44a 55%,#2ed573 80%,#00ffb3 100%); }
     .fg-needle { width: 10px; height: 10px; border-radius: 50%; background: #fff;
       border: 2px solid #0b0f14; margin-top: -8px; transform: translateX(-50%);
       position: relative; box-shadow: 0 0 6px rgba(255,255,255,0.4); }
 
     /* Price rows */
     .price-row { display: flex; justify-content: space-between; align-items: center;
-      padding: 7px 0; border-bottom: 1px solid var(--border); }
+      padding: 9px 0; border-bottom: 1px solid var(--border); }
     .price-row:last-child { border-bottom: none; }
-    .price-sym { font-size: 12px; font-weight: 600; color: var(--text); }
-    .price-sub { font-size: 10px; color: var(--faint); }
+    .price-sym { font-size: 14px; font-weight: 700; color: #fff; }
+    .price-sub { font-size: 10px; color: var(--faint); margin-top: 1px; }
     .price-val { text-align: right; }
-    .price-num { font-size: 13px; font-weight: 700; font-family: "JetBrains Mono", monospace; }
-    .price-chg { font-size: 11px; font-weight: 600; }
-    .up   { color: #00e5a0; }
-    .down { color: #ff4757; }
+    .price-num { font-size: 15px; font-weight: 800; font-family: "JetBrains Mono", monospace; }
+    .price-chg { font-size: 12px; font-weight: 700; margin-top: 1px; }
+    .up   { color: #00ffb3; }
+    .down { color: #ff3b52; }
     .flat { color: var(--faint); }
 
     /* Sentiment bar */
@@ -120,65 +121,69 @@
     .sess-closed { background: var(--faint); }
 
     /* Flash update animation */
-    @keyframes flashGreen { 0%{background:transparent} 25%{background:rgba(0,229,160,0.18)} 100%{background:transparent} }
-    @keyframes flashRed   { 0%{background:transparent} 25%{background:rgba(255,71,87,0.18)} 100%{background:transparent} }
-    .flash-up   { animation: flashGreen 0.9s ease; border-radius: 4px; }
-    .flash-down { animation: flashRed   0.9s ease; border-radius: 4px; }
-    @keyframes countUp { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes flashGreen { 0%{background:transparent;text-shadow:none} 30%{background:rgba(0,255,179,0.15);text-shadow:0 0 12px #00ffb3} 100%{background:transparent;text-shadow:none} }
+    @keyframes flashRed   { 0%{background:transparent;text-shadow:none} 30%{background:rgba(255,59,82,0.15);text-shadow:0 0 12px #ff3b52}  100%{background:transparent;text-shadow:none} }
+    .flash-up   { animation: flashGreen 1s ease; border-radius: 5px; }
+    .flash-down { animation: flashRed   1s ease; border-radius: 5px; }
+    @keyframes countUp { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
     .val-appear { animation: countUp 0.4s ease; }
 
-    /* Constant live pulse on prices */
-    @keyframes livePulse { 0%,75%,100%{opacity:1;transform:scale(1)} 87%{opacity:0.5;transform:scale(0.97)} }
-    .live-val { animation: livePulse 2.5s ease infinite; }
+    /* Constant live pulse — brighter, more visible */
+    @keyframes livePulse { 0%,70%,100%{opacity:1;text-shadow:none} 85%{opacity:0.45;text-shadow:0 0 8px currentColor} }
+    .live-val { animation: livePulse 2.2s ease infinite; }
 
-    /* Price grid — bigger, bolder */
+    /* Price grid */
     .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-    .pg-cell { background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-      border-radius: 9px; padding: 11px 13px; transition: border-color 0.25s, background 0.25s; }
-    .pg-cell:hover { border-color: var(--border2); background: rgba(255,255,255,0.05); }
-    .pg-name  { font-size: 9px; color: var(--faint); text-transform: uppercase;
-      letter-spacing: 0.08em; margin-bottom: 4px; }
-    .pg-price { font-size: 14px; font-weight: 800; font-family: "JetBrains Mono", monospace;
-      line-height: 1.2; }
-    .pg-chg   { font-size: 11px; font-weight: 700; margin-top: 3px; }
+    .pg-cell { background: rgba(255,255,255,0.035); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 13px; transition: border-color 0.2s, background 0.2s; }
+    .pg-cell:hover { border-color: rgba(0,255,179,0.3); background: rgba(0,255,179,0.04); }
+    .pg-name  { font-size: 10px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.09em; font-weight: 700; margin-bottom: 5px; }
+    .pg-price { font-size: 15px; font-weight: 800; font-family: "JetBrains Mono", monospace;
+      line-height: 1.2; color: #fff; }
+    .pg-chg   { font-size: 12px; font-weight: 700; margin-top: 3px; }
 
     /* Sentiment gauges */
-    .sent-gauge { padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .sent-gauge { padding: 8px 0; border-bottom: 1px solid var(--border); }
     .sent-gauge:last-child { border-bottom: none; }
-    .sg-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .sg-name  { font-size: 10px; font-weight: 700; color: var(--text); }
-    .sg-label { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+    .sg-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .sg-name  { font-size: 11px; font-weight: 700; color: #fff; }
+    .sg-label { font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 5px;
       text-transform: uppercase; letter-spacing: 0.05em; }
-    .sg-bar-bg { width: 100%; height: 5px; border-radius: 3px;
-      background: linear-gradient(90deg,#ff4757 0%,#ffa502 30%,#f0c040 50%,#2ed573 75%,#00e5a0 100%); }
-    .sg-needle { width: 8px; height: 8px; border-radius: 50%; background: #fff;
-      border: 2px solid var(--bg); margin-top: -6px; position: relative;
-      transform: translateX(-50%); transition: left 0.6s ease;
-      box-shadow: 0 0 6px rgba(255,255,255,0.5); }
-    .sg-note { font-size: 9px; color: var(--faint); margin-top: 2px; }
+    .sg-bar-bg { width: 100%; height: 6px; border-radius: 3px;
+      background: linear-gradient(90deg,#ff3b52 0%,#ffa502 30%,#ffd44a 50%,#2ed573 75%,#00ffb3 100%); }
+    .sg-needle { width: 10px; height: 10px; border-radius: 50%; background: #fff;
+      border: 2px solid var(--bg); margin-top: -8px; position: relative;
+      transform: translateX(-50%); transition: left 0.7s ease;
+      box-shadow: 0 0 8px #fff, 0 0 16px rgba(255,255,255,0.4); }
+    .sg-note { font-size: 10px; color: var(--muted); margin-top: 3px; }
 
-    /* Sessions — improved with countdown */
-    .sess-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .sess-card { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
-      background: rgba(255,255,255,0.02); transition: all 0.3s; }
-    .sess-card.open { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.06); }
-    .sess-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
-    .sess-name-big { font-size: 11px; font-weight: 800; }
-    .sess-card.open .sess-name-big { color: var(--green); }
-    .sess-time-small { font-size: 9px; color: var(--faint); font-family: monospace; }
-    .sess-countdown { font-size: 10px; font-weight: 600; color: var(--faint); }
+    /* Sessions */
+    .sess-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .sess-card { border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px;
+      background: rgba(255,255,255,0.025); transition: all 0.3s; }
+    .sess-card.open { border-color: rgba(0,255,179,0.45); background: rgba(0,255,179,0.07);
+      box-shadow: 0 0 12px rgba(0,255,179,0.08); }
+    .sess-card-top { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
+    .sess-name-big { font-size: 13px; font-weight: 800; color: var(--muted); }
+    .sess-card.open .sess-name-big { color: var(--green); text-shadow: 0 0 8px var(--green); }
+    .sess-time-small { font-size: 10px; color: var(--faint); font-family: monospace; }
+    .sess-countdown { font-size: 11px; font-weight: 700; color: var(--faint); margin-top: 2px; }
     .sess-card.open .sess-countdown { color: var(--green); }
+    .sess-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .sess-open  { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .sess-closed { background: var(--faint); }
 
     /* News */
-    .news-item { display: block; padding: 8px 0; border-bottom: 1px solid var(--border);
-      text-decoration: none; transition: opacity 0.15s; }
+    .news-item { display: block; padding: 9px 0; border-bottom: 1px solid var(--border);
+      text-decoration: none; transition: all 0.15s; }
     .news-item:last-child { border-bottom: none; }
-    .news-item:hover { opacity: 0.8; }
-    .news-title { font-size: 11px; color: var(--text); line-height: 1.45; }
+    .news-item:hover { padding-left: 4px; }
+    .news-title { font-size: 12px; color: #e8eef8; line-height: 1.5; font-weight: 500; }
     .news-item:hover .news-title { color: var(--green); }
-    .news-meta { font-size: 10px; color: var(--faint); margin-top: 3px;
+    .news-meta { font-size: 10px; color: var(--muted); margin-top: 3px;
       display: flex; align-items: center; gap: 6px; }
-    .news-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--faint); }
+    .news-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--faint); }
 
     @media (max-width: 1024px) {
       body { grid-template-columns: 1fr; }
@@ -685,12 +690,12 @@ function buildTicker(prices) {
     Object.entries(priceLabels).forEach(([key, sym]) => {
       const v = prices[key];
       if (!v?.price) return;
-      const chgColor = v.chg > 0 ? '#00e5a0' : v.chg < 0 ? '#ff4757' : '#6b7c93';
+      const chgColor = v.chg > 0 ? '#00ffb3' : v.chg < 0 ? '#ff3b52' : '#8fa4bf';
       const arrow    = v.chg > 0 ? '▲' : v.chg < 0 ? '▼' : '◆';
       const chgStr   = (v.chg >= 0 ? '+' : '') + v.chg.toFixed(2) + '%';
       const fmt      = GRID_FMT[key];
       const priceStr = fmt ? (fmt.prefix + fmtPrice(v.price, fmt.dec)) : v.price;
-      items.push(`<span class="ticker-item"><span style="color:var(--faint);font-size:10px;letter-spacing:.06em">${sym}</span> <span style="color:${chgColor}">${priceStr}</span> <span style="color:${chgColor};font-size:10px">${arrow} ${chgStr}</span></span>`);
+      items.push(`<span class="ticker-item"><span style="color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.07em">${sym}</span> <span style="color:${chgColor};font-size:14px;font-weight:800">${priceStr}</span> <span style="color:${chgColor};font-size:11px;font-weight:700">${arrow} ${chgStr}</span></span>`);
       items.push('<span class="ticker-sep">|</span>');
     });
   }
@@ -718,7 +723,7 @@ async function loadFearGreed() {
   const d = await r.json();
   const item = d.data[0];
   const val  = parseInt(item.value);
-  const color = val >= 75 ? '#00e5a0' : val >= 55 ? '#2ed573' : val >= 45 ? '#f0c040' : val >= 25 ? '#ffa502' : '#ff4757';
+  const color = val >= 75 ? '#00ffb3' : val >= 55 ? '#2ed573' : val >= 45 ? '#ffd44a' : val >= 25 ? '#ffa502' : '#ff3b52';
   const sc = document.getElementById('fgScore');
   const lb = document.getElementById('fgLabel');
   const nd = document.getElementById('fgNeedle');
@@ -789,7 +794,7 @@ async function loadPrices() {
     }
     chgEl.textContent = chgStr;
     chgEl.className   = 'pg-chg ' + cls;
-    priceEl.style.color = val.chg > 0 ? '#00e5a0' : val.chg < 0 ? '#ff4757' : 'var(--text)';
+    priceEl.style.color = val.chg > 0 ? '#00ffb3' : val.chg < 0 ? '#ff3b52' : 'var(--text)';
   });
 
   // ── Left-panel: BTC row ─────────────────────────────────────────────────
@@ -828,7 +833,7 @@ async function loadPrices() {
     if (dxyEl) {
       const prev = parseFloat(dxyEl.textContent) || 0;
       dxyEl.textContent = dxy.toFixed(2);
-      dxyEl.style.color = dxy > 104 ? '#ff4757' : dxy > 101 ? '#f0c040' : '#00e5a0';
+      dxyEl.style.color = dxy > 104 ? '#ff3b52' : dxy > 101 ? '#ffd44a' : '#00ffb3';
       if (prev) flash(dxyEl, dxy - prev);
     }
     if (dxyChgEl) {
@@ -918,7 +923,7 @@ async function loadNews() {
 
 // ── Multi-asset sentiment gauges ──────────────────────────────────────────────
 function _sentColor(s) {
-  return s >= 75 ? '#00e5a0' : s >= 60 ? '#2ed573' : s >= 40 ? '#f0c040' : s >= 25 ? '#ffa502' : '#ff4757';
+  return s >= 75 ? '#00ffb3' : s >= 60 ? '#2ed573' : s >= 40 ? '#ffd44a' : s >= 25 ? '#ffa502' : '#ff3b52';
 }
 function _sentBg(s) {
   const c = _sentColor(s);
