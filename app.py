@@ -58,6 +58,42 @@ google_oauth = oauth.register(
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# ── Live market prices (used by login page panels) ───────────────────────────
+import time as _time
+_prices_cache = {"data": None, "ts": 0}
+
+@app.route("/api/market-prices")
+def market_prices():
+    import yfinance as yf
+    global _prices_cache
+    now = _time.time()
+    if _prices_cache["data"] and now - _prices_cache["ts"] < 30:
+        return jsonify(_prices_cache["data"])
+
+    SYMS = {
+        "gold":   "GC=F",
+        "silver": "SI=F",
+        "oil":    "CL=F",
+        "nasdaq": "^IXIC",
+        "sp500":  "^GSPC",
+        "dow":    "^DJI",
+        "btc":    "BTC-USD",
+        "eurusd": "EURUSD=X",
+    }
+    out = {}
+    for key, sym in SYMS.items():
+        try:
+            fi = yf.Ticker(sym).fast_info
+            price = float(fi.last_price)
+            prev  = float(fi.previous_close or fi.regular_market_previous_close or price)
+            chg   = round((price - prev) / prev * 100, 2) if prev else 0.0
+            out[key] = {"price": round(price, 4), "chg": chg}
+        except Exception:
+            out[key] = {"price": None, "chg": 0.0}
+
+    _prices_cache = {"data": out, "ts": now}
+    return jsonify(out)
+
 # ── Canonical domain redirect ─────────────────────────────────────────────────
 _CANONICAL = "https://backtesting-journalmytrades.com"
 _OLD_HOST  = "tradejournal-n3hn.onrender.com"
