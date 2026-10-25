@@ -128,18 +128,69 @@ def get_news():
     now = _time.time()
     if _news_cache["data"] and now - _news_cache["ts"] < 300:
         return jsonify(_news_cache["data"])
-    try:
-        r = http_requests.get(
-            "https://min-api.cryptocompare.com/data/v2/news/"
-            "?lang=EN&categories=Trading,Forex,Crypto,Commodities&sortOrder=latest&limit=6",
-            timeout=10, headers={"User-Agent": "TradeJournal/1.0"}
-        )
-        data = r.json().get("Data", [])
+
+    import xml.etree.ElementTree as _ET
+    import email.utils as _eu
+
+    # Global financial RSS feeds — no API keys needed
+    RSS_FEEDS = [
+        ("Reuters Markets",  "https://feeds.reuters.com/reuters/businessNews"),
+        ("CNBC Markets",     "https://www.cnbc.com/id/100003114/device/rss/rss.html"),
+        ("MarketWatch",      "https://feeds.marketwatch.com/marketwatch/topstories/"),
+        ("FXStreet",         "https://www.fxstreet.com/rss/news"),
+        ("Yahoo Finance",    "https://finance.yahoo.com/news/rssindex"),
+    ]
+
+    hdrs = {"User-Agent": "Mozilla/5.0 TradeJournal/2.0", "Accept": "application/rss+xml, application/xml, text/xml"}
+    all_items = []
+
+    for source_name, url in RSS_FEEDS:
+        if len(all_items) >= 10:
+            break
+        try:
+            r = http_requests.get(url, timeout=7, headers=hdrs)
+            if r.status_code != 200:
+                continue
+            root = _ET.fromstring(r.content)
+            ns   = {"atom": "http://www.w3.org/2005/Atom"}
+            # Handle both RSS <item> and Atom <entry>
+            items = root.findall(".//item") or root.findall(".//atom:entry", ns)
+            for it in items[:4]:
+                def _t(tag):
+                    el = it.find(tag) or it.find("atom:" + tag, ns)
+                    return (el.text or "").strip() if el is not None else ""
+                title   = _t("title")
+                link_el = it.find("link") or it.find("atom:link", ns)
+                link    = (link_el.text or link_el.get("href", "#") if link_el is not None else "#").strip()
+                pubdate = _t("pubDate") or _t("published") or _t("updated")
+                try:
+                    ts = int(_eu.parsedate_to_datetime(pubdate).timestamp())
+                except Exception:
+                    ts = int(now)
+                if title and link:
+                    all_items.append({
+                        "title":        title,
+                        "url":          link,
+                        "published_on": ts,
+                        "source":       source_name,
+                        "source_info":  {"name": source_name},
+                    })
+        except Exception as e:
+            app.logger.warning(f"RSS {source_name} failed: {e}")
+
+    # Sort newest first, deduplicate by title prefix
+    all_items.sort(key=lambda x: x["published_on"], reverse=True)
+    seen, deduped = set(), []
+    for it in all_items:
+        key = it["title"][:40].lower()
+        if key not in seen:
+            seen.add(key)
+            deduped.append(it)
+
+    data = deduped[:8]
+    if data:
         _news_cache = {"data": data, "ts": now}
-        return jsonify(data)
-    except Exception as e:
-        app.logger.warning(f"news fetch failed: {e}")
-        return jsonify(_news_cache["data"] or [])
+    return jsonify(_news_cache["data"] or [])
 
 # ── Multi-asset sentiment (5-min cache, derived from yfinance 30d history) ────
 _sentiment_cache = {"data": None, "ts": 0}
