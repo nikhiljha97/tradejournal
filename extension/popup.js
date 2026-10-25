@@ -61,6 +61,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("riskFixedMode").click();
     }
   });
+
+  // Restore in-progress log trade form (persists across popup close/reopen)
+  restoreLogForm();
 });
 
 // ── Wire all DOM events (no inline handlers) ──────────────────────────────────
@@ -132,6 +135,13 @@ function wireEvents() {
     reader.onload = (ev) => addScreenshot(ev.target.result);
     reader.readAsDataURL(file);
     e.target.value = "";   // reset so same file can be re-selected
+  });
+
+  // Auto-save log form on any change so state survives popup close
+  const LOG_FIELDS = ["logInstrument","logEntry","logStop","logTarget","logLots","logDate","logExit","logPnl","logNotes"];
+  LOG_FIELDS.forEach(id => {
+    document.getElementById(id).addEventListener("input",  saveLogForm);
+    document.getElementById(id).addEventListener("change", saveLogForm);
   });
 }
 
@@ -276,6 +286,7 @@ function onCalcChange() {
 // ── Direction ─────────────────────────────────────────────────────────────────
 function setDirection(dir) {
   selectedDirection = dir;
+  saveLogForm();
   document.getElementById("btnBuy").className  = "dir-btn" + (dir === "Buy"  ? " active-buy"  : "");
   document.getElementById("btnSell").className = "dir-btn" + (dir === "Sell" ? " active-sell" : "");
 }
@@ -283,6 +294,7 @@ function setDirection(dir) {
 // ── Outcome ───────────────────────────────────────────────────────────────────
 function setOutcome(outcome) {
   selectedOutcome = outcome;
+  saveLogForm();
   const map = { win: "win", loss: "loss", be: "be", open: "open-active" };
   document.getElementById("outcomeWin").className  = "outcome-btn" + (outcome === "win"  ? " win"         : "");
   document.getElementById("outcomeLoss").className = "outcome-btn" + (outcome === "loss" ? " loss"        : "");
@@ -420,11 +432,13 @@ function addScreenshot(dataUrl) {
   }
   capturedScreenshots.push(dataUrl);
   renderThumbs();
+  saveLogForm();
 }
 
 function removeScreenshot(idx) {
   capturedScreenshots.splice(idx, 1);
   renderThumbs();
+  saveLogForm();
 }
 
 function renderThumbs() {
@@ -493,11 +507,39 @@ async function submitTrade() {
 
   if (resp && resp.status === 201) {
     showToast("Trade logged!");
+    chrome.storage.local.remove("_logDraft");
     resetLogForm();
   } else {
     const errMsg = resp?.data?.error || "Failed to log — check connection";
     showToast(errMsg, true);
   }
+}
+
+// ── Log form persistence (survives popup close/reopen) ────────────────────────
+const LOG_FIELDS = ["logInstrument","logEntry","logStop","logTarget","logLots","logDate","logExit","logPnl","logNotes"];
+
+function saveLogForm() {
+  const data = {};
+  LOG_FIELDS.forEach(id => { data[id] = document.getElementById(id).value; });
+  data._direction  = selectedDirection;
+  data._outcome    = selectedOutcome;
+  data._screenshots = capturedScreenshots;
+  chrome.storage.local.set({ _logDraft: data });
+}
+
+function restoreLogForm() {
+  chrome.storage.local.get(["_logDraft"], ({ _logDraft: d }) => {
+    if (!d) return;
+    LOG_FIELDS.forEach(id => {
+      if (d[id] !== undefined && d[id] !== "") document.getElementById(id).value = d[id];
+    });
+    if (d._direction) setDirection(d._direction);
+    if (d._outcome)   setOutcome(d._outcome);
+    if (Array.isArray(d._screenshots) && d._screenshots.length) {
+      capturedScreenshots = d._screenshots;
+      renderThumbs();
+    }
+  });
 }
 
 function resetLogForm() {
