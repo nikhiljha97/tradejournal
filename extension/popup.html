@@ -425,7 +425,7 @@ textarea{resize:none;height:64px;font-family:inherit}
 
       <!-- Screenshot attachment -->
       <div class="form-row" id="screenshotSection">
-        <label>Chart Screenshot</label>
+        <label>Chart Screenshots <span id="ssCount" style="color:#666;font-size:11px">(0/3)</span></label>
         <div class="ss-row">
           <button class="ss-btn" id="captureBtn" title="Capture the current chart tab">
             <span class="ss-icon">📷</span> Capture Chart
@@ -435,11 +435,8 @@ textarea{resize:none;height:64px;font-family:inherit}
             <input type="file" id="screenshotFile" accept="image/*" style="display:none"/>
           </label>
         </div>
-        <!-- Preview -->
-        <div id="ssPreview" class="ss-preview" style="display:none">
-          <img id="ssThumb" src="" alt="chart preview"/>
-          <button class="ss-remove" id="ssRemove" title="Remove screenshot">✕</button>
-        </div>
+        <!-- Multi-thumbnail grid -->
+        <div id="ssThumbs" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
       </div>
 
       <button class="btn-primary" id="submitTradeBtn">Log Trade</button>

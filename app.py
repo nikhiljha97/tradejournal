@@ -1849,18 +1849,24 @@ def ext_log_trade():
     })
 
     # Handle chart screenshot upload (base64 JPEG from extension)
-    screenshot_b64 = payload.pop("screenshot_b64", None)
-    if screenshot_b64:
+    screenshot_b64       = payload.pop("screenshot_b64", None)
+    screenshot_b64_extra = payload.pop("screenshot_b64_extra", []) or []
+    all_b64 = ([screenshot_b64] if screenshot_b64 else []) + list(screenshot_b64_extra)
+    if all_b64:
         try:
             import cloudinary, cloudinary.uploader
             cloudinary.config(cloudinary_url=os.environ.get("CLOUDINARY_URL", ""))
-            result = cloudinary.uploader.upload(
-                screenshot_b64,
-                folder=f"tradejournal/user_{user.id}",
-                resource_type="image",
-                transformation=[{"width": 1200, "crop": "limit", "quality": "auto"}],
-            )
-            payload["image_url"] = result["secure_url"]
+            urls = []
+            for b64 in all_b64[:3]:
+                result = cloudinary.uploader.upload(
+                    b64,
+                    folder=f"tradejournal/user_{user.id}",
+                    resource_type="image",
+                    transformation=[{"width": 1200, "crop": "limit", "quality": "auto"}],
+                )
+                urls.append(result["secure_url"])
+            # Store as JSON array if multiple, plain string if single
+            payload["image_url"] = json.dumps(urls) if len(urls) > 1 else urls[0]
         except Exception as img_err:
             print(f"[ext] Screenshot upload failed: {img_err}")
 

@@ -8,7 +8,7 @@ let pipValues          = {};
 let selectedDirection  = "";
 let selectedOutcome    = "";
 let currentUser        = null;
-let capturedScreenshot = null;
+let capturedScreenshots = [];   // up to 3 dataUrls
 let riskMode           = "pct";   // "pct" | "fixed"
 let _sentTimer         = null;
 
@@ -129,13 +129,10 @@ function wireEvents() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => setScreenshot(ev.target.result);
+    reader.onload = (ev) => addScreenshot(ev.target.result);
     reader.readAsDataURL(file);
     e.target.value = "";   // reset so same file can be re-selected
   });
-
-  // Remove screenshot
-  document.getElementById("ssRemove").addEventListener("click", clearScreenshot);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -389,7 +386,7 @@ async function captureChart() {
     });
 
     const resized = await resizeDataUrl(dataUrl, 1200, 0.82);
-    setScreenshot(resized);
+    addScreenshot(resized);
   } catch (err) {
     showToast("Capture failed — use Upload instead", true);
     console.error("[TJ capture]", err.message);
@@ -416,16 +413,39 @@ function resizeDataUrl(dataUrl, maxWidth, quality) {
   });
 }
 
-function setScreenshot(dataUrl) {
-  capturedScreenshot = dataUrl;
-  document.getElementById("ssThumb").src    = dataUrl;
-  document.getElementById("ssPreview").style.display = "block";
+function addScreenshot(dataUrl) {
+  if (capturedScreenshots.length >= 3) {
+    showToast("Max 3 screenshots allowed", true);
+    return;
+  }
+  capturedScreenshots.push(dataUrl);
+  renderThumbs();
 }
 
-function clearScreenshot() {
-  capturedScreenshot = null;
-  document.getElementById("ssPreview").style.display = "none";
-  document.getElementById("ssThumb").src = "";
+function removeScreenshot(idx) {
+  capturedScreenshots.splice(idx, 1);
+  renderThumbs();
+}
+
+function renderThumbs() {
+  const container = document.getElementById("ssThumbs");
+  const countEl   = document.getElementById("ssCount");
+  container.innerHTML = "";
+  capturedScreenshots.forEach((dataUrl, i) => {
+    const wrap = document.createElement("div");
+    wrap.style.cssText = "position:relative;display:inline-block";
+    const img = document.createElement("img");
+    img.src = dataUrl;
+    img.style.cssText = "width:90px;height:56px;object-fit:cover;border-radius:6px;border:1px solid #1e2a38";
+    const btn = document.createElement("button");
+    btn.textContent = "✕";
+    btn.style.cssText = "position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;line-height:14px;padding:0";
+    btn.addEventListener("click", () => removeScreenshot(i));
+    wrap.appendChild(img);
+    wrap.appendChild(btn);
+    container.appendChild(wrap);
+  });
+  countEl.textContent = `(${capturedScreenshots.length}/3)`;
 }
 
 // ── Submit trade ──────────────────────────────────────────────────────────────
@@ -458,7 +478,8 @@ async function submitTrade() {
     outcome:         selectedOutcome    || null,
     notes:           notes              || "",
     source:          "extension",
-    screenshot_b64:  capturedScreenshot || null,
+    screenshot_b64:  capturedScreenshots[0] || null,
+    screenshot_b64_extra: capturedScreenshots.slice(1),
   };
 
   const btn = document.getElementById("submitTradeBtn");
@@ -485,7 +506,8 @@ function resetLogForm() {
   });
   document.getElementById("logDate").value = todayStr();
   selectedDirection = ""; selectedOutcome = "";
-  clearScreenshot();
+  capturedScreenshots = [];
+  renderThumbs();
   hideSentiment();
   document.getElementById("btnBuy").className  = "dir-btn";
   document.getElementById("btnSell").className = "dir-btn";
