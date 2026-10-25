@@ -13,6 +13,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_bcrypt import Bcrypt
 from werkzeug.utils import secure_filename
 from flask_compress import Compress
+from authlib.integrations.flask_client import OAuth
 
 try:
     from dotenv import load_dotenv
@@ -42,6 +43,16 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 login_manager.login_message = ""
+
+# ── Google OAuth ──────────────────────────────────────────────────────────────
+oauth = OAuth(app)
+google_oauth = oauth.register(
+    name="google",
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -482,6 +493,54 @@ def register():
             return jsonify({"ok": True, "verify": False})
         return jsonify({"ok": True, "verify": True})
     return render_template("auth.html", mode="register")
+
+@app.route("/auth/google")
+def auth_google():
+    redirect_uri = url_for("auth_google_callback", _external=True)
+    return google_oauth.authorize_redirect(redirect_uri)
+
+@app.route("/auth/google/callback")
+def auth_google_callback():
+    try:
+        token     = google_oauth.authorize_access_token()
+        user_info = token.get("userinfo") or google_oauth.userinfo()
+        email     = (user_info.get("email") or "").lower().strip()
+        if not email:
+            return redirect("/login?error=google_no_email")
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            # Build a unique username from Google display name
+            base = re.sub(r"[^a-z0-9]", "", (user_info.get("name") or email.split("@")[0]).lower())[:18] or "trader"
+            username = base
+            i = 1
+            while User.query.filter_by(username=username).first():
+                username = f"{base}{i}"; i += 1
+            user = User(
+                email=email,
+                username=username,
+                password_hash="",          # no password — Google auth only
+                email_verified=True,       # Google already verified the email
+                verification_token=None,
+            )
+            db.session.add(user)
+            db.session.flush()
+            # Default settings
+            from models import Settings
+            if not Settings.query.filter_by(user_id=user.id).first():
+                db.session.add(Settings(user_id=user.id))
+            db.session.commit()
+        else:
+            # Existing user — ensure email is marked verified
+            if not user.email_verified:
+                user.email_verified = True
+                db.session.commit()
+
+        login_user(user, remember=True)
+        return redirect("/")
+    except Exception as e:
+        print(f"[google_oauth] callback error: {e}")
+        return redirect("/login?error=google_failed")
 
 @app.route("/login", methods=["GET","POST"])
 def login():
