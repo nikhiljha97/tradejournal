@@ -129,65 +129,85 @@ def get_news():
     if _news_cache["data"] and now - _news_cache["ts"] < 300:
         return jsonify(_news_cache["data"])
 
-    import xml.etree.ElementTree as _ET
-    import email.utils as _eu
+    data = []
 
-    # Global financial RSS feeds — no API keys needed
-    RSS_FEEDS = [
-        ("Reuters Markets",  "https://feeds.reuters.com/reuters/businessNews"),
-        ("CNBC Markets",     "https://www.cnbc.com/id/100003114/device/rss/rss.html"),
-        ("MarketWatch",      "https://feeds.marketwatch.com/marketwatch/topstories/"),
-        ("FXStreet",         "https://www.fxstreet.com/rss/news"),
-        ("Yahoo Finance",    "https://finance.yahoo.com/news/rssindex"),
-    ]
-
-    hdrs = {"User-Agent": "Mozilla/5.0 TradeJournal/2.0", "Accept": "application/rss+xml, application/xml, text/xml"}
-    all_items = []
-
-    for source_name, url in RSS_FEEDS:
-        if len(all_items) >= 10:
-            break
+    # ── Tier 1: Finnhub (set FINNHUB_API_KEY in Render env vars — free at finnhub.io) ──
+    # Covers: equities, forex, crypto, commodities. 60 req/min free tier.
+    finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
+    if finnhub_key and not data:
         try:
-            r = http_requests.get(url, timeout=7, headers=hdrs)
-            if r.status_code != 200:
-                continue
-            root = _ET.fromstring(r.content)
-            ns   = {"atom": "http://www.w3.org/2005/Atom"}
-            # Handle both RSS <item> and Atom <entry>
-            items = root.findall(".//item") or root.findall(".//atom:entry", ns)
-            for it in items[:4]:
-                def _t(tag):
-                    el = it.find(tag) or it.find("atom:" + tag, ns)
-                    return (el.text or "").strip() if el is not None else ""
-                title   = _t("title")
-                link_el = it.find("link") or it.find("atom:link", ns)
-                link    = (link_el.text or link_el.get("href", "#") if link_el is not None else "#").strip()
-                pubdate = _t("pubDate") or _t("published") or _t("updated")
-                try:
-                    ts = int(_eu.parsedate_to_datetime(pubdate).timestamp())
-                except Exception:
-                    ts = int(now)
-                if title and link:
-                    all_items.append({
-                        "title":        title,
-                        "url":          link,
-                        "published_on": ts,
-                        "source":       source_name,
-                        "source_info":  {"name": source_name},
-                    })
+            categories = ["general", "forex", "crypto"]
+            seen_fh, fh_items = set(), []
+            for cat in categories:
+                r = http_requests.get(
+                    f"https://finnhub.io/api/v1/news?category={cat}&token={finnhub_key}",
+                    timeout=8, headers={"User-Agent": "TradeJournal/1.0"}
+                )
+                if r.status_code == 200:
+                    for it in (r.json() or [])[:4]:
+                        title = (it.get("headline") or "").strip()
+                        key   = title[:40].lower()
+                        if not title or key in seen_fh:
+                            continue
+                        seen_fh.add(key)
+                        fh_items.append({
+                            "title":        title,
+                            "url":          it.get("url", "#"),
+                            "published_on": int(it.get("datetime", now)),
+                            "source":       it.get("source", ""),
+                            "source_info":  {"name": it.get("source", "")},
+                        })
+            fh_items.sort(key=lambda x: x["published_on"], reverse=True)
+            data = fh_items[:8]
         except Exception as e:
-            app.logger.warning(f"RSS {source_name} failed: {e}")
+            app.logger.warning(f"Finnhub news failed: {e}")
 
-    # Sort newest first, deduplicate by title prefix
-    all_items.sort(key=lambda x: x["published_on"], reverse=True)
-    seen, deduped = set(), []
-    for it in all_items:
-        key = it["title"][:40].lower()
-        if key not in seen:
-            seen.add(key)
-            deduped.append(it)
+    # ── Tier 2: yfinance .news fallback (no key needed, works on Render) ──
+    if not data:
+        NEWS_TICKERS = ["SPY", "GLD", "CL=F", "EURUSD=X", "BTC-USD", "^VIX", "QQQ"]
+        all_items, seen_titles = [], set()
+        for sym in NEWS_TICKERS:
+            if len(all_items) >= 10:
+                break
+            try:
+                raw_news = yf.Ticker(sym).news or []
+                for item in raw_news[:3]:
+                    content = item.get("content") or item
+                    title   = (content.get("title") or item.get("title", "")).strip()
+                    url     = (
+                        (content.get("canonicalUrl") or {}).get("url")
+                        or content.get("link")
+                        or item.get("link", "#")
+                    )
+                    pub = content.get("pubDate") or ""
+                    if pub:
+                        try:
+                            import datetime as _dt
+                            ts = int(_dt.datetime.fromisoformat(pub.replace("Z", "+00:00")).timestamp())
+                        except Exception:
+                            ts = int(now)
+                    else:
+                        ts = int(item.get("providerPublishTime", now))
+                    source = (
+                        (content.get("provider") or {}).get("displayName")
+                        or item.get("publisher", "")
+                    )
+                    if not title:
+                        continue
+                    key = title[:40].lower()
+                    if key in seen_titles:
+                        continue
+                    seen_titles.add(key)
+                    all_items.append({
+                        "title": title, "url": url or "#",
+                        "published_on": ts, "source": source,
+                        "source_info": {"name": source},
+                    })
+            except Exception as e:
+                app.logger.warning(f"yfinance news {sym} failed: {e}")
+        all_items.sort(key=lambda x: x["published_on"], reverse=True)
+        data = all_items[:8]
 
-    data = deduped[:8]
     if data:
         _news_cache = {"data": data, "ts": now}
     return jsonify(_news_cache["data"] or [])
