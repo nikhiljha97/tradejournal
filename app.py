@@ -131,36 +131,28 @@ def get_news():
 
     data = []
 
-    # ── Tier 1: Finnhub (set FINNHUB_API_KEY in Render env vars — free at finnhub.io) ──
-    # Covers: equities, forex, crypto, commodities. 60 req/min free tier.
+    # ── Tier 1: Finnhub — global market news (general + forex + crypto + merger) ──
     finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
     if finnhub_key and not data:
-        try:
-            categories = ["general", "forex", "crypto"]
-            seen_fh, fh_items = set(), []
-            for cat in categories:
-                r = http_requests.get(
-                    f"https://finnhub.io/api/v1/news?category={cat}&token={finnhub_key}",
-                    timeout=8, headers={"User-Agent": "TradeJournal/1.0"}
-                )
-                if r.status_code == 200:
-                    for it in (r.json() or [])[:4]:
-                        title = (it.get("headline") or "").strip()
-                        key   = title[:40].lower()
-                        if not title or key in seen_fh:
-                            continue
-                        seen_fh.add(key)
-                        fh_items.append({
-                            "title":        title,
-                            "url":          it.get("url", "#"),
-                            "published_on": int(it.get("datetime", now)),
-                            "source":       it.get("source", ""),
-                            "source_info":  {"name": it.get("source", "")},
-                        })
-            fh_items.sort(key=lambda x: x["published_on"], reverse=True)
-            data = fh_items[:8]
-        except Exception as e:
-            app.logger.warning(f"Finnhub news failed: {e}")
+        seen_fh, fh_items = set(), []
+        for cat in ["general", "forex", "crypto", "merger"]:
+            result = _fh("/news", {"category": cat})
+            for it in (result or [])[:5]:
+                title = (it.get("headline") or "").strip()
+                k = title[:40].lower()
+                if not title or k in seen_fh:
+                    continue
+                seen_fh.add(k)
+                fh_items.append({
+                    "title":        title,
+                    "url":          it.get("url", "#"),
+                    "published_on": int(it.get("datetime", now)),
+                    "source":       it.get("source", ""),
+                    "source_info":  {"name": it.get("source", "")},
+                    "summary":      it.get("summary", ""),
+                })
+        fh_items.sort(key=lambda x: x["published_on"], reverse=True)
+        data = fh_items[:10]
 
     # ── Tier 2: yfinance .news fallback (no key needed, works on Render) ──
     if not data:
@@ -297,6 +289,108 @@ def market_sentiment():
     except Exception as e:
         app.logger.warning(f"market_sentiment failed: {e}")
         return jsonify(_sentiment_cache["data"] or {})
+
+# ── Finnhub helpers ───────────────────────────────────────────────────────────
+def _fh(path, params=None):
+    """Call Finnhub REST API. Returns parsed JSON or None on error."""
+    key = os.environ.get("FINNHUB_API_KEY", "").strip()
+    if not key:
+        return None
+    try:
+        url = f"https://finnhub.io/api/v1{path}"
+        p   = dict(params or {})
+        p["token"] = key
+        r = http_requests.get(url, params=p, timeout=8,
+                              headers={"User-Agent": "TradeJournal/1.0"})
+        return r.json() if r.status_code == 200 else None
+    except Exception as e:
+        app.logger.warning(f"Finnhub {path} failed: {e}")
+        return None
+
+# ── Market Status via Finnhub (real open/closed + session) ────────────────────
+_mstatus_cache = {"data": None, "ts": 0}
+
+@app.route("/api/market-status")
+def market_status_api():
+    global _mstatus_cache
+    now = _time.time()
+    if _mstatus_cache["data"] and now - _mstatus_cache["ts"] < 60:
+        return jsonify(_mstatus_cache["data"])
+
+    # Exchange codes → session card IDs
+    EXCHANGES = [
+        ("US", "ny",     "New York",  "America/New_York"),
+        ("L",  "london", "London",    "Europe/London"),
+        ("T",  "tokyo",  "Tokyo",     "Asia/Tokyo"),
+        ("AS", "sydney", "Sydney",    "Australia/Sydney"),
+    ]
+    out = {}
+    key_present = bool(os.environ.get("FINNHUB_API_KEY", "").strip())
+
+    for code, sid, label, tz in EXCHANGES:
+        data = _fh(f"/stock/market-status", {"exchange": code})
+        if data:
+            out[sid] = {
+                "isOpen":  data.get("isOpen", False),
+                "session": data.get("session"),        # pre-market/regular/post-market/null
+                "holiday": data.get("holiday"),
+                "label":   label,
+            }
+
+    if out:
+        _mstatus_cache = {"data": out, "ts": now}
+        return jsonify(out)
+    # No key or all failed — return empty so JS uses its own UTC-based logic
+    return jsonify({})
+
+# ── Economic Calendar via Finnhub ──────────────────────────────────────────────
+_econ_cache = {"data": None, "ts": 0}
+
+@app.route("/api/economic-calendar")
+def economic_calendar():
+    global _econ_cache
+    now = _time.time()
+    if _econ_cache["data"] and now - _econ_cache["ts"] < 3600:   # 1-hour cache
+        return jsonify(_econ_cache["data"])
+
+    import datetime as _dt
+    today = _dt.date.today().isoformat()
+    week  = (_dt.date.today() + _dt.timedelta(days=7)).isoformat()
+
+    data = _fh("/calendar/economic", {"from": today, "to": week})
+    if not data:
+        return jsonify(_econ_cache["data"] or [])
+
+    # Keep only high-impact events with a name
+    HIGH = {"high", "3", "3.0"}
+    raw  = data if isinstance(data, list) else data.get("economicCalendar", [])
+    events = []
+    for ev in raw:
+        impact = str(ev.get("impact", ev.get("unit", ""))).lower()
+        name   = (ev.get("event") or ev.get("name") or "").strip()
+        if not name:
+            continue
+        # Include high-impact OR well-known events regardless of impact label
+        important = (impact in HIGH or "high" in impact
+                     or any(k in name.lower() for k in
+                            ["nfp","non-farm","fed","fomc","cpi","pce","gdp",
+                             "interest rate","inflation","employment","payroll"]))
+        if not important:
+            continue
+        events.append({
+            "event":   name,
+            "date":    ev.get("time") or ev.get("date", ""),
+            "country": ev.get("country", ""),
+            "impact":  impact,
+            "actual":  ev.get("actual"),
+            "estimate":ev.get("estimate"),
+            "prev":    ev.get("prev"),
+        })
+
+    events = events[:10]
+    if events:
+        _econ_cache = {"data": events, "ts": now}
+    return jsonify(_econ_cache["data"] or [])
 
 # ── Canonical domain redirect ─────────────────────────────────────────────────
 _CANONICAL = "https://backtesting-journalmytrades.com"
