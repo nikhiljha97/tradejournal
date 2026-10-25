@@ -34,8 +34,21 @@
     html, body { min-height: 100vh; background: var(--bg); color: var(--text);
       font-family: "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
 
-    body { display: grid; grid-template-columns: 1fr 420px 1fr; min-height: 100vh;
-      align-items: start; gap: 0; }
+    body { display: grid; grid-template-columns: 1fr 420px 1fr;
+      grid-template-rows: 44px 1fr; min-height: 100vh; align-items: start; gap: 0; }
+
+    /* ── Scrolling ticker ── */
+    .ticker-wrap { grid-column: 1/-1; background: #0d1520;
+      border-bottom: 1px solid var(--border); overflow: hidden;
+      display: flex; align-items: center; height: 44px; position: sticky; top: 0; z-index: 50; }
+    .ticker-inner { display: flex; white-space: nowrap; will-change: transform; }
+    @keyframes scrollTicker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .ticker-running { animation: scrollTicker 45s linear infinite; }
+    .ticker-item { display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 28px; font-size: 13.5px; font-weight: 600; color: var(--text);
+      letter-spacing: 0.01em; }
+    .ticker-quote { font-style: italic; color: #a0b4c8; font-size: 13px; font-weight: 500; }
+    .ticker-sep { color: var(--border2); font-size: 18px; line-height: 1; }
 
     .auth-wrap { width: 100%; padding: 24px; grid-column: 2; align-self: center;
       min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
@@ -115,29 +128,46 @@
     .val-appear { animation: countUp 0.4s ease; }
 
     /* Constant live pulse on prices */
-    @keyframes livePulse { 0%,80%,100%{opacity:1} 90%{opacity:0.55} }
-    .live-val { animation: livePulse 3s ease infinite; }
+    @keyframes livePulse { 0%,75%,100%{opacity:1;transform:scale(1)} 87%{opacity:0.5;transform:scale(0.97)} }
+    .live-val { animation: livePulse 2.5s ease infinite; }
 
-    /* Price grid */
-    .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .pg-cell { background: rgba(255,255,255,0.025); border: 1px solid var(--border);
-      border-radius: 8px; padding: 9px 11px; transition: border-color 0.3s; }
-    .pg-cell:hover { border-color: var(--border2); }
+    /* Price grid — bigger, bolder */
+    .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .pg-cell { background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 13px; transition: border-color 0.25s, background 0.25s; }
+    .pg-cell:hover { border-color: var(--border2); background: rgba(255,255,255,0.05); }
     .pg-name  { font-size: 9px; color: var(--faint); text-transform: uppercase;
-      letter-spacing: 0.07em; margin-bottom: 3px; }
-    .pg-price { font-size: 12px; font-weight: 800; font-family: "JetBrains Mono", monospace;
+      letter-spacing: 0.08em; margin-bottom: 4px; }
+    .pg-price { font-size: 14px; font-weight: 800; font-family: "JetBrains Mono", monospace;
       line-height: 1.2; }
-    .pg-chg   { font-size: 10px; font-weight: 600; margin-top: 2px; }
+    .pg-chg   { font-size: 11px; font-weight: 700; margin-top: 3px; }
 
-    /* Compact sessions */
-    .sess-chips { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .sess-chip  { display: flex; align-items: center; gap: 5px;
-      background: rgba(255,255,255,0.025); border: 1px solid var(--border);
-      border-radius: 6px; padding: 5px 8px;
-      font-size: 11px; font-weight: 700; color: var(--muted); }
-    .sess-chip.open { border-color: rgba(0,229,160,0.35); color: var(--green);
-      background: rgba(0,229,160,0.06); }
-    .sess-chip .sess-dot { flex-shrink: 0; }
+    /* Sentiment gauges */
+    .sent-gauge { padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .sent-gauge:last-child { border-bottom: none; }
+    .sg-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .sg-name  { font-size: 10px; font-weight: 700; color: var(--text); }
+    .sg-label { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.05em; }
+    .sg-bar-bg { width: 100%; height: 5px; border-radius: 3px;
+      background: linear-gradient(90deg,#ff4757 0%,#ffa502 30%,#f0c040 50%,#2ed573 75%,#00e5a0 100%); }
+    .sg-needle { width: 8px; height: 8px; border-radius: 50%; background: #fff;
+      border: 2px solid var(--bg); margin-top: -6px; position: relative;
+      transform: translateX(-50%); transition: left 0.6s ease;
+      box-shadow: 0 0 6px rgba(255,255,255,0.5); }
+    .sg-note { font-size: 9px; color: var(--faint); margin-top: 2px; }
+
+    /* Sessions — improved with countdown */
+    .sess-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .sess-card { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+      background: rgba(255,255,255,0.02); transition: all 0.3s; }
+    .sess-card.open { border-color: rgba(0,229,160,0.4); background: rgba(0,229,160,0.06); }
+    .sess-card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+    .sess-name-big { font-size: 11px; font-weight: 800; }
+    .sess-card.open .sess-name-big { color: var(--green); }
+    .sess-time-small { font-size: 9px; color: var(--faint); font-family: monospace; }
+    .sess-countdown { font-size: 10px; font-weight: 600; color: var(--faint); }
+    .sess-card.open .sess-countdown { color: var(--green); }
 
     /* News */
     .news-item { display: block; padding: 8px 0; border-bottom: 1px solid var(--border);
@@ -242,35 +272,69 @@
 </head>
 <body>
 
-<!-- LEFT PANEL: Fear & Greed + Crypto/Gold prices -->
+<!-- FULL-WIDTH SCROLLING TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="tickerInner">
+    <!-- Populated by JS — duplicated for seamless loop -->
+  </div>
+</div>
+
+<!-- LEFT PANEL: Sentiment gauges -->
 <aside class="side-panel" id="leftPanel">
   <div class="panel-title"><span class="live-dot"></span> Market Pulse</div>
 
+  <!-- Crypto Fear & Greed (compact) -->
   <div class="mkt-card">
-    <div class="mkt-card-title">Crypto Fear &amp; Greed Index</div>
-    <div class="fg-wrap">
-      <div class="fg-score" id="fgScore" style="color:var(--faint)">—</div>
-      <div class="fg-label" id="fgLabel" style="color:var(--faint)">Loading…</div>
-      <div class="fg-bar-bg" style="position:relative">
-        <div class="fg-needle" id="fgNeedle" style="left:50%"></div>
+    <div class="mkt-card-title" style="display:flex;justify-content:space-between">
+      <span>Crypto Fear &amp; Greed</span>
+      <span id="fgUpdated" style="font-size:9px;color:var(--faint);text-transform:none;letter-spacing:0"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="fg-score" id="fgScore" style="color:var(--faint);font-size:36px;font-weight:800;line-height:1">—</div>
+      <div>
+        <div class="fg-label" id="fgLabel" style="color:var(--faint);font-size:12px;font-weight:700">Loading…</div>
+        <div class="fg-bar-bg" style="position:relative;margin-top:6px;width:120px">
+          <div class="fg-needle" id="fgNeedle" style="left:50%"></div>
+        </div>
       </div>
-      <div style="font-size:10px;color:var(--faint);margin-top:6px" id="fgUpdated"></div>
     </div>
   </div>
 
+  <!-- Multi-Asset Sentiment Gauges -->
   <div class="mkt-card">
-    <div class="mkt-card-title">Live Prices</div>
-    <div id="priceRows">
-      <div class="price-row"><div><div class="price-sym">BTC</div><div class="price-sub">Bitcoin</div></div><div class="price-val"><div class="price-num flat">—</div><div class="price-chg flat">—</div></div></div>
-      <div class="price-row"><div><div class="price-sym">ETH</div><div class="price-sub">Ethereum</div></div><div class="price-val"><div class="price-num flat">—</div><div class="price-chg flat">—</div></div></div>
-      <div class="price-row"><div><div class="price-sym">XAU/USD</div><div class="price-sub">Gold Spot</div></div><div class="price-val"><div class="price-num flat" id="goldPrice">—</div><div class="price-chg flat" id="goldChg">—</div></div></div>
+    <div class="mkt-card-title">Multi-Asset Sentiment</div>
+    <div id="sentGauges">
+      <div class="sent-gauge" id="sg_wall_street">
+        <div class="sg-top"><span class="sg-name">Wall Street</span><span class="sg-label" style="background:rgba(107,124,147,0.2);color:var(--muted)">—</span></div>
+        <div class="sg-bar-bg" style="position:relative"><div class="sg-needle" id="sgn_wall_street" style="left:50%"></div></div>
+        <div class="sg-note" id="sgnote_wall_street">S&amp;P 500 RSI·14</div>
+      </div>
+      <div class="sent-gauge" id="sg_gold">
+        <div class="sg-top"><span class="sg-name">Gold Sentiment</span><span class="sg-label" style="background:rgba(107,124,147,0.2);color:var(--muted)">—</span></div>
+        <div class="sg-bar-bg" style="position:relative"><div class="sg-needle" id="sgn_gold" style="left:50%"></div></div>
+        <div class="sg-note">Gold vs 20d MA</div>
+      </div>
+      <div class="sent-gauge" id="sg_oil">
+        <div class="sg-top"><span class="sg-name">Oil Sentiment</span><span class="sg-label" style="background:rgba(107,124,147,0.2);color:var(--muted)">—</span></div>
+        <div class="sg-bar-bg" style="position:relative"><div class="sg-needle" id="sgn_oil" style="left:50%"></div></div>
+        <div class="sg-note">WTI Crude vs 20d MA</div>
+      </div>
+      <div class="sent-gauge" id="sg_forex">
+        <div class="sg-top"><span class="sg-name">Forex (USD Weak/Strong)</span><span class="sg-label" style="background:rgba(107,124,147,0.2);color:var(--muted)">—</span></div>
+        <div class="sg-bar-bg" style="position:relative"><div class="sg-needle" id="sgn_forex" style="left:50%"></div></div>
+        <div class="sg-note">EUR/USD vs 20d MA</div>
+      </div>
+      <div class="sent-gauge" id="sg_vix">
+        <div class="sg-top"><span class="sg-name">VIX Fear Index</span><span class="sg-label" style="background:rgba(107,124,147,0.2);color:var(--muted)">—</span></div>
+        <div class="sg-bar-bg" style="position:relative"><div class="sg-needle" id="sgn_vix" style="left:50%"></div></div>
+        <div class="sg-note" id="sgnote_vix">CBOE Volatility Index</div>
+      </div>
+      <div class="sent-gauge" id="sg_risk_appetite">
+        <div class="sg-top"><span class="sg-name">Global Risk Appetite</span><span class="sg-label" style="background:rgba(107,124,147,0.2);color:var(--muted)">—</span></div>
+        <div class="sg-bar-bg" style="position:relative"><div class="sg-needle" id="sgn_risk_appetite" style="left:50%"></div></div>
+        <div class="sg-note">Equity+Oil+VIX+Gold composite</div>
+      </div>
     </div>
-  </div>
-
-  <div class="mkt-card" style="font-size:11px;color:var(--faint);line-height:1.6">
-    <div class="mkt-card-title">Market Wisdom</div>
-    <div id="quoteText" style="color:var(--text);font-style:italic">"Loading…"</div>
-    <div id="quoteAuthor" style="margin-top:6px;color:var(--faint)"></div>
   </div>
 </aside>
 
@@ -398,15 +462,30 @@
     </div>
   </div>
 
-  <div class="mkt-card" style="padding:10px 16px">
-    <div class="mkt-card-title" style="margin-bottom:8px">Sessions</div>
-    <div class="sess-chips" id="sessChips">
-      <div class="sess-chip" id="sc_sydney"><span class="sess-dot sess-closed" id="dot_sydney"></span>SYD</div>
-      <div class="sess-chip" id="sc_tokyo"> <span class="sess-dot sess-closed" id="dot_tokyo"></span>TKY</div>
-      <div class="sess-chip" id="sc_london"><span class="sess-dot sess-closed" id="dot_london"></span>LON</div>
-      <div class="sess-chip" id="sc_ny">    <span class="sess-dot sess-closed" id="dot_ny"></span>NYC</div>
+  <div class="mkt-card" style="padding:12px 14px">
+    <div class="mkt-card-title" style="margin-bottom:8px">Forex Sessions <span id="sessNote" style="font-size:9px;color:var(--green);font-weight:600;text-transform:none;letter-spacing:0;margin-left:6px"></span></div>
+    <div class="sess-grid">
+      <div class="sess-card" id="sc_sydney">
+        <div class="sess-card-top"><div class="sess-dot sess-closed" id="dot_sydney"></div><div class="sess-name-big">Sydney</div></div>
+        <div class="sess-time-small">22:00–07:00 UTC</div>
+        <div class="sess-countdown" id="scd_sydney">—</div>
+      </div>
+      <div class="sess-card" id="sc_tokyo">
+        <div class="sess-card-top"><div class="sess-dot sess-closed" id="dot_tokyo"></div><div class="sess-name-big">Tokyo</div></div>
+        <div class="sess-time-small">00:00–09:00 UTC</div>
+        <div class="sess-countdown" id="scd_tokyo">—</div>
+      </div>
+      <div class="sess-card" id="sc_london">
+        <div class="sess-card-top"><div class="sess-dot sess-closed" id="dot_london"></div><div class="sess-name-big">London</div></div>
+        <div class="sess-time-small">08:00–16:00 UTC</div>
+        <div class="sess-countdown" id="scd_london">—</div>
+      </div>
+      <div class="sess-card" id="sc_ny">
+        <div class="sess-card-top"><div class="sess-dot sess-closed" id="dot_ny"></div><div class="sess-name-big">New York</div></div>
+        <div class="sess-time-small">13:00–22:00 UTC</div>
+        <div class="sess-countdown" id="scd_ny">—</div>
+      </div>
     </div>
-    <div style="font-size:9px;color:var(--faint);margin-top:6px" id="sessNote">—</div>
   </div>
 
   <div class="mkt-card">
@@ -573,9 +652,8 @@
 </script>
 
 <script>
-// ── Live Market Data v2 ──────────────────────────────────────────────────────
+// ── Live Market Data v3 ──────────────────────────────────────────────────────
 
-// ── Catchier Quotes ──────────────────────────────────────────────────────────
 const QUOTES = [
   { q: "Losers average losers.", a: "Paul Tudor Jones" },
   { q: "The market is a device for transferring money from the impatient to the patient.", a: "Warren Buffett" },
@@ -593,14 +671,37 @@ const QUOTES = [
   { q: "In this business, if you're good, you're right six times out of ten. You're never going to be right nine times out of ten.", a: "Peter Lynch" },
 ];
 
-let _quoteIdx = Math.floor(Math.random() * QUOTES.length);
-function rotateQuote() {
-  _quoteIdx = (_quoteIdx + 1) % QUOTES.length;
-  const q  = QUOTES[_quoteIdx];
-  const qt = document.getElementById('quoteText');
-  const qa = document.getElementById('quoteAuthor');
-  if (qt) { qt.style.opacity = '0'; setTimeout(() => { qt.textContent = '“' + q.q + '”'; qt.style.opacity = '1'; }, 300); }
-  if (qa) { qa.style.opacity = '0'; setTimeout(() => { qa.textContent = '— ' + q.a; qa.style.opacity = '1'; }, 400); }
+// ── Ticker band ───────────────────────────────────────────────────────────────
+function buildTicker(prices) {
+  const items = [];
+  // Add quotes
+  QUOTES.forEach(q => {
+    items.push(`<span class="ticker-quote">“${q.q}” — ${q.a}</span>`);
+    items.push('<span class="ticker-sep">|</span>');
+  });
+  // Add live prices if available
+  const priceLabels = {gold:'GOLD',silver:'SILVER',oil:'OIL',nasdaq:'NQ',sp500:'SPX',dow:'DJIA',btc:'BTC',eth:'ETH',eurusd:'EUR/USD'};
+  if (prices) {
+    Object.entries(priceLabels).forEach(([key, sym]) => {
+      const v = prices[key];
+      if (!v?.price) return;
+      const chgColor = v.chg > 0 ? '#00e5a0' : v.chg < 0 ? '#ff4757' : '#6b7c93';
+      const arrow    = v.chg > 0 ? '▲' : v.chg < 0 ? '▼' : '◆';
+      const chgStr   = (v.chg >= 0 ? '+' : '') + v.chg.toFixed(2) + '%';
+      const fmt      = GRID_FMT[key];
+      const priceStr = fmt ? (fmt.prefix + fmtPrice(v.price, fmt.dec)) : v.price;
+      items.push(`<span class="ticker-item"><span style="color:var(--faint);font-size:10px;letter-spacing:.06em">${sym}</span> <span style="color:${chgColor}">${priceStr}</span> <span style="color:${chgColor};font-size:10px">${arrow} ${chgStr}</span></span>`);
+      items.push('<span class="ticker-sep">|</span>');
+    });
+  }
+  const html = items.map(t => `<span class="ticker-item">${t}</span>`).join('');
+  const el = document.getElementById('tickerInner');
+  if (!el) return;
+  // Duplicate for seamless infinite scroll
+  el.innerHTML = html + html;
+  el.classList.remove('ticker-running');
+  void el.offsetWidth;
+  el.classList.add('ticker-running');
 }
 
 // ── Flash helper ─────────────────────────────────────────────────────────────
@@ -675,8 +776,9 @@ async function loadPrices() {
     const chgEl   = document.getElementById('pgc_' + key);
     if (!fmt || !priceEl || !chgEl) return;
 
-    const prev      = _prevGrid[key];
-    _prevGrid[key]  = val.price;
+    const prev       = _prevGrid[key];
+    _prevGrid[key]   = val.price;
+    _prevGrid[key + '_chg'] = val.chg;
     const priceStr  = fmt.prefix + fmtPrice(val.price, fmt.dec);
     const chgStr    = (val.chg >= 0 ? '+' : '') + val.chg.toFixed(2) + '%';
     const cls       = val.chg > 0 ? 'up' : val.chg < 0 ? 'down' : 'flat';
@@ -736,37 +838,67 @@ async function loadPrices() {
   }
 }
 
-// ── Trading Sessions (compact chips) ─────────────────────────────────────────
+// ── Trading Sessions with live countdown ─────────────────────────────────────
 function updateSessions() {
-  const utcTotal = new Date().getUTCHours() * 60 + new Date().getUTCMinutes();
+  const now  = new Date();
+  const utcM = now.getUTCHours() * 60 + now.getUTCMinutes();
   const SESSIONS = [
-    { id:'sydney', open:22*60, close:7*60,  name:'SYD', wraps:true  },
-    { id:'tokyo',  open:0*60,  close:9*60,  name:'TKY', wraps:false },
-    { id:'london', open:8*60,  close:16*60, name:'LON', wraps:false },
-    { id:'ny',     open:13*60, close:22*60, name:'NYC', wraps:false },
+    { id:'sydney', open:22*60, close:7*60,  wraps:true  },
+    { id:'tokyo',  open:0*60,  close:9*60,  wraps:false },
+    { id:'london', open:8*60,  close:16*60, wraps:false },
+    { id:'ny',     open:13*60, close:22*60, wraps:false },
   ];
+
+  function minsUntil(target) {
+    let diff = target - utcM;
+    if (diff < 0) diff += 1440;
+    return diff;
+  }
+  function fmtDur(m) {
+    const h = Math.floor(m / 60), mn = m % 60;
+    return h > 0 ? `${h}h ${mn}m` : `${mn}m`;
+  }
+
   const openNames = [];
   SESSIONS.forEach(s => {
     const isOpen = s.wraps
-      ? (utcTotal >= s.open || utcTotal < s.close)
-      : (utcTotal >= s.open && utcTotal < s.close);
-    const chip = document.getElementById('sc_' + s.id);
+      ? (utcM >= s.open || utcM < s.close)
+      : (utcM >= s.open && utcM < s.close);
+
+    const card = document.getElementById('sc_' + s.id);
     const dot  = document.getElementById('dot_' + s.id);
-    if (chip) chip.className = 'sess-chip' + (isOpen ? ' open' : '');
+    const cntd = document.getElementById('scd_' + s.id);
+    if (card) card.className = 'sess-card' + (isOpen ? ' open' : '');
     if (dot)  dot.className  = 'sess-dot ' + (isOpen ? 'sess-open' : 'sess-closed');
-    if (isOpen) openNames.push(s.name);
+
+    if (cntd) {
+      if (isOpen) {
+        const minsLeft = minsUntil(s.close);
+        cntd.textContent = 'Closes in ' + fmtDur(minsLeft);
+      } else {
+        const minsLeft = minsUntil(s.open);
+        cntd.textContent = 'Opens in ' + fmtDur(minsLeft);
+      }
+    }
+    if (isOpen) openNames.push(s.id === 'ny' ? 'NYC' : s.id[0].toUpperCase() + s.id.slice(1));
   });
+
+  // Overlap highlight (London+NY = peak liquidity)
+  const lonOpen = SESSIONS[2]; const nyOpen = SESSIONS[3];
+  const lonActive = utcM >= lonOpen.open && utcM < lonOpen.close;
+  const nyActive  = utcM >= nyOpen.open  && utcM < nyOpen.close;
   const noteEl = document.getElementById('sessNote');
-  if (noteEl) noteEl.textContent = openNames.length
-    ? openNames.join(' + ') + ' session' + (openNames.length > 1 ? 's' : '') + ' open'
-    : 'All sessions closed (weekend / off-hours)';
+  if (noteEl) {
+    if (lonActive && nyActive) noteEl.textContent = 'LON+NYC overlap — peak liquidity';
+    else if (openNames.length) noteEl.textContent = openNames.join(' + ') + ' open';
+    else noteEl.textContent = '';
+  }
 }
 
-// ── Live News (CryptoCompare — free, no key) ──────────────────────────────────
+// ── News via backend proxy ────────────────────────────────────────────────────
 async function loadNews() {
-  const r = await fetch('https://min-api.cryptocompare.com/data/v2/news/?lang=EN&categories=Trading,Forex,Crypto,Commodities&sortOrder=latest&limit=6');
-  const d = await r.json();
-  const items = d.Data || [];
+  const r     = await fetch('/api/news');
+  const items = await r.json();
   const container = document.getElementById('newsItems');
   const ageEl     = document.getElementById('newsAge');
   if (!container || !items.length) return;
@@ -784,33 +916,70 @@ async function loadNews() {
   }).join('');
 }
 
-// ── Auto-refresh ─────────────────────────────────────────────────────────────
-// Prices: every 15s (backend caches 30s so it's never hammered)
-// Fear&Greed + News: every 5 min (daily data / rarely changes)
+// ── Multi-asset sentiment gauges ──────────────────────────────────────────────
+function _sentColor(s) {
+  return s >= 75 ? '#00e5a0' : s >= 60 ? '#2ed573' : s >= 40 ? '#f0c040' : s >= 25 ? '#ffa502' : '#ff4757';
+}
+function _sentBg(s) {
+  const c = _sentColor(s);
+  return `background:${c}22;color:${c}`;
+}
+async function loadSentiment() {
+  const r = await fetch('/api/market-sentiment');
+  const d = await r.json();
+  Object.entries(d).forEach(([key, val]) => {
+    const needle = document.getElementById('sgn_' + key);
+    const card   = document.getElementById('sg_'  + key);
+    if (!needle || !card) return;
+    const s = val.score;
+    needle.style.left = s + '%';
+    const labelEl = card.querySelector('.sg-label');
+    if (labelEl) { labelEl.textContent = val.label; labelEl.style.cssText = _sentBg(s); }
+    const noteEl = document.getElementById('sgnote_' + key);
+    if (noteEl && val.note) noteEl.textContent = val.note;
+  });
+}
+
 function refreshPrices() { loadPrices().catch(()=>{}); }
 function refreshSlow()   { loadFearGreed().catch(()=>{}); loadNews().catch(()=>{}); }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Quote rotation with CSS fade
-  const qt = document.getElementById('quoteText');
-  const qa = document.getElementById('quoteAuthor');
-  if (qt) qt.style.transition = 'opacity 0.3s ease';
-  if (qa) qa.style.transition = 'opacity 0.4s ease';
+  // Build ticker immediately (quotes only), then rebuild with prices once loaded
+  buildTicker(null);
 
-  const q0 = QUOTES[_quoteIdx];
-  if (qt) qt.textContent = '“' + q0.q + '”';
-  if (qa) qa.textContent = '— ' + q0.a;
-  setInterval(rotateQuote, 18000);
-
+  // Sessions update every second (for live countdown)
   updateSessions();
-  setInterval(updateSessions, 30000);
+  setInterval(updateSessions, 1000);
 
-  refreshPrices();
+  // Prices every 15s
+  async function doPrices() {
+    await loadPrices();
+    // Rebuild ticker with live prices after first successful load
+    if (Object.values(_prevGrid).some(v => v)) buildTicker(_buildPriceSnapshot());
+  }
+
+  // Sentiment once on load, then every 5 min
+  loadSentiment().catch(() => {});
+  setInterval(() => loadSentiment().catch(() => {}), 300000);
+
+  // Slow (FGI + news): load now, then every 5 min
   refreshSlow();
-  setInterval(refreshPrices, 15000);
-  setInterval(refreshSlow,   300000);
+  setInterval(refreshSlow, 300000);
+
+  // Prices: load now, then every 15s
+  doPrices();
+  setInterval(doPrices, 15000);
 });
+
+function _buildPriceSnapshot() {
+  const snap = {};
+  Object.keys(GRID_FMT).forEach(key => {
+    const p = _prevGrid[key];
+    if (p) snap[key] = { price: p, chg: _prevGrid[key + '_chg'] || 0 };
+  });
+  return snap;
+}
 </script>
 </body>
 </html>

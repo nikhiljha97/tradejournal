@@ -111,14 +111,121 @@ def market_prices():
     try:
         out = _fetch_prices()
         if any(v["price"] for v in out.values()):
-            _prices_cache = {"data": out, "ts": now}
+                _prices_cache = {"data": out, "ts": now}
         return jsonify(out)
     except Exception as e:
         app.logger.warning(f"market_prices failed: {e}")
-        # Return stale cache rather than empty if available
         if _prices_cache["data"]:
             return jsonify(_prices_cache["data"])
         return jsonify({k: {"price": None, "chg": 0.0} for k in _PRICE_SYMS})
+
+# ── News proxy (avoids CORS, 5-min cache) ─────────────────────────────────────
+_news_cache = {"data": None, "ts": 0}
+
+@app.route("/api/news")
+def get_news():
+    global _news_cache
+    now = _time.time()
+    if _news_cache["data"] and now - _news_cache["ts"] < 300:
+        return jsonify(_news_cache["data"])
+    try:
+        r = http_requests.get(
+            "https://min-api.cryptocompare.com/data/v2/news/"
+            "?lang=EN&categories=Trading,Forex,Crypto,Commodities&sortOrder=latest&limit=6",
+            timeout=10, headers={"User-Agent": "TradeJournal/1.0"}
+        )
+        data = r.json().get("Data", [])
+        _news_cache = {"data": data, "ts": now}
+        return jsonify(data)
+    except Exception as e:
+        app.logger.warning(f"news fetch failed: {e}")
+        return jsonify(_news_cache["data"] or [])
+
+# ── Multi-asset sentiment (5-min cache, derived from yfinance 30d history) ────
+_sentiment_cache = {"data": None, "ts": 0}
+
+def _rsi14(series):
+    delta = series.diff()
+    g = delta.where(delta > 0, 0.0)
+    l = -delta.where(delta < 0, 0.0)
+    ag = g.ewm(com=13, adjust=False).mean()
+    al = l.ewm(com=13, adjust=False).mean()
+    rs = ag / al.replace(0, float("inf"))
+    return float((100 - 100 / (1 + rs)).iloc[-1])
+
+def _ma_score(series, w=20):
+    """0–100 momentum score vs w-day SMA. 50 = at MA."""
+    col = series.dropna()
+    if len(col) < w:
+        return 50.0
+    sma  = float(col.rolling(w).mean().iloc[-1])
+    price = float(col.iloc[-1])
+    pct  = (price - sma) / sma * 100  # % above/below MA
+    return max(0.0, min(100.0, 50 + pct * 10))  # ±5 % = full swing
+
+def _score_label(s):
+    if s >= 75: return "Extreme Greed"
+    if s >= 60: return "Greed"
+    if s >= 40: return "Neutral"
+    if s >= 25: return "Fear"
+    return "Extreme Fear"
+
+@app.route("/api/market-sentiment")
+def market_sentiment():
+    global _sentiment_cache
+    now = _time.time()
+    if _sentiment_cache["data"] and now - _sentiment_cache["ts"] < 300:
+        return jsonify(_sentiment_cache["data"])
+    try:
+        import yfinance as yf
+        syms = ["^GSPC", "GC=F", "CL=F", "EURUSD=X", "^VIX"]
+        raw  = yf.download(syms, period="30d", interval="1d",
+                           progress=False, auto_adjust=True, timeout=20)
+        cl   = raw["Close"]
+        out  = {}
+
+        # Wall Street (S&P RSI-14)
+        sp = cl["^GSPC"].dropna()
+        if len(sp) >= 15:
+            rsi = _rsi14(sp)
+            out["wall_street"] = {"score": round(rsi, 1), "label": _score_label(rsi), "note": "S&P 500 RSI·14"}
+
+        # Gold sentiment (momentum vs 20d MA)
+        gold_s = _ma_score(cl["GC=F"])
+        out["gold"] = {"score": round(gold_s, 1), "label": _score_label(gold_s), "note": "Gold vs 20d MA"}
+
+        # Oil sentiment
+        oil_s = _ma_score(cl["CL=F"])
+        out["oil"] = {"score": round(oil_s, 1), "label": _score_label(oil_s), "note": "WTI vs 20d MA"}
+
+        # Forex: EUR/USD above MA → USD weak → risk-on
+        fx_s = _ma_score(cl["EURUSD=X"])
+        out["forex"] = {"score": round(fx_s, 1), "label": _score_label(fx_s), "note": "EUR/USD vs 20d MA"}
+
+        # VIX-based greed (inverted: low VIX = greed)
+        vix_col = cl["^VIX"].dropna()
+        if len(vix_col):
+            vix_val = float(vix_col.iloc[-1])
+            vix_score = max(0.0, min(100.0, (40 - vix_val) / 30 * 100))
+            vix_lbl = "Extreme Fear" if vix_val > 35 else "Fear" if vix_val > 25 else "Neutral" if vix_val > 18 else "Greed" if vix_val > 12 else "Extreme Greed"
+            out["vix"] = {"score": round(vix_score, 1), "value": round(vix_val, 2), "label": vix_lbl, "note": f"VIX {vix_val:.1f}"}
+
+        # Global Risk Appetite composite (commodity-equity balance)
+        ws  = out.get("wall_street", {}).get("score", 50)
+        gs  = out.get("gold",        {}).get("score", 50)
+        os_ = out.get("oil",         {}).get("score", 50)
+        vs  = out.get("vix",         {}).get("score", 50)
+        # Risk-On: equities up, oil up, VIX low, gold neutral
+        # Gold rising = hedge = slight risk-off weight
+        risk = ws * 0.40 + os_ * 0.25 + vs * 0.25 + (100 - gs) * 0.10
+        rlbl = "Risk-On" if risk >= 65 else "Leaning Risk-On" if risk >= 55 else "Neutral" if risk >= 45 else "Leaning Risk-Off" if risk >= 35 else "Risk-Off"
+        out["risk_appetite"] = {"score": round(risk, 1), "label": rlbl, "note": "Equity+Oil+VIX+Gold composite"}
+
+        _sentiment_cache = {"data": out, "ts": now}
+        return jsonify(out)
+    except Exception as e:
+        app.logger.warning(f"market_sentiment failed: {e}")
+        return jsonify(_sentiment_cache["data"] or {})
 
 # ── Canonical domain redirect ─────────────────────────────────────────────────
 _CANONICAL = "https://backtesting-journalmytrades.com"
