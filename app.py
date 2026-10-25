@@ -62,37 +62,63 @@ def load_user(user_id):
 import time as _time
 _prices_cache = {"data": None, "ts": 0}
 
-@app.route("/api/market-prices")
-def market_prices():
-    import yfinance as yf
-    global _prices_cache
-    now = _time.time()
-    if _prices_cache["data"] and now - _prices_cache["ts"] < 30:
-        return jsonify(_prices_cache["data"])
+# key → yfinance ticker
+_PRICE_SYMS = {
+    "gold":   "GC=F",
+    "silver": "SI=F",
+    "oil":    "CL=F",
+    "nasdaq": "^IXIC",
+    "sp500":  "^GSPC",
+    "dow":    "^DJI",
+    "btc":    "BTC-USD",
+    "eth":    "ETH-USD",
+    "eurusd": "EURUSD=X",
+}
 
-    SYMS = {
-        "gold":   "GC=F",
-        "silver": "SI=F",
-        "oil":    "CL=F",
-        "nasdaq": "^IXIC",
-        "sp500":  "^GSPC",
-        "dow":    "^DJI",
-        "btc":    "BTC-USD",
-        "eurusd": "EURUSD=X",
-    }
+def _fetch_prices():
+    """Batch-download 5d of daily closes; compare last two trading days."""
+    import yfinance as yf
+    sym_list = list(_PRICE_SYMS.values())
+    # period=5d gives enough days to always get 2 trading days even over weekends
+    raw = yf.download(sym_list, period="5d", interval="1d",
+                      progress=False, auto_adjust=True, timeout=20)
+    closes = raw["Close"].dropna(how="all")
+    if closes.empty:
+        raise RuntimeError("yfinance returned empty DataFrame")
+
     out = {}
-    for key, sym in SYMS.items():
+    for key, sym in _PRICE_SYMS.items():
         try:
-            fi = yf.Ticker(sym).fast_info
-            price = float(fi.last_price)
-            prev  = float(fi.previous_close or fi.regular_market_previous_close or price)
-            chg   = round((price - prev) / prev * 100, 2) if prev else 0.0
-            out[key] = {"price": round(price, 4), "chg": chg}
+            col = closes[sym].dropna()
+            if len(col) < 2:
+                out[key] = {"price": round(float(col.iloc[-1]), 6), "chg": 0.0}
+                continue
+            latest = float(col.iloc[-1])
+            prev   = float(col.iloc[-2])
+            chg    = round((latest - prev) / prev * 100, 2) if prev else 0.0
+            out[key] = {"price": round(latest, 6), "chg": chg}
         except Exception:
             out[key] = {"price": None, "chg": 0.0}
+    return out
 
-    _prices_cache = {"data": out, "ts": now}
-    return jsonify(out)
+@app.route("/api/market-prices")
+def market_prices():
+    global _prices_cache
+    now = _time.time()
+    # Serve cache if fresher than 30 s
+    if _prices_cache["data"] and now - _prices_cache["ts"] < 30:
+        return jsonify(_prices_cache["data"])
+    try:
+        out = _fetch_prices()
+        if any(v["price"] for v in out.values()):
+            _prices_cache = {"data": out, "ts": now}
+        return jsonify(out)
+    except Exception as e:
+        app.logger.warning(f"market_prices failed: {e}")
+        # Return stale cache rather than empty if available
+        if _prices_cache["data"]:
+            return jsonify(_prices_cache["data"])
+        return jsonify({k: {"price": None, "chg": 0.0} for k in _PRICE_SYMS})
 
 # ── Canonical domain redirect ─────────────────────────────────────────────────
 _CANONICAL = "https://backtesting-journalmytrades.com"

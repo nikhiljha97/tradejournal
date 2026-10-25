@@ -638,33 +638,48 @@ function fmtPrice(n, decimals) {
 // ── Backend price grid ────────────────────────────────────────────────────────
 const _prevGrid = {};
 const GRID_FMT = {
-  gold:   { label:'Gold',     prefix:'$', dec: 2 },
-  silver: { label:'Silver',   prefix:'$', dec: 3 },
-  oil:    { label:'Crude Oil',prefix:'$', dec: 2 },
-  eurusd: { label:'EUR/USD',  prefix:'',  dec: 5 },
-  nasdaq: { label:'Nasdaq',   prefix:'',  dec: 0 },
-  sp500:  { label:'S&P 500',  prefix:'',  dec: 2 },
-  dow:    { label:'Dow',      prefix:'',  dec: 0 },
-  btc:    { label:'Bitcoin',  prefix:'$', dec: 0 },
+  gold:   { prefix:'$', dec: 2 },
+  silver: { prefix:'$', dec: 3 },
+  oil:    { prefix:'$', dec: 2 },
+  eurusd: { prefix:'',  dec: 5 },
+  nasdaq: { prefix:'',  dec: 0 },
+  sp500:  { prefix:'',  dec: 2 },
+  dow:    { prefix:'',  dec: 0 },
+  btc:    { prefix:'$', dec: 0 },
+  eth:    { prefix:'$', dec: 2 },  // used for left panel only
 };
 
+let _priceRetries = 0;
+
 async function loadPrices() {
-  const r = await fetch('/api/market-prices');
-  const d = await r.json();
+  let d;
+  try {
+    const r = await fetch('/api/market-prices');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    d = await r.json();
+    _priceRetries = 0;
+  } catch(e) {
+    _priceRetries++;
+    console.warn('market-prices fetch failed attempt', _priceRetries, e);
+    return;
+  }
+
+  const hasAny = Object.values(d).some(v => v.price);
+  if (!hasAny) return;
+
+  // ── Right-panel price grid ──────────────────────────────────────────────
   Object.entries(d).forEach(([key, val]) => {
     if (!val.price) return;
-    const fmt   = GRID_FMT[key];
-    if (!fmt) return;
+    const fmt     = GRID_FMT[key];
     const priceEl = document.getElementById('pgp_' + key);
     const chgEl   = document.getElementById('pgc_' + key);
-    if (!priceEl || !chgEl) return;
+    if (!fmt || !priceEl || !chgEl) return;
 
-    const prev = _prevGrid[key];
-    _prevGrid[key] = val.price;
-
-    const priceStr = fmt.prefix + fmtPrice(val.price, fmt.dec);
-    const chgStr   = (val.chg >= 0 ? '+' : '') + val.chg.toFixed(2) + '%';
-    const cls      = val.chg > 0 ? 'up' : val.chg < 0 ? 'down' : 'flat';
+    const prev      = _prevGrid[key];
+    _prevGrid[key]  = val.price;
+    const priceStr  = fmt.prefix + fmtPrice(val.price, fmt.dec);
+    const chgStr    = (val.chg >= 0 ? '+' : '') + val.chg.toFixed(2) + '%';
+    const cls       = val.chg > 0 ? 'up' : val.chg < 0 ? 'down' : 'flat';
 
     if (priceEl.textContent !== priceStr) {
       priceEl.textContent = priceStr;
@@ -672,12 +687,29 @@ async function loadPrices() {
     }
     chgEl.textContent = chgStr;
     chgEl.className   = 'pg-chg ' + cls;
-
-    // Color the price itself
     priceEl.style.color = val.chg > 0 ? '#00e5a0' : val.chg < 0 ? '#ff4757' : 'var(--text)';
   });
 
-  // Sync gold to left panel XAU row
+  // ── Left-panel: BTC row ─────────────────────────────────────────────────
+  const leftRows = document.querySelectorAll('#priceRows .price-row');
+  [['btc', leftRows[0]], ['eth', leftRows[1]]].forEach(([key, row]) => {
+    const val = d[key];
+    if (!val?.price || !row) return;
+    const fmt   = GRID_FMT[key];
+    const numEl = row.querySelector('.price-num');
+    const chgEl = row.querySelector('.price-chg');
+    if (!numEl || !chgEl) return;
+    const prev = _prevGrid['_left_' + key];
+    _prevGrid['_left_' + key] = val.price;
+    const priceStr = fmt.prefix + fmtPrice(val.price, fmt.dec);
+    numEl.textContent = priceStr;
+    numEl.className   = 'price-num ' + (val.chg > 0 ? 'up' : val.chg < 0 ? 'down' : 'flat');
+    chgEl.textContent = (val.chg >= 0 ? '+' : '') + val.chg.toFixed(2) + '%';
+    chgEl.className   = 'price-chg ' + (val.chg > 0 ? 'up' : val.chg < 0 ? 'down' : 'flat');
+    if (prev !== undefined) flash(numEl, val.price - prev);
+  });
+
+  // ── Left-panel: XAU row ─────────────────────────────────────────────────
   if (d.gold?.price) {
     const gNumEl = document.getElementById('goldPrice');
     const gChgEl = document.getElementById('goldChg');
@@ -685,10 +717,11 @@ async function loadPrices() {
     if (gChgEl) { gChgEl.textContent = (d.gold.chg >= 0 ? '+' : '') + d.gold.chg.toFixed(2) + '%';
                   gChgEl.className = 'price-chg ' + (d.gold.chg > 0 ? 'up' : d.gold.chg < 0 ? 'down' : 'flat'); }
   }
-  // Update DXY from EUR/USD if available
+
+  // ── DXY from EUR/USD ─────────────────────────────────────────────────────
   if (d.eurusd?.price) {
-    const dxy    = (1 / d.eurusd.price) * 107.0;
-    const dxyEl  = document.getElementById('dxyVal');
+    const dxy      = (1 / d.eurusd.price) * 107.0;
+    const dxyEl    = document.getElementById('dxyVal');
     const dxyChgEl = document.getElementById('dxyChg');
     if (dxyEl) {
       const prev = parseFloat(dxyEl.textContent) || 0;
@@ -696,8 +729,8 @@ async function loadPrices() {
       dxyEl.style.color = dxy > 104 ? '#ff4757' : dxy > 101 ? '#f0c040' : '#00e5a0';
       if (prev) flash(dxyEl, dxy - prev);
     }
-    if (dxyChgEl && d.eurusd.chg) {
-      const dxyChg = -d.eurusd.chg; // EUR up = DXY down
+    if (dxyChgEl) {
+      const dxyChg = -d.eurusd.chg;
       dxyChgEl.textContent = (dxyChg > 0 ? '+' : '') + dxyChg.toFixed(2) + '% (24h)';
     }
   }
@@ -751,13 +784,11 @@ async function loadNews() {
   }).join('');
 }
 
-// ── Auto-refresh every 15 seconds ────────────────────────────────────────────
-function refreshAll() {
-  loadFearGreed().catch(()=>{});
-  loadCrypto().catch(()=>{});
-  loadPrices().catch(()=>{});
-  loadNews().catch(()=>{});
-}
+// ── Auto-refresh ─────────────────────────────────────────────────────────────
+// Prices: every 15s (backend caches 30s so it's never hammered)
+// Fear&Greed + News: every 5 min (daily data / rarely changes)
+function refreshPrices() { loadPrices().catch(()=>{}); }
+function refreshSlow()   { loadFearGreed().catch(()=>{}); loadNews().catch(()=>{}); }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -775,8 +806,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSessions();
   setInterval(updateSessions, 30000);
 
-  refreshAll();
-  setInterval(refreshAll, 15000);
+  refreshPrices();
+  refreshSlow();
+  setInterval(refreshPrices, 15000);
+  setInterval(refreshSlow,   300000);
 });
 </script>
 </body>
