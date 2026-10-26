@@ -347,7 +347,7 @@ def market_status_api():
 _econ_cache = {"data": None, "ts": 0}
 
 @app.route("/api/economic-calendar")
-def economic_calendar():
+def api_economic_calendar():
     global _econ_cache
     now = _time.time()
     if _econ_cache["data"] and now - _econ_cache["ts"] < 3600:   # 1-hour cache
