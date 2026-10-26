@@ -122,6 +122,23 @@ def market_prices():
 # ── News proxy (avoids CORS, 5-min cache) ─────────────────────────────────────
 _news_cache = {"data": None, "ts": 0}
 
+# Keywords that make a headline trading-relevant
+_TRADE_KEYWORDS = [
+    "market","stock","equit","index","s&p","nasdaq","dow","russell","nikkei","ftse","dax",
+    "forex","currency","usd","eur","gbp","jpy","cad","aud","chf","yuan","rmb",
+    "fed","fomc","central bank","interest rate","inflation","cpi","pce","gdp","nfp",
+    "non-farm","payroll","treasury","bond","yield","rate hike","rate cut","boe","ecb","boj",
+    "gold","silver","oil","crude","wti","brent","commodity","copper","platinum",
+    "bitcoin","btc","ethereum","eth","crypto","defi","altcoin","blockchain",
+    "trade","trading","trader","hedge fund","wall street","earnings","ipo",
+    "recession","gdp","unemployment","jobs report","macro","monetary","fiscal",
+    "dollar","rally","selloff","bull","bear","volatility","vix","risk",
+]
+
+def _is_trading_news(title: str) -> bool:
+    t = title.lower()
+    return any(k in t for k in _TRADE_KEYWORDS)
+
 @app.route("/api/news")
 def get_news():
     global _news_cache
@@ -131,16 +148,18 @@ def get_news():
 
     data = []
 
-    # ── Tier 1: Finnhub — global market news (general + forex + crypto + merger) ──
+    # ── Tier 1: Finnhub — forex + crypto + merger (no "general" = no off-topic news) ──
     finnhub_key = os.environ.get("FINNHUB_API_KEY", "").strip()
     if finnhub_key and not data:
         seen_fh, fh_items = set(), []
-        for cat in ["general", "forex", "crypto", "merger"]:
+        for cat in ["forex", "crypto", "merger"]:
             result = _fh("/news", {"category": cat})
-            for it in (result or [])[:5]:
+            for it in (result or [])[:6]:
                 title = (it.get("headline") or "").strip()
+                if not title or not _is_trading_news(title):
+                    continue
                 k = title[:40].lower()
-                if not title or k in seen_fh:
+                if k in seen_fh:
                     continue
                 seen_fh.add(k)
                 fh_items.append({
@@ -154,19 +173,21 @@ def get_news():
         fh_items.sort(key=lambda x: x["published_on"], reverse=True)
         data = fh_items[:10]
 
-    # ── Tier 2: yfinance .news fallback (no key needed, works on Render) ──
+    # ── Tier 2: yfinance .news fallback — filtered to trading-relevant headlines ──
     if not data:
         NEWS_TICKERS = ["SPY", "GLD", "CL=F", "EURUSD=X", "BTC-USD", "^VIX", "QQQ"]
         all_items, seen_titles = [], set()
         for sym in NEWS_TICKERS:
-            if len(all_items) >= 10:
+            if len(all_items) >= 12:
                 break
             try:
                 raw_news = yf.Ticker(sym).news or []
-                for item in raw_news[:3]:
+                for item in raw_news[:4]:
                     content = item.get("content") or item
                     title   = (content.get("title") or item.get("title", "")).strip()
-                    url     = (
+                    if not title or not _is_trading_news(title):
+                        continue
+                    url = (
                         (content.get("canonicalUrl") or {}).get("url")
                         or content.get("link")
                         or item.get("link", "#")
@@ -184,8 +205,6 @@ def get_news():
                         (content.get("provider") or {}).get("displayName")
                         or item.get("publisher", "")
                     )
-                    if not title:
-                        continue
                     key = title[:40].lower()
                     if key in seen_titles:
                         continue
