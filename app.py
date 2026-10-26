@@ -369,44 +369,60 @@ _econ_cache = {"data": None, "ts": 0}
 def api_economic_calendar():
     global _econ_cache
     now = _time.time()
-    if _econ_cache["data"] and now - _econ_cache["ts"] < 3600:   # 1-hour cache
+    if _econ_cache["data"] and now - _econ_cache["ts"] < 3600:
         return jsonify(_econ_cache["data"])
+
+    if not os.environ.get("FINNHUB_API_KEY", "").strip():
+        return jsonify(_econ_cache["data"] or [])
 
     import datetime as _dt
     today = _dt.date.today().isoformat()
-    week  = (_dt.date.today() + _dt.timedelta(days=7)).isoformat()
+    ahead = (_dt.date.today() + _dt.timedelta(days=14)).isoformat()  # 2-week window
 
-    data = _fh("/calendar/economic", {"from": today, "to": week})
+    data = _fh("/calendar/economic", {"from": today, "to": ahead})
+    app.logger.info(f"Finnhub econ raw type={type(data)} len={len(data) if isinstance(data,(list,dict)) else '?'}")
+
     if not data:
         return jsonify(_econ_cache["data"] or [])
 
-    # Keep only high-impact events with a name
-    HIGH = {"high", "3", "3.0"}
-    raw  = data if isinstance(data, list) else data.get("economicCalendar", [])
+    # Finnhub wraps in {"economicCalendar":[...]} or returns list directly
+    raw = data if isinstance(data, list) else data.get("economicCalendar", [])
+    app.logger.info(f"Finnhub econ raw events count={len(raw)}")
+
+    IMPACT_RANK = {"high": 0, "medium": 1, "low": 2, "": 3}
     events = []
     for ev in raw:
-        impact = str(ev.get("impact", ev.get("unit", ""))).lower()
         name   = (ev.get("event") or ev.get("name") or "").strip()
+        impact = str(ev.get("impact") or "").strip().lower()
         if not name:
             continue
-        # Include high-impact OR well-known events regardless of impact label
-        important = (impact in HIGH or "high" in impact
-                     or any(k in name.lower() for k in
-                            ["nfp","non-farm","fed","fomc","cpi","pce","gdp",
-                             "interest rate","inflation","employment","payroll"]))
-        if not important:
+        # Include high + medium impact, plus any named key events
+        is_key = any(k in name.lower() for k in [
+            "nfp","non-farm","payroll","fed","fomc","cpi","pce","gdp",
+            "interest rate","inflation","employment","retail sales",
+            "trade balance","manufacturing","services pmi","consumer confidence",
+            "housing","durable goods","industrial","ecb","boe","boj","rba","rbnz","snb"
+        ])
+        if impact not in ("high", "medium") and not is_key:
             continue
         events.append({
-            "event":   name,
-            "date":    ev.get("time") or ev.get("date", ""),
-            "country": ev.get("country", ""),
-            "impact":  impact,
-            "actual":  ev.get("actual"),
-            "estimate":ev.get("estimate"),
-            "prev":    ev.get("prev"),
+            "event":    name,
+            "date":     ev.get("time") or ev.get("date", ""),
+            "country":  (ev.get("country") or "").upper(),
+            "impact":   impact,
+            "actual":   ev.get("actual"),
+            "estimate": ev.get("estimate"),
+            "prev":     ev.get("prev"),
+            "_rank":    IMPACT_RANK.get(impact, 3),
         })
 
-    events = events[:10]
+    # Sort by date, then by impact rank
+    events.sort(key=lambda x: (x["date"], x["_rank"]))
+    for e in events:
+        e.pop("_rank", None)
+    events = events[:12]
+
+    app.logger.info(f"Finnhub econ filtered={len(events)} events")
     if events:
         _econ_cache = {"data": events, "ts": now}
     return jsonify(_econ_cache["data"] or [])

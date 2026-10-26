@@ -977,7 +977,7 @@ async function loadEconomicCalendar() {
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const events = await r.json();
     if (!Array.isArray(events) || !events.length) {
-      container.innerHTML = '<div style="color:var(--faint);font-size:11px;padding:4px 0">Set FINNHUB_API_KEY to enable</div>';
+      container.innerHTML = '<div style="color:var(--faint);font-size:11px;padding:4px 0">No high-impact events in next 14 days</div>';
       return;
     }
     const IMPACT_COLOR = { high:'#ff3b52', '3':'#ff3b52', medium:'#ffa502', '2':'#ffa502', low:'#8fa4bf', '1':'#8fa4bf' };
