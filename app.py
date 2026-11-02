@@ -56,7 +56,17 @@ google_oauth = oauth.register(
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    from sqlalchemy.exc import OperationalError as _OpErr
+    try:
+        return User.query.get(int(user_id))
+    except _OpErr as e:
+        msg = str(e).lower()
+        if any(kw in msg for kw in ("ssl", "connection", "closed", "broken", "bad record", "decryption")):
+            try: db.session.remove()
+            except Exception: pass
+            import time as _t; _t.sleep(0.3)
+            return User.query.get(int(user_id))
+        return None
 
 # ── Live market prices (used by login page panels) ───────────────────────────
 import time as _time

@@ -15,7 +15,7 @@ class Config:
     # pool_pre_ping tests the connection before use and reconnects if closed.
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
-        "pool_recycle": 60,       # recycle every 60s — Neon drops SSL ~5min idle but free tier is aggressive
+        "pool_recycle": 30,       # recycle every 30s — Neon free tier drops SSL aggressively; stay ahead of it
         "pool_size": 3,           # keep pool small on free tier (512MB RAM)
         "max_overflow": 2,
         "pool_timeout": 20,
