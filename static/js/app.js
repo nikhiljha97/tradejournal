@@ -591,8 +591,12 @@ function renderBlotter(trades, total, start) {
       const dc=sc>0.2?C.green:sc<-0.2?C.red:C.muted;
       const isOpen=t.realized_pnl==null&&!t.exit_price;
       const statusBadge=isOpen?`<span class="open-trade-badge">● OPEN</span>`:`<span style="color:var(--muted);font-size:11px">Closed</span>`;
-      const chartThumb=t.image_url
-        ?`<img class="chart-thumb" src="${t.image_url}" alt="chart" onclick="event.stopPropagation();openLightbox('${t.image_url}')">`
+      const _imgUrls = parseImageUrls(t.image_url);
+      const chartThumb=_imgUrls.length
+        ?`<img class="chart-thumb" src="${_imgUrls[0]}" alt="chart"
+            onerror="this._retries=(this._retries||0)+1;if(this._retries<4){const self=this;setTimeout(()=>{self.src=self.src.split('?')[0]+'?r='+self._retries;},2000*self._retries);}else{this.style.display='none';this.nextElementSibling.style.display='inline-block';}"
+            onclick="event.stopPropagation();openLightbox(${JSON.stringify(_imgUrls)})"
+          ><span class="chart-thumb-broken" style="display:none" onclick="event.stopPropagation();openLightbox(${JSON.stringify(_imgUrls)})">🖼</span>`
         :`<span style="color:var(--faint);font-size:11px">—</span>`;
       return `<tr style="cursor:pointer" onclick="editTrade(${t.id})">
         <td class="num">${t.trade_date||''}</td>
@@ -701,17 +705,47 @@ function blotterGoPage(n) {
   }
 }
 
+/* ── Image URL helpers ───────────────────────────────────────── */
+function parseImageUrls(raw) {
+  if(!raw) return [];
+  if(typeof raw==='string'){
+    const s=raw.trim();
+    if(s.startsWith('[')){
+      try{ return JSON.parse(s).filter(Boolean); } catch(e){}
+    }
+    return [s];
+  }
+  if(Array.isArray(raw)) return raw.filter(Boolean);
+  return [];
+}
+
 /* ── Lightbox ────────────────────────────────────────────────── */
-function openLightbox(url) {
+function openLightbox(urls) {
+  const list = Array.isArray(urls) ? urls : parseImageUrls(urls);
+  if(!list.length) return;
   let lb=$('lightbox');
   if(!lb){
     lb=document.createElement('div');
     lb.id='lightbox';lb.className='lightbox';
-    lb.innerHTML='<img id="lightboxImg">';
-    lb.onclick=()=>lb.classList.remove('open');
+    lb.innerHTML='<div class="lb-wrap"><img id="lightboxImg"><div id="lbNav" style="display:none;text-align:center;margin-top:8px;gap:8px;"></div></div>';
+    lb.onclick=(e)=>{ if(e.target===lb||e.target.classList.contains('lb-wrap'))lb.classList.remove('open'); };
     document.body.appendChild(lb);
   }
-  $('lightboxImg').src=url;
+  let idx=0;
+  const imgEl=$('lightboxImg');
+  const navEl=$('lbNav');
+  function show(i){
+    idx=i;
+    imgEl.src=list[i];
+    if(list.length>1){
+      navEl.style.display='flex';
+      navEl.innerHTML=list.map((_,n)=>`<span onclick="event.stopPropagation();lbGoto(${n})" style="width:8px;height:8px;border-radius:50%;background:${n===i?'var(--green)':'var(--border)'}"></span>`).join('');
+    } else {
+      navEl.style.display='none';
+    }
+  }
+  window.lbGoto=(n)=>show(n);
+  show(0);
   lb.classList.add('open');
 }
 
@@ -784,10 +818,24 @@ function _setImagePreview(file) {
   $('imageUploadPrompt').classList.add('hidden');
 }
 function _loadExistingImage(imageUrl) {
-  if(imageUrl){
-    $('imagePreview').src=imageUrl;
+  const urls = parseImageUrls(imageUrl);
+  if(urls.length){
+    $('imagePreview').src=urls[0];
     $('imagePreviewWrap').classList.remove('hidden');
     $('imageUploadPrompt').classList.add('hidden');
+    // Show count badge if multiple
+    let badge=$('imgCountBadge');
+    if(!badge){
+      badge=document.createElement('span');
+      badge.id='imgCountBadge';
+      badge.style.cssText='position:absolute;top:4px;right:4px;background:var(--gold);color:#000;font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px;';
+      $('imagePreviewWrap').style.position='relative';
+      $('imagePreviewWrap').appendChild(badge);
+    }
+    badge.textContent=urls.length>1?`1/${urls.length}`:'';
+    badge.style.display=urls.length>1?'block':'none';
+    // Click preview to open gallery lightbox
+    $('imagePreview').onclick=(e)=>{ e.stopPropagation(); openLightbox(urls); };
   } else {
     _resetImageUpload();
   }

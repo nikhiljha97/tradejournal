@@ -2343,8 +2343,10 @@ def ext_log_trade():
                     transformation=[{"width": 1200, "crop": "limit", "quality": "auto"}],
                 )
                 urls.append(result["secure_url"])
-            # Store as JSON array if multiple, plain string if single
-            payload["image_url"] = json.dumps(urls) if len(urls) > 1 else urls[0]
+                print(f"[ext] Image uploaded OK: {result['secure_url'][:80]}")
+            # Always store as JSON array for consistency
+            payload["image_url"] = json.dumps(urls)
+            print(f"[ext] Stored image_url: {payload['image_url'][:120]}")
         except Exception as img_err:
             print(f"[ext] Screenshot upload failed: {img_err}")
 
