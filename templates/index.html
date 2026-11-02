@@ -383,6 +383,14 @@
         </div>
         <div class="field"><label>Realized P&L $ (override)</label><input type="number" step="any" id="f_pnl" class="num" oninput="recalc()"></div>
         </div>
+        <!-- ── Partial Exits ──────────────────────────────────── -->
+        <div class="form-section-row" style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;margin-bottom:8px">
+          <p class="form-section" style="margin:0">Partial Exits</p>
+          <button type="button" class="btn-ghost" style="padding:4px 10px;font-size:11px" onclick="addPartialRow()">+ Add Partial</button>
+        </div>
+        <div id="partialRows" style="display:flex;flex-direction:column;gap:6px"></div>
+        <div id="partialSummary" style="display:none;margin-top:8px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.7"></div>
+
         <div class="field"><label>Commission $</label><input type="number" step="any" id="f_commission" class="num" value="0"></div>
       </div>
 

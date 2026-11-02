@@ -583,6 +583,13 @@ with app.app_context():
             conn.commit()
     except Exception as e:
         print(f"Migration note (email_verified): {e}")
+    # Add partial_exits column if it doesn't exist
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(text("ALTER TABLE trade ADD COLUMN IF NOT EXISTS partial_exits TEXT DEFAULT '[]'"))
+            conn.commit()
+    except Exception as e:
+        print(f"Migration note (partial_exits): {e}")
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -687,10 +694,50 @@ def _compute_derived(data):
     elif entry is not None and stop is not None and target is not None and entry != stop:
         planned_rr = abs(target - entry) / abs(entry - stop)
 
+    # ── Partial exits handling ─────────────────────────────────────────────────
+    # partials: list of {lots, price, time} — compute their P&L contribution
+    import json as _json_local
+    raw_partials = data.get("partial_exits") or []
+    if isinstance(raw_partials, str):
+        try: raw_partials = _json_local.loads(raw_partials)
+        except: raw_partials = []
+
+    sign = 1 if direction == "Long" else -1
+    partial_exits_computed = []
+    partial_lots_total = 0.0
+    partial_pnl_total  = 0.0
+
+    for p in raw_partials:
+        p_lots  = _num(p.get("lots"))
+        p_price = _num(p.get("price"))
+        p_time  = p.get("time", "")
+        if p_lots and p_price and entry is not None:
+            p_pnl  = sign * (p_price - entry) * contract_size * p_lots
+            p_risk = (abs(entry - stop) * contract_size * p_lots) if (stop is not None and entry != stop) else (planned_risk * (p_lots / lots) if (planned_risk and lots) else None)
+            p_r    = round(p_pnl / p_risk, 3) if p_risk and p_risk > 0 else None
+            partial_exits_computed.append({
+                "lots":  round(p_lots, 4),
+                "price": round(p_price, 5),
+                "time":  p_time,
+                "pnl":   round(p_pnl, 2),
+                "r":     p_r,
+            })
+            partial_lots_total += p_lots
+            partial_pnl_total  += p_pnl
+
+    data["partial_exits"] = _json_local.dumps(partial_exits_computed)
+
+    # Remaining lots exit at the main exit price
+    remaining_lots = (lots - partial_lots_total) if lots else None
+
     realized_pnl = _num(data.get("realized_pnl"))
-    if realized_pnl is None and exit_price is not None and entry is not None and lots:
-        sign = 1 if direction == "Long" else -1
-        realized_pnl = sign * (exit_price - entry) * contract_size * lots
+    if realized_pnl is None:
+        # If partials logged, sum partial PnL + remaining exit PnL
+        if partial_exits_computed and exit_price is not None and entry is not None and remaining_lots:
+            remaining_pnl = sign * (exit_price - entry) * contract_size * remaining_lots
+            realized_pnl  = partial_pnl_total + remaining_pnl
+        elif exit_price is not None and entry is not None and lots:
+            realized_pnl = sign * (exit_price - entry) * contract_size * lots
 
     realized_r = None
     if realized_pnl is not None and planned_risk and planned_risk > 0:
@@ -738,7 +785,9 @@ def _save_trade(data):
         planned_risk_usd=data.get("planned_risk_usd"), planned_rr=data.get("planned_rr"),
         realized_pnl=data.get("realized_pnl"), realized_r=data.get("realized_r"),
         commission=data.get("commission") or 0.0, order_type=data.get("order_type","MARKET"),
-        setups=json.dumps(data.get("setups") or []), notes=data.get("notes"),
+        setups=json.dumps(data.get("setups") or []),
+        partial_exits=data.get("partial_exits") or "[]",
+        notes=data.get("notes"),
         import_source=data.get("import_source","manual"),
         emotions=json.dumps(data.get("emotions") or []),
         sentiment_label=data.get("sentiment_label"),
@@ -2053,6 +2102,7 @@ def update_trade(trade_id):
                 except (TypeError, ValueError): val = None
             setattr(t, field, val)
     t.setups            = json.dumps(payload.get("setups") or [])
+    t.partial_exits     = payload.get("partial_exits") or "[]"
     t.notes             = payload.get("notes")
     t.emotions          = json.dumps(payload.get("emotions") or [])
     t.sentiment_label   = payload.get("sentiment_label")

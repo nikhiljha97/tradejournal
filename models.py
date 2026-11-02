@@ -49,6 +49,9 @@ class Trade(db.Model):
     notes               = db.Column(db.Text)
     import_source       = db.Column(db.String(50))   # "manual" / "csv" / "mt5" / "pdf"
 
+    # Partial exits — JSON list of {lots, price, time, pnl, r}
+    partial_exits       = db.Column(db.Text, default="[]")
+
     # Sentiment — all LLM derived
     emotions            = db.Column(db.Text, default="[]")   # JSON list
     sentiment_label     = db.Column(db.String(100))
@@ -86,6 +89,7 @@ class Trade(db.Model):
             "commission": self.commission,
             "order_type": self.order_type,
             "setups": json.loads(self.setups or "[]"),
+            "partial_exits": json.loads(self.partial_exits or "[]"),
             "notes": self.notes,
             "import_source": self.import_source,
             "emotions": json.loads(self.emotions or "[]"),

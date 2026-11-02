@@ -838,6 +838,72 @@ const PIP_SIZE = {
 function getContractSize(inst) { return CONTRACT_SIZE[inst] || 100000; }
 function getPipSize(inst)       { return PIP_SIZE[inst] || 0.0001; }
 
+/* ── Partial exits management ────────────────────────────────── */
+let _partialCount = 0;
+
+function addPartialRow(data) {
+  // Insert column header if this is the first row
+  const container = document.getElementById('partialRows');
+  if (!container) return;
+  if (container.children.length === 0) {
+    const hdr = document.createElement('div');
+    hdr.className = 'partial-row-hdr';
+    hdr.id = 'partialHdr';
+    hdr.innerHTML = '<span>Lots</span><span>Exit Price</span><span>Time</span><span>R</span><span></span>';
+    container.appendChild(hdr);
+  }
+  const idx = ++_partialCount;
+  const row = document.createElement('div');
+  row.className = 'partial-row';
+  row.dataset.idx = idx;
+  row.innerHTML = `
+    <input type="number" step="any" placeholder="0.07" class="pr-lots" oninput="recalc()" value="${data?.lots||''}">
+    <input type="number" step="any" placeholder="exit price" class="pr-price" oninput="recalc()" value="${data?.price||''}">
+    <input type="text" placeholder="HH:MM" class="pr-time" value="${data?.time||''}">
+    <span class="pr-r" id="prR_${idx}">—</span>
+    <button type="button" class="pr-del" onclick="removePartialRow(this)" title="Remove">×</button>`;
+  container.appendChild(row);
+  recalc();
+}
+
+function removePartialRow(btn) {
+  const row = btn.closest('.partial-row');
+  const container = document.getElementById('partialRows');
+  row.remove();
+  // Remove header if no rows left
+  if (container && container.querySelectorAll('.partial-row').length === 0) {
+    const hdr = document.getElementById('partialHdr');
+    if (hdr) hdr.remove();
+  }
+  recalc();
+}
+
+function getPartialExits() {
+  const rows = document.querySelectorAll('#partialRows .partial-row');
+  const result = [];
+  rows.forEach(row => {
+    const lots  = parseFloat(row.querySelector('.pr-lots')?.value);
+    const price = parseFloat(row.querySelector('.pr-price')?.value);
+    const time  = row.querySelector('.pr-time')?.value || '';
+    if (lots > 0 && price > 0) result.push({ lots, price, time });
+  });
+  return result;
+}
+
+function clearPartialRows() {
+  const container = document.getElementById('partialRows');
+  if (container) container.innerHTML = '';
+  _partialCount = 0;
+  const summary = document.getElementById('partialSummary');
+  if (summary) { summary.style.display = 'none'; summary.innerHTML = ''; }
+}
+
+function loadPartialRows(partials) {
+  clearPartialRows();
+  if (!partials || !partials.length) return;
+  partials.forEach(p => addPartialRow(p));
+}
+
 function recalc() {
   const inst=($('f_instrument').value||'').toUpperCase();
   const lots=parseFloat($('f_lots').value)||0;
@@ -857,22 +923,58 @@ function recalc() {
     if(sp&&lots) risk=sp*ps*cs*lots; // pips→price×contract_size×lots
   } else if(riskModeEl==='dollar'){
     risk=parseFloat($('f_dollar_risk').value)||null;
-  } else if(!isNaN(entry)&&!isNaN(stop)&&lots){
+  }
+  // Price-derived fallback: applies to "price" mode AND as fallback when pip/dollar fields empty
+  if(risk==null&&!isNaN(entry)&&!isNaN(stop)&&lots){
     risk=Math.abs(entry-stop)*cs*lots;
   }
   let plannedRR=null;
   if(!isNaN(entry)&&!isNaN(stop)&&!isNaN(target)&&entry!==stop)
     plannedRR=Math.abs(target-entry)/Math.abs(entry-stop);
+  // ── Partial exits: compute per-partial R and aggregate ─────────
+  const partials = getPartialExits();
+  const sign = dir==='Long' ? 1 : -1;
+  let partialLotsSum = 0;
+  let partialPnlSum  = 0;
+  const perPartialRisk = (p_lots) => risk ? risk * (p_lots / lots) : (
+    (!isNaN(entry)&&!isNaN(stop)&&p_lots) ? Math.abs(entry-stop)*cs*p_lots : null
+  );
+  partials.forEach((p, i) => {
+    partialLotsSum += p.lots;
+    const p_pnl = sign*(p.price-entry)*cs*p.lots;
+    partialPnlSum += p_pnl;
+    const p_risk = perPartialRisk(p.lots);
+    const p_r = p_risk ? p_pnl/p_risk : null;
+    // Update per-row R display
+    const allRows = document.querySelectorAll('#partialRows .partial-row');
+    if (allRows[i]) {
+      const rEl = allRows[i].querySelector('.pr-r');
+      if (rEl) {
+        rEl.textContent = p_r!=null ? fmtR(p_r) : '—';
+        rEl.style.color = p_r!=null ? (p_r>0?'var(--green)':'var(--red)') : 'var(--muted)';
+      }
+    }
+  });
+  const remainingLots = lots - partialLotsSum;
+
   let pnl=null;
   if(!isNaN(pnlOverride)) {
     pnl=pnlOverride;
     // Apply win/loss sign from toggle
     if(winLoss==='win' && pnl<0) pnl=Math.abs(pnl);
     if(winLoss==='loss' && pnl>0) pnl=-Math.abs(pnl);
+  } else if (partials.length > 0 && !isNaN(entry) && lots) {
+    // Blended: partials + remaining exit
+    let totalPnl = partialPnlSum;
+    if (!isNaN(exit) && remainingLots > 0) {
+      totalPnl += sign*(exit-entry)*cs*remainingLots;
+    }
+    pnl = totalPnl;
   } else if(!isNaN(exit)&&!isNaN(entry)&&lots){
-    const sign=dir==='Long'?1:-1;
     pnl=(exit-entry)*sign*cs*lots;
   }
+
+  // Realized R uses FULL planned_risk (risk is already for full lots)
   const realR=(pnl!=null&&risk)?pnl/risk:null;
   $('crRisk').textContent=risk?fmt$(risk):'—';
   $('crRR').textContent=plannedRR?fmt(plannedRR)+' : 1':'—';
@@ -880,6 +982,42 @@ function recalc() {
   $('crPnL').className=pnl!=null?cls(pnl):'';
   $('crR').textContent=realR!=null?fmtR(realR):'—';
   $('crR').className=realR!=null?cls(realR):'';
+
+  // ── Partial summary panel ───────────────────────────────────
+  const summaryEl = document.getElementById('partialSummary');
+  if (summaryEl && partials.length > 0 && !isNaN(entry)) {
+    summaryEl.style.display = 'block';
+    let rows = `<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Partial exit breakdown</div>`;
+    partials.forEach((p, i) => {
+      const p_pnl = sign*(p.price-entry)*cs*p.lots;
+      const p_risk = perPartialRisk(p.lots);
+      const p_r = p_risk ? p_pnl/p_risk : null;
+      const pct = lots ? (p.lots/lots*100).toFixed(0)+'%' : '';
+      rows += `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted)">Partial ${i+1} — ${p.lots} lots (${pct}) @ ${p.price}</span>
+        <span style="color:${p_r!=null&&p_r>0?'var(--green)':'var(--red)'};font-weight:700;font-family:monospace">${p_r!=null?fmtR(p_r):'—'} &nbsp; ${fmt$(p_pnl)}</span>
+      </div>`;
+    });
+    if (!isNaN(exit) && remainingLots > 0) {
+      const rem_pnl = sign*(exit-entry)*cs*remainingLots;
+      const rem_risk = perPartialRisk(remainingLots);
+      const rem_r = rem_risk ? rem_pnl/rem_risk : null;
+      const pct = lots ? (remainingLots/lots*100).toFixed(0)+'%' : '';
+      rows += `<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted)">Final exit — ${remainingLots.toFixed(2)} lots (${pct}) @ ${exit}</span>
+        <span style="color:${rem_r!=null&&rem_r>0?'var(--green)':'var(--red)'};font-weight:700;font-family:monospace">${rem_r!=null?fmtR(rem_r):'—'} &nbsp; ${fmt$(rem_pnl)}</span>
+      </div>`;
+    }
+    if (pnl!=null) {
+      rows += `<div style="display:flex;justify-content:space-between;padding:4px 0;margin-top:2px">
+        <span style="color:var(--text);font-weight:700">Blended result</span>
+        <span style="color:${pnl>=0?'var(--green)':'var(--red)'};font-weight:800;font-family:monospace">${realR!=null?fmtR(realR)+' &nbsp;':''} ${fmt$(pnl)}</span>
+      </div>`;
+    }
+    summaryEl.innerHTML = rows;
+  } else if (summaryEl) {
+    summaryEl.style.display = 'none';
+  }
 }
 ['f_instrument','f_lots','f_entry','f_stop','f_target','f_exit',
  'f_stop_pips','f_target_pips','f_dollar_risk','f_direction','f_pnl']
@@ -998,6 +1136,7 @@ async function saveTrade() {
     target_pips:riskModeEl==='pip'?$('f_target_pips').value:null,
     dollar_risk:riskModeEl==='dollar'?$('f_dollar_risk').value:null,
     setups:[...selectedTags], notes:$('f_notes').value, emotions:[],
+    partial_exits: getPartialExits(),
   };
   $('saveBtn').disabled=true; $('saveBtn').textContent='Saving…';
   try {
@@ -1029,6 +1168,7 @@ async function updateTrade(id) {
     dollar_risk:riskModeEl==='dollar'?$('f_dollar_risk').value:null,
     setups:[...selectedTags], notes:$('f_notes').value, emotions:[],
     win_loss: document.querySelector('input[name="win_loss"]:checked')?.value || 'auto',
+    partial_exits: getPartialExits(),
   };
   $('saveBtn').disabled=true; $('saveBtn').textContent='Updating…';
   try {
@@ -1085,6 +1225,7 @@ function editTrade(id) {
     sp.textContent=t.notes?'Click "Preview psychology read" to re-analyze.':'';
   }
   _loadExistingImage(t.image_url||null);
+  loadPartialRows(t.partial_exits || []);
   recalc();
   $('entryModal').classList.add('open');
 }
@@ -1119,6 +1260,7 @@ function clearEntryForm() {
   _resetImageUpload();
   $('sentPreview').textContent='';
   resetTimePickers();
+  clearPartialRows();
   recalc();
 }
 
@@ -1531,6 +1673,7 @@ window.saveTrade = async function() {
     target_pips:riskModeEl==='pip'?$('f_target_pips').value:null,
     dollar_risk:riskModeEl==='dollar'?$('f_dollar_risk').value:null,
     setups:[...selectedTags], notes:$('f_notes').value, emotions:[],
+    partial_exits: getPartialExits(),
   };
   $('saveBtn').disabled=true; $('saveBtn').textContent='Saving…';
   try {

@@ -854,6 +854,33 @@ tbody tr:hover { background: var(--panel2); }
   .w200 { width: 140px !important; height: 140px !important; }
 }
 
+/* ── Partial exits row ───────────────────────────────────────── */
+.partial-row {
+  display: grid; grid-template-columns: 1fr 1fr 80px 60px 28px;
+  gap: 6px; align-items: center;
+  background: var(--panel2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 12px;
+}
+.partial-row input {
+  background: var(--bg); border: 1px solid var(--border2); color: var(--text);
+  border-radius: 5px; padding: 5px 8px; font-size: 12px; width: 100%;
+}
+.partial-row input:focus { outline: none; border-color: var(--green-dim); }
+.partial-row .pr-r {
+  font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 11px;
+  text-align: center; color: var(--muted); white-space: nowrap;
+}
+.partial-row .pr-del {
+  background: none; border: none; color: var(--faint); cursor: pointer;
+  font-size: 16px; line-height: 1; padding: 0; text-align: center;
+}
+.partial-row .pr-del:hover { color: var(--red); }
+.partial-row-hdr {
+  display: grid; grid-template-columns: 1fr 1fr 80px 60px 28px;
+  gap: 6px; font-size: 10px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 0 10px; margin-bottom: 2px;
+}
+
 /* ── Neuromarketing / Dopamine Design System ─────────────────── */
 
 /* Toast achievement notifications */
