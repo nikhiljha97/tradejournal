@@ -1076,7 +1076,7 @@ RULES:
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
             model="qwen/qwen3.8-27b",
-            max_tokens=450,
+            max_tokens=700,
             temperature=0.3,
             messages=messages,
         )
@@ -1517,7 +1517,7 @@ def _ai_idea_summary(idea):
         import json as _j
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
-            model="qwen/qwen3.8-27b", max_tokens=500, temperature=0.2,
+            model="qwen/qwen3.8-27b", max_tokens=800, temperature=0.2,
             messages=[{"role": "user", "content": prompt}],
         )
         raw = resp.choices[0].message.content.strip()
@@ -1809,7 +1809,7 @@ Return ONLY the JSON object. No markdown, no explanation outside the JSON."""
         client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
         resp = client.chat.completions.create(
             model="qwen/qwen3.8-27b",
-            max_tokens=600,
+            max_tokens=1000,
             temperature=0.2,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -2399,7 +2399,7 @@ RULES:
         client = Groq(api_key=os.environ.get("GROQ_API_KEY",""))
         resp = client.chat.completions.create(
             model="qwen/qwen3.8-27b",
-            max_tokens=800,
+            max_tokens=2500,
             temperature=0.3,
             messages=[
                 {"role": "system", "content": system},
