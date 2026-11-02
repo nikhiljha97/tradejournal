@@ -592,11 +592,13 @@ function renderBlotter(trades, total, start) {
       const isOpen=t.realized_pnl==null&&!t.exit_price;
       const statusBadge=isOpen?`<span class="open-trade-badge">● OPEN</span>`:`<span style="color:var(--muted);font-size:11px">Closed</span>`;
       const _imgUrls = parseImageUrls(t.image_url);
+      const _imgJson = JSON.stringify(_imgUrls).replace(/"/g,'&quot;');
       const chartThumb=_imgUrls.length
-        ?`<img class="chart-thumb" src="${_imgUrls[0]}" alt="chart"
-            onerror="this._retries=(this._retries||0)+1;if(this._retries<4){const self=this;setTimeout(()=>{self.src=self.src.split('?')[0]+'?r='+self._retries;},2000*self._retries);}else{this.style.display='none';this.nextElementSibling.style.display='inline-block';}"
-            onclick="event.stopPropagation();openLightbox(${JSON.stringify(_imgUrls)})"
-          ><span class="chart-thumb-broken" style="display:none" onclick="event.stopPropagation();openLightbox(${JSON.stringify(_imgUrls)})">🖼</span>`
+        ?`<div class="chart-cell" onclick="event.stopPropagation();openLightbox(${JSON.stringify(_imgUrls)})">
+            <img class="chart-thumb" src="${_imgUrls[0]}" alt="chart"
+              onerror="this._retries=(this._retries||0)+1;if(this._retries<4){const self=this;setTimeout(()=>{self.src=self.src.split('?')[0]+'?r='+self._retries;},2000*self._retries);}else{this.style.opacity='0.3';}"
+            >${_imgUrls.length>1?`<span class="chart-count">${_imgUrls.length}</span>`:''}
+          </div>`
         :`<span style="color:var(--faint);font-size:11px">—</span>`;
       return `<tr style="cursor:pointer" onclick="editTrade(${t.id})">
         <td class="num">${t.trade_date||''}</td>
@@ -720,34 +722,59 @@ function parseImageUrls(raw) {
 }
 
 /* ── Lightbox ────────────────────────────────────────────────── */
+let _lbList=[], _lbIdx=0;
+function _lbShow(i){
+  _lbIdx=((i%_lbList.length)+_lbList.length)%_lbList.length;
+  const imgEl=$('lightboxImg');
+  imgEl.style.opacity='0';
+  imgEl.src=_lbList[_lbIdx];
+  imgEl.onload=()=>{ imgEl.style.opacity='1'; };
+  // dots
+  const dots=$('lbDots');
+  if(_lbList.length>1){
+    dots.style.display='flex';
+    dots.innerHTML=_lbList.map((_,n)=>`<span class="lb-dot${n===_lbIdx?' active':''}" onclick="event.stopPropagation();_lbShow(${n})"></span>`).join('');
+  } else { dots.style.display='none'; }
+  // counter
+  const ctr=$('lbCounter');
+  if(_lbList.length>1){ ctr.textContent=`${_lbIdx+1} / ${_lbList.length}`; ctr.style.display='block'; }
+  else ctr.style.display='none';
+  // arrows
+  $('lbPrev').style.display=_lbList.length>1?'flex':'none';
+  $('lbNext').style.display=_lbList.length>1?'flex':'none';
+}
 function openLightbox(urls) {
-  const list = Array.isArray(urls) ? urls : parseImageUrls(urls);
-  if(!list.length) return;
+  _lbList = Array.isArray(urls) ? urls : parseImageUrls(urls);
+  if(!_lbList.length) return;
   let lb=$('lightbox');
   if(!lb){
     lb=document.createElement('div');
     lb.id='lightbox';lb.className='lightbox';
-    lb.innerHTML='<div class="lb-wrap"><img id="lightboxImg"><div id="lbNav" style="display:none;text-align:center;margin-top:8px;gap:8px;"></div></div>';
-    lb.onclick=(e)=>{ if(e.target===lb||e.target.classList.contains('lb-wrap'))lb.classList.remove('open'); };
+    lb.innerHTML=`
+      <div class="lb-overlay" onclick="closeLightbox()"></div>
+      <button class="lb-arrow" id="lbPrev" onclick="event.stopPropagation();_lbShow(_lbIdx-1)">&#8249;</button>
+      <div class="lb-wrap">
+        <img id="lightboxImg" style="transition:opacity 0.18s">
+        <div id="lbCounter" class="lb-counter"></div>
+        <div id="lbDots" class="lb-dots"></div>
+      </div>
+      <button class="lb-arrow" id="lbNext" onclick="event.stopPropagation();_lbShow(_lbIdx+1)">&#8250;</button>
+      <button class="lb-close" onclick="closeLightbox()">&#x2715;</button>`;
     document.body.appendChild(lb);
   }
-  let idx=0;
-  const imgEl=$('lightboxImg');
-  const navEl=$('lbNav');
-  function show(i){
-    idx=i;
-    imgEl.src=list[i];
-    if(list.length>1){
-      navEl.style.display='flex';
-      navEl.innerHTML=list.map((_,n)=>`<span onclick="event.stopPropagation();lbGoto(${n})" style="width:8px;height:8px;border-radius:50%;background:${n===i?'var(--green)':'var(--border)'}"></span>`).join('');
-    } else {
-      navEl.style.display='none';
-    }
-  }
-  window.lbGoto=(n)=>show(n);
-  show(0);
+  // keyboard nav
+  lb._keyHandler&&document.removeEventListener('keydown',lb._keyHandler);
+  lb._keyHandler=(e)=>{
+    if(!$('lightbox').classList.contains('open')) return;
+    if(e.key==='ArrowRight'||e.key==='ArrowDown') _lbShow(_lbIdx+1);
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp') _lbShow(_lbIdx-1);
+    if(e.key==='Escape') closeLightbox();
+  };
+  document.addEventListener('keydown',lb._keyHandler);
+  _lbShow(0);
   lb.classList.add('open');
 }
+function closeLightbox(){ const lb=$('lightbox'); if(lb) lb.classList.remove('open'); }
 
 /* ── Time picker ─────────────────────────────────────────────── */
 function initTimePickers() {
