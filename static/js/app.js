@@ -822,7 +822,23 @@ function toggleOpenTrade() {
   $('exit_fields').style.pointerEvents=open?'none':'auto';
   $('exit_time_field').style.opacity=open?'0.3':'1';
   $('exit_time_field').style.pointerEvents=open?'none':'auto';
-  if(open){$('f_exit').value='';$('f_pnl').value='';$('f_exit_time').value='';recalc();}
+  const edf=$('exit_date_field');
+  if(edf){ edf.style.opacity=open?'0.3':'1'; edf.style.pointerEvents=open?'none':'auto'; }
+  if(open){$('f_exit').value='';$('f_pnl').value='';$('f_exit_time').value='';$('f_exit_date').value='';recalc();}
+}
+function syncExitDate() {
+  const exitDate=$('f_exit_date').value;
+  const entryDate=$('f_date').value;
+  const lbl=$('exit_date_field').querySelector('label');
+  if(exitDate && entryDate && exitDate!==entryDate){
+    const days=Math.round((new Date(exitDate)-new Date(entryDate))/(86400000));
+    const hint=lbl.querySelector('.swing-hint');
+    if(hint) hint.textContent=`+${days}d swing`;
+    else lbl.insertAdjacentHTML('beforeend',`<span class="swing-hint" style="color:var(--gold);font-size:10px;font-weight:700;margin-left:4px">+${days}d swing</span>`);
+  } else {
+    const hint=lbl.querySelector('.swing-hint');
+    if(hint) hint.remove();
+  }
 }
 
 /* ── Image upload ────────────────────────────────────────────── */
@@ -1200,6 +1216,7 @@ async function saveTrade() {
   const isOpen=$('f_open_trade').checked;
   const payload={
     trade_date:$('f_date').value, entry_time:$('f_entry_time').value,
+    exit_date:isOpen?null:($('f_exit_date').value||null),
     exit_time:isOpen?null:$('f_exit_time').value, session:$('f_session').value,
     instrument:($('f_instrument').value||'').toUpperCase(), direction:$('f_direction').value,
     lots:$('f_lots').value, entry_price:$('f_entry').value,
@@ -1282,6 +1299,7 @@ function editTrade(id) {
   const wr=$(`f_win_loss_${wl}`); if(wr) wr.checked=true;
   setTimePicker('entry',t.entry_time);
   setTimePicker('exit',t.exit_time);
+  $('f_exit_date').value=t.exit_date||'';
   const isOpen=t.realized_pnl==null&&!t.exit_price;
   $('f_open_trade').checked=isOpen;
   toggleOpenTrade();
@@ -1327,7 +1345,7 @@ function clearEntryForm() {
   $('f_open_trade').checked=false;
   toggleOpenTrade();
   ['f_entry','f_stop','f_target','f_exit','f_pnl','f_lots',
-   'f_stop_pips','f_target_pips','f_dollar_risk','f_notes','f_commission']
+   'f_stop_pips','f_target_pips','f_dollar_risk','f_notes','f_commission','f_exit_date']
     .forEach(id=>{const el=$(id);if(el)el.value='';});
   selectedTags.clear();
   document.querySelectorAll('#setupTags .toggle.on').forEach(e=>e.classList.remove('on'));
@@ -1737,6 +1755,7 @@ window.saveTrade = async function() {
   const isOpen=$('f_open_trade').checked;
   const payload={
     trade_date:$('f_date').value, entry_time:$('f_entry_time').value,
+    exit_date:isOpen?null:($('f_exit_date').value||null),
     exit_time:isOpen?null:$('f_exit_time').value, session:$('f_session').value,
     instrument:($('f_instrument').value||'').toUpperCase(), direction:$('f_direction').value,
     lots:$('f_lots').value, entry_price:$('f_entry').value,

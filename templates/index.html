@@ -335,6 +335,16 @@
               <input type="hidden" id="f_exit_time">
             </div>
           </div>
+          <div class="field" id="exit_date_field">
+            <label style="display:flex;align-items:center;gap:6px">
+              Exit date
+              <span style="font-size:10px;color:var(--muted);font-weight:400">(swing only)</span>
+            </label>
+            <input type="date" id="f_exit_date" class="num"
+              placeholder="Same as entry"
+              style="font-size:12px;"
+              oninput="syncExitDate()">
+          </div>
         </div>
 
         <p class="form-section">Instrument</p>

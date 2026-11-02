@@ -13,6 +13,7 @@ class Trade(db.Model):
     # Timing
     trade_date          = db.Column(db.String(10), nullable=False, index=True)
     entry_time          = db.Column(db.String(8))
+    exit_date           = db.Column(db.String(10))   # swing trades: exit on a different day
     exit_time           = db.Column(db.String(8))
     duration_minutes    = db.Column(db.Float)
 
@@ -68,6 +69,7 @@ class Trade(db.Model):
             "id": self.id,
             "trade_date": self.trade_date,
             "entry_time": self.entry_time,
+            "exit_date": self.exit_date,
             "exit_time": self.exit_time,
             "duration_minutes": self.duration_minutes,
             "instrument": self.instrument,

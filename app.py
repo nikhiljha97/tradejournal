@@ -601,6 +601,14 @@ with app.app_context():
     except Exception as e:
         print(f"Migration note (partial_exits): {e}")
 
+    # Add exit_date column for swing trades
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(text("ALTER TABLE trades ADD COLUMN IF NOT EXISTS exit_date VARCHAR(10)"))
+            conn.commit()
+    except Exception as e:
+        print(f"Migration note (exit_date): {e}")
+
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
@@ -758,12 +766,13 @@ def _compute_derived(data):
         from dateutil import parser as dp
         try:
             td = data.get("trade_date","")
+            xd = data.get("exit_date","") or td   # use exit_date if set, else same day
             et = data.get("entry_time","")
             xt = data.get("exit_time","")
             if et and xt and td:
                 e_dt = dp.parse(f"{td} {et}")
-                x_dt = dp.parse(f"{td} {xt}")
-                if x_dt > e_dt:
+                x_dt = dp.parse(f"{xd} {xt}")
+                if x_dt >= e_dt:
                     dur = (x_dt - e_dt).total_seconds() / 60
         except: pass
 
@@ -785,7 +794,7 @@ def _save_trade(data):
     t = Trade(
         user_id=uid(),
         trade_date=data.get("trade_date"), entry_time=data.get("entry_time"),
-        exit_time=data.get("exit_time"), duration_minutes=data.get("duration_minutes"),
+        exit_date=data.get("exit_date"), exit_time=data.get("exit_time"), duration_minutes=data.get("duration_minutes"),
         instrument=data.get("instrument"), session=data.get("session"),
         direction=data.get("direction"), lots=data.get("lots"),
         contracts=data.get("contracts"), entry_price=data.get("entry_price"),
@@ -818,7 +827,7 @@ def _save_trade_for(data, user_id: int):
     t = Trade(
         user_id=user_id,
         trade_date=data.get("trade_date"), entry_time=data.get("entry_time"),
-        exit_time=data.get("exit_time"), duration_minutes=data.get("duration_minutes"),
+        exit_date=data.get("exit_date"), exit_time=data.get("exit_time"), duration_minutes=data.get("duration_minutes"),
         instrument=data.get("instrument"), session=data.get("session"),
         direction=data.get("direction"), lots=data.get("lots"),
         contracts=data.get("contracts"), entry_price=data.get("entry_price"),
@@ -2099,7 +2108,7 @@ def update_trade(trade_id):
     _numeric = {"duration_minutes","lots","contracts","entry_price","stop_price",
                 "target_price","exit_price","stop_pips","target_pips","dollar_risk",
                 "planned_risk_usd","planned_rr","realized_pnl","realized_r","commission"}
-    for field in ["trade_date","entry_time","exit_time","duration_minutes","instrument",
+    for field in ["trade_date","entry_time","exit_date","exit_time","duration_minutes","instrument",
                   "session","direction","lots","contracts","entry_price","stop_price",
                   "target_price","exit_price","stop_pips","target_pips","dollar_risk",
                   "planned_risk_usd","planned_rr","realized_pnl","realized_r","commission","order_type"]:
