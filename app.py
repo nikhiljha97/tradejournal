@@ -586,7 +586,7 @@ with app.app_context():
     # Add partial_exits column if it doesn't exist
     try:
         with db.engine.connect() as conn:
-            conn.execute(text("ALTER TABLE trade ADD COLUMN IF NOT EXISTS partial_exits TEXT DEFAULT '[]'"))
+            conn.execute(text("ALTER TABLE trades ADD COLUMN IF NOT EXISTS partial_exits TEXT DEFAULT '[]'"))
             conn.commit()
     except Exception as e:
         print(f"Migration note (partial_exits): {e}")
