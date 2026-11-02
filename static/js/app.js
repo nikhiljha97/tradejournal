@@ -92,6 +92,14 @@ async function refresh() {
   _populatePairFilter();
   blotterPage = 0;
   renderBlotterPage();
+
+  /* ── Neuromarketing hooks ──────────────────────────────────── */
+  if (typeof updateStreakBadge === 'function') {
+    updateStreakBadge(m.kpi.current_streak || 0);
+  }
+  if (typeof renderWinRateBar === 'function') {
+    renderWinRateBar(parseFloat(m.kpi.win_rate) || 0);
+  }
 }
 
 /* ── Discipline strip ────────────────────────────────────────── */
@@ -1223,12 +1231,77 @@ function updateCoachBadge() {
   }
 }
 
+function renderMd(text) {
+  // Escape any HTML that might be in the raw text first
+  const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const lines = safe.split('\n');
+  const out = [];
+  let inList = false;
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    // Headings
+    if (/^### (.+)/.test(line)) {
+      if (inList) { out.push('</ul>'); inList = false; }
+      out.push('<h4 class="md-h4">' + line.replace(/^### /, '') + '</h4>');
+      continue;
+    }
+    if (/^## (.+)/.test(line)) {
+      if (inList) { out.push('</ul>'); inList = false; }
+      out.push('<h3 class="md-h3">' + line.replace(/^## /, '') + '</h3>');
+      continue;
+    }
+    if (/^# (.+)/.test(line)) {
+      if (inList) { out.push('</ul>'); inList = false; }
+      out.push('<h2 class="md-h2">' + line.replace(/^# /, '') + '</h2>');
+      continue;
+    }
+    // Horizontal rule
+    if (/^---+$/.test(line.trim())) {
+      if (inList) { out.push('</ul>'); inList = false; }
+      out.push('<hr class="md-hr">');
+      continue;
+    }
+    // List items
+    if (/^[*\-] (.+)/.test(line)) {
+      if (!inList) { out.push('<ul class="md-ul">'); inList = true; }
+      let content = line.replace(/^[*\-] /, '');
+      content = applyInlineMd(content);
+      out.push('<li>' + content + '</li>');
+      continue;
+    }
+    // Empty line
+    if (line.trim() === '') {
+      if (inList) { out.push('</ul>'); inList = false; }
+      out.push('<br>');
+      continue;
+    }
+    // Normal paragraph line
+    if (inList) { out.push('</ul>'); inList = false; }
+    out.push('<span>' + applyInlineMd(line) + '</span><br>');
+  }
+  if (inList) out.push('</ul>');
+  return out.join('');
+}
+
+function applyInlineMd(text) {
+  // Bold+italic: ***text***
+  text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong class="md-bold"><em>$1</em></strong>');
+  // Bold: **text**
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong class="md-bold">$1</strong>');
+  // Italic: *text* (single, not preceded/followed by *)
+  text = text.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+  // Inline code: `text`
+  text = text.replace(/`([^`]+)`/g, '<code class="md-code">$1</code>');
+  return text;
+}
+
 function addCoachMessage(text, role='ai', label='') {
   const msgs = document.getElementById('coachMessages');
   const div = document.createElement('div');
   div.className = `coach-msg ${role}`;
-  if (label) div.innerHTML = `<div class="coach-msg-label">${label}</div>${text.replace(/\n/g,'<br>')}`;
-  else div.innerHTML = text.replace(/\n/g,'<br>');
+  const body = (role === 'ai') ? renderMd(text) : text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  if (label) div.innerHTML = `<div class="coach-msg-label">${label}</div>${body}`;
+  else div.innerHTML = body;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
   if (!coachOpen) {
@@ -1380,6 +1453,61 @@ document.querySelectorAll('.tab').forEach(btn => {
   });
 });
 
+/* ── Achievement / Neuromarketing trigger after trade save ───── */
+function _triggerTradeAchievement(payload, metrics) {
+  if (!metrics || !metrics.kpi) return;
+  const k = metrics.kpi;
+  const winLoss = payload.win_loss;
+  const pnl = parseFloat(payload.realized_pnl) || 0;
+  const isWin = winLoss === 'win' || (winLoss === 'auto' && pnl > 0);
+  const isLoss = winLoss === 'loss' || (winLoss === 'auto' && pnl < 0);
+  const streak = k.current_streak || 0;
+  const totalTrades = k.total_trades || 0;
+  const winRate = parseFloat(k.win_rate) || 0;
+
+  if (typeof showToast !== 'function') return;
+
+  // Win streak milestones
+  if (isWin && streak >= 10) {
+    showToast('🔥🔥🔥 ' + streak + '-trade win streak! You are unstoppable.', 'gold', 5000);
+    if (typeof fireConfetti === 'function') fireConfetti();
+  } else if (isWin && streak >= 5) {
+    showToast('🔥 ' + streak + '-trade winning streak! Edge confirmed.', 'gold', 4500);
+    if (typeof fireConfetti === 'function') setTimeout(fireConfetti, 400);
+  } else if (isWin && streak >= 3) {
+    showToast('⚡ ' + streak + ' in a row! You are in the zone.', 'win', 3800);
+  } else if (isWin && streak === 2) {
+    showToast('✅ Back-to-back wins! Keep the discipline.', 'win', 3200);
+  }
+
+  // Milestone trade counts
+  if ([10, 25, 50, 100, 250, 500].includes(totalTrades)) {
+    showToast('🎯 ' + totalTrades + ' trades logged! Data is your edge.', 'info', 4500);
+    if (totalTrades >= 50 && typeof fireConfetti === 'function') fireConfetti();
+  }
+
+  // Win rate achievement
+  if (isWin && winRate >= 70 && totalTrades >= 10) {
+    showToast('📈 Win rate at ' + winRate + '%! Elite execution.', 'gold', 4000);
+  } else if (isWin && winRate >= 60 && totalTrades >= 15) {
+    showToast('📊 ' + winRate + '% win rate — your edge is real.', 'win', 3500);
+  }
+
+  // Big win relative to avg
+  const avgWin = parseFloat(k.avg_win) || 0;
+  if (isWin && avgWin > 0 && pnl >= avgWin * 2.5) {
+    showToast('💰 Big winner! ' + (pnl >= 0 ? '+$' + pnl.toFixed(2) : '') + ' — that is 2.5x your average win.', 'gold', 4500);
+  }
+
+  // Recovery encouragement
+  if (isWin && isLoss === false) {
+    const lossStreak = k.longest_loss_streak || 0;
+    if (lossStreak >= 3 && streak === 1) {
+      showToast('💪 Bounce back win! Stay disciplined, the edge returns.', 'win', 3800);
+    }
+  }
+}
+
 /* ── Patch saveTrade to trigger coach after logging ──────────── */
 const _origSave = window.saveTrade;
 window.saveTrade = async function() {
@@ -1415,6 +1543,8 @@ window.saveTrade = async function() {
     // Trigger coach analysis on new trade
     patternLoaded = false; // Reset so patterns refresh
     triggerCoachOnTrade(d.id);
+    // ── Achievement toasts ──────────────────────────────────
+    _triggerTradeAchievement(payload, lastMetrics);
   } catch(e){toast('Save failed: '+e.message);}
   finally{$('saveBtn').disabled=false;$('saveBtn').textContent='Save';}
 };

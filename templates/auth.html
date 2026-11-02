@@ -361,10 +361,38 @@
 
 <div class="auth-wrap">
   <div class="brand">
-    <span class="brand-icon">◈</span>
+    <span class="brand-icon" style="display:block;font-size:32px;animation:brandPulse 3s ease-in-out infinite">◈</span>
     <div class="brand-name">TradeJournal</div>
     <div class="brand-sub">Edge analytics &amp; psychology for serious traders</div>
+    <!-- Social proof + stats row -->
+    <div style="display:flex;justify-content:center;gap:20px;margin-top:14px;flex-wrap:wrap">
+      <div style="text-align:center;background:rgba(0,255,179,0.06);border:1px solid rgba(0,255,179,0.15);border-radius:8px;padding:8px 16px">
+        <div style="font-size:20px;font-weight:800;color:var(--green);font-family:'JetBrains Mono',monospace" id="authStatTrades">2,400+</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Trades Logged</div>
+      </div>
+      <div style="text-align:center;background:rgba(240,212,74,0.06);border:1px solid rgba(240,212,74,0.15);border-radius:8px;padding:8px 16px">
+        <div style="font-size:20px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace">Free</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Forever</div>
+      </div>
+      <div style="text-align:center;background:rgba(79,163,255,0.06);border:1px solid rgba(79,163,255,0.15);border-radius:8px;padding:8px 16px">
+        <div style="font-size:20px;font-weight:800;color:#4fa3ff;font-family:'JetBrains Mono',monospace">AI</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Psychology Coach</div>
+      </div>
+    </div>
   </div>
+  <style>
+    @keyframes brandPulse {
+      0%,100%{text-shadow:0 0 12px rgba(0,255,179,0.5),0 0 24px rgba(0,255,179,0.2)}
+      50%{text-shadow:0 0 20px rgba(0,255,179,0.9),0 0 40px rgba(0,255,179,0.35)}
+    }
+    .btn-submit { transition: background 0.15s, box-shadow 0.3s; }
+    .btn-submit:not(:disabled):hover { box-shadow: 0 0 0 4px rgba(0,255,179,0.2); }
+    .btn-submit.ready-pulse { animation: ctaPulse 2s ease-in-out infinite; }
+    @keyframes ctaPulse {
+      0%,100%{box-shadow:0 0 0 0 rgba(0,255,179,0.4)}
+      50%{box-shadow:0 0 0 8px rgba(0,255,179,0)}
+    }
+  </style>
 
   <div class="card">
     <div class="card-title">
@@ -1085,6 +1113,22 @@ function _buildPriceSnapshot() {
   });
   return snap;
 }
+
+/* ── Neuromarketing: CTA pulse when inputs are filled ───────── */
+(function() {
+  var inputs = document.querySelectorAll('#f_email, #f_password, #f_username');
+  var btn = document.getElementById('submitBtn');
+  function checkReady() {
+    if (!btn) return;
+    var filled = Array.from(inputs).filter(function(el) { return el && el.value.length > 0; });
+    if (filled.length === inputs.length || (inputs.length === 0)) {
+      btn.classList.add('ready-pulse');
+    } else {
+      btn.classList.remove('ready-pulse');
+    }
+  }
+  inputs.forEach(function(el) { if (el) el.addEventListener('input', checkReady); });
+})();
 </script>
 </body>
 </html>

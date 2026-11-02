@@ -544,6 +544,39 @@ tbody tr:hover { background: var(--panel2); }
   color: var(--green); margin-bottom: 5px; font-weight: 600;
 }
 
+/* ── Coach markdown rendering ─────────────────────────────────── */
+.coach-msg.ai .md-h2 {
+  font-size: 14px; font-weight: 800; color: var(--gold);
+  margin: 10px 0 4px; letter-spacing: 0.03em;
+}
+.coach-msg.ai .md-h3 {
+  font-size: 13px; font-weight: 700; color: var(--gold);
+  margin: 8px 0 3px; letter-spacing: 0.02em;
+}
+.coach-msg.ai .md-h4 {
+  font-size: 12px; font-weight: 700; color: var(--green);
+  margin: 6px 0 2px; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.coach-msg.ai .md-bold {
+  color: var(--gold); font-weight: 700;
+}
+.coach-msg.ai .md-ul {
+  margin: 4px 0 4px 12px; padding: 0; list-style: none;
+}
+.coach-msg.ai .md-ul li {
+  position: relative; padding-left: 14px; margin-bottom: 3px; line-height: 1.55;
+}
+.coach-msg.ai .md-ul li::before {
+  content: '▸'; position: absolute; left: 0; color: var(--green); font-size: 10px; top: 2px;
+}
+.coach-msg.ai .md-hr {
+  border: none; border-top: 1px solid var(--border); margin: 8px 0;
+}
+.coach-msg.ai .md-code {
+  background: rgba(0,255,179,0.08); color: var(--green);
+  border-radius: 4px; padding: 1px 5px; font-family: monospace; font-size: 11px;
+}
+
 .coach-input-row {
   display: flex; gap: 8px; padding: 10px 14px;
   border-top: 1px solid var(--border);
@@ -820,6 +853,120 @@ tbody tr:hover { background: var(--panel2); }
   .info-btn::after { left: 0; transform: none; width: 220px; }
   .w200 { width: 140px !important; height: 140px !important; }
 }
+
+/* ── Neuromarketing / Dopamine Design System ─────────────────── */
+
+/* Toast achievement notifications */
+#toast-container {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  background: var(--panel2); border: 1px solid var(--border2);
+  border-radius: 12px; padding: 12px 20px;
+  font-size: 13px; font-weight: 600; color: var(--text);
+  box-shadow: 0 6px 32px rgba(0,0,0,0.55);
+  display: flex; align-items: center; gap: 10px;
+  animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  max-width: 340px; text-align: center;
+  pointer-events: auto;
+}
+.toast.win  { border-color: var(--green); box-shadow: 0 6px 32px rgba(0,229,160,0.18); }
+.toast.gold { border-color: var(--gold);  box-shadow: 0 6px 32px rgba(240,192,64,0.2); }
+.toast.info { border-color: var(--blue);  box-shadow: 0 6px 32px rgba(79,163,255,0.15); }
+.toast.out  { animation: toastOut 0.3s ease forwards; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.95); }
+}
+
+/* Win streak badge */
+.streak-badge {
+  display: none; align-items: center; gap: 5px;
+  background: linear-gradient(135deg, #1a2a0a, #0f1f00);
+  border: 1px solid #3d6a00; border-radius: 999px;
+  padding: 4px 12px; font-size: 12px; font-weight: 700;
+  color: #a0e040; cursor: default;
+  animation: streakGlow 2s ease-in-out infinite;
+}
+.streak-badge.visible { display: flex; }
+.streak-badge.fire { color: var(--amber); border-color: #804000;
+  background: linear-gradient(135deg, #2a1200, #1a0800);
+  animation: fireGlow 1.5s ease-in-out infinite; }
+@keyframes streakGlow {
+  0%,100% { box-shadow: 0 0 8px rgba(100,220,0,0.2); }
+  50%      { box-shadow: 0 0 16px rgba(100,220,0,0.45); }
+}
+@keyframes fireGlow {
+  0%,100% { box-shadow: 0 0 8px rgba(255,167,38,0.25); }
+  50%      { box-shadow: 0 0 20px rgba(255,167,38,0.55); }
+}
+
+/* KPI number count-up animation — flash when updated */
+@keyframes kpiFlashGreen {
+  0%   { background: rgba(0,229,160,0.18); }
+  100% { background: transparent; }
+}
+@keyframes kpiFlashRed {
+  0%   { background: rgba(255,71,87,0.18); }
+  100% { background: transparent; }
+}
+.kpi.flash-green { animation: kpiFlashGreen 0.8s ease forwards; }
+.kpi.flash-red   { animation: kpiFlashRed   0.8s ease forwards; }
+
+/* Win rate progress bar in discipline strip */
+.wr-strip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; flex: 1 1 0; min-width: 200px;
+  border-right: 1px solid var(--border);
+}
+.wr-bar-wrap {
+  flex: 1; height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden;
+}
+.wr-bar-fill {
+  height: 100%; border-radius: 3px; background: var(--green);
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.wr-bar-fill.high { background: var(--green); box-shadow: 0 0 8px rgba(0,229,160,0.4); }
+.wr-bar-fill.mid  { background: var(--amber); }
+.wr-bar-fill.low  { background: var(--red); }
+.wr-label { font-size: 10px; color: var(--muted); white-space: nowrap; }
+.wr-pct   { font-size: 13px; font-weight: 700; font-family: "JetBrains Mono", monospace; }
+
+/* Confetti burst (canvas overlay) */
+#confetti-canvas {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 9998;
+}
+
+/* Pulse ring on "Log Trade" button when streak is active */
+.btn-gold.streak-pulse {
+  animation: btnStreakPulse 2s ease-in-out infinite;
+}
+@keyframes btnStreakPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(240,192,64,0.4); }
+  50%      { box-shadow: 0 0 0 6px rgba(240,192,64,0); }
+}
+
+/* Milestone bar above equity chart */
+.milestone-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0 4px; font-size: 11px; color: var(--muted);
+}
+.milestone-track {
+  flex: 1; height: 4px; background: var(--panel2); border-radius: 2px; overflow: hidden;
+}
+.milestone-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--green), var(--gold));
+  transition: width 1.4s cubic-bezier(0.4,0,0.2,1);
+}
+.milestone-label { white-space: nowrap; }
 
 /* ── Small mobile (max 480px) ───────────────────────────────── */
 @media (max-width: 480px) {

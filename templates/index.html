@@ -43,6 +43,7 @@
     <button class="tab" data-tab="history">History</button>
   </nav>
   <div class="topbar-right">
+    <span class="streak-badge" id="streakBadge" title="Current win streak"></span>
     <span class="ai-badge" id="aiBadge">
       <span class="ai-dot"></span>
       <span id="aiLabel">{{ 'AI ON' if ai_available else 'No API Key' }}</span>
@@ -877,6 +878,140 @@ document.addEventListener('click', e => {
 })();
 </script>
 <!-- ── END LOT SIZE CALCULATOR DRAWER ─────────── -->
+
+<!-- ── NEUROMARKETING: Toast notifications + Confetti ─────── -->
+<div id="toast-container"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<script>
+/* ── Achievement Toast System ─────────────────────────────── */
+(function() {
+  window.showToast = function(message, type='win', duration=3800) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.innerHTML = message;
+    c.appendChild(t);
+    setTimeout(function() {
+      t.classList.add('out');
+      setTimeout(function() { t.remove(); }, 350);
+    }, duration);
+  };
+})();
+
+/* ── Streak Badge ─────────────────────────────────────────── */
+window.updateStreakBadge = function(streak) {
+  var b = document.getElementById('streakBadge');
+  var btn = document.querySelector('.btn-gold');
+  if (!b) return;
+  if (streak >= 2) {
+    var icon = streak >= 5 ? '🔥' : streak >= 3 ? '⚡' : '✅';
+    b.textContent = icon + ' ' + streak + ' streak';
+    b.classList.add('visible');
+    b.classList.toggle('fire', streak >= 5);
+    if (btn) btn.classList.toggle('streak-pulse', streak >= 3);
+  } else {
+    b.classList.remove('visible');
+    if (btn) btn.classList.remove('streak-pulse');
+  }
+};
+
+/* ── Win rate progress bar injection ─────────────────────── */
+window.renderWinRateBar = function(winPct) {
+  var strip = document.getElementById('disciplineStrip');
+  if (!strip) return;
+  var existing = strip.querySelector('.wr-strip');
+  if (!existing) {
+    var el = document.createElement('div');
+    el.className = 'wr-strip';
+    el.innerHTML = '<span class="wr-label">Win Rate</span>'
+      + '<div class="wr-bar-wrap"><div class="wr-bar-fill" id="wrBarFill" style="width:0%"></div></div>'
+      + '<span class="wr-pct" id="wrPct">—</span>';
+    strip.appendChild(el);
+  }
+  var fill = document.getElementById('wrBarFill');
+  var pctEl = document.getElementById('wrPct');
+  if (!fill || !pctEl) return;
+  var pct = Math.min(Math.max(winPct, 0), 100);
+  fill.className = 'wr-bar-fill ' + (pct >= 60 ? 'high' : pct >= 45 ? 'mid' : 'low');
+  pctEl.style.color = pct >= 60 ? 'var(--green)' : pct >= 45 ? 'var(--amber)' : 'var(--red)';
+  pctEl.textContent = pct.toFixed(0) + '%';
+  // animate after brief delay
+  setTimeout(function() { fill.style.width = pct + '%'; }, 80);
+};
+
+/* ── KPI number count-up animation ───────────────────────── */
+window.animateCountUp = function(el, target, decimals, prefix, suffix, duration) {
+  if (!el) return;
+  decimals = decimals || 0;
+  prefix = prefix || '';
+  suffix = suffix || '';
+  duration = duration || 900;
+  var start = 0;
+  var startTime = null;
+  function step(ts) {
+    if (!startTime) startTime = ts;
+    var progress = Math.min((ts - startTime) / duration, 1);
+    var ease = 1 - Math.pow(1 - progress, 3); // ease-out-cubic
+    var val = start + (target - start) * ease;
+    el.textContent = prefix + val.toFixed(decimals) + suffix;
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = prefix + target.toFixed(decimals) + suffix;
+  }
+  requestAnimationFrame(step);
+};
+
+/* ── Confetti Burst ────────────────────────────────────────── */
+window.fireConfetti = function() {
+  var canvas = document.getElementById('confetti-canvas');
+  if (!canvas) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  var ctx = canvas.getContext('2d');
+  var particles = [];
+  var colors = ['#00e5a0','#f0c040','#4fa3ff','#ff4757','#ffa726','#c084fc'];
+  for (var i = 0; i < 90; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: -10,
+      r: Math.random() * 6 + 3,
+      d: Math.random() * 80 + 20,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngle: 0,
+      tiltSpeed: Math.random() * 0.07 + 0.05,
+      vx: Math.random() * 4 - 2,
+      vy: Math.random() * 3 + 2,
+    });
+  }
+  var angle = 0;
+  var frame = 0;
+  var maxFrames = 120;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01;
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.tiltAngle += p.tiltSpeed;
+      p.y += p.vy;
+      p.x += p.vx + Math.sin(angle + p.d) * 0.5;
+      p.tilt = Math.sin(p.tiltAngle) * 12;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.tilt * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, 1 - frame / maxFrames);
+      ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 2);
+      ctx.restore();
+    }
+    frame++;
+    if (frame < maxFrames) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  draw();
+};
+</script>
+<!-- ── END NEUROMARKETING ───────────────────────────────── -->
 
 </body>
 </html>
