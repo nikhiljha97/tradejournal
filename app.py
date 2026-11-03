@@ -2737,9 +2737,11 @@ def backtest_page():
 
 
 @app.route("/api/chart-data")
-@login_required
 def chart_data():
+    if not current_user.is_authenticated:
+        return jsonify({"error": "Not authenticated", "redirect": "/login"}), 401
     import threading as _threading
+    from sqlalchemy.exc import OperationalError as _SqlOpErr
     symbol = request.args.get("symbol", "XAUUSD").upper()
     tf     = request.args.get("tf", "1h").lower()
 
@@ -2748,40 +2750,65 @@ def chart_data():
     if tf not in _YF_PARAMS:
         return jsonify({"error": "Unknown timeframe"}), 400
 
-    # Check cache
-    meta = ChartMeta.query.filter_by(symbol=symbol, timeframe=tf).first()
-    cached_count = ChartCandle.query.filter_by(symbol=symbol, timeframe=tf).count()
+    # Check cache — retry once on Neon SSL drop
+    try:
+        meta = ChartMeta.query.filter_by(symbol=symbol, timeframe=tf).first()
+        cached_count = ChartCandle.query.filter_by(symbol=symbol, timeframe=tf).count()
+    except _SqlOpErr as _e:
+        try:
+            db.session.remove()
+            import time as _t; _t.sleep(0.4)
+            meta = ChartMeta.query.filter_by(symbol=symbol, timeframe=tf).first()
+            cached_count = ChartCandle.query.filter_by(symbol=symbol, timeframe=tf).count()
+        except Exception as _e2:
+            return jsonify({"error": f"DB unavailable: {str(_e2)[:80]}"}), 503
+    except Exception as _e:
+        return jsonify({"error": str(_e)[:120]}), 500
+
     stale = True
     if meta and meta.last_fetched:
         age = (datetime.utcnow() - meta.last_fetched).total_seconds()
         stale = age > _STALE_AFTER[tf]
 
-    if cached_count == 0:
-        # No data at all: fetch synchronously so the user gets something
-        _fetch_and_cache(symbol, tf)
-    elif stale:
-        # Check how old the most recent candle actually is
-        latest_candle = (ChartCandle.query
-                         .filter_by(symbol=symbol, timeframe=tf)
-                         .order_by(ChartCandle.ts.desc())
-                         .first())
-        latest_ts_ms = latest_candle.ts if latest_candle else 0
-        data_age_hours = (datetime.utcnow().timestamp() * 1000 - latest_ts_ms) / 3_600_000
+    try:
+        if cached_count == 0:
+            # No data at all: fetch synchronously so the user gets something
+            _fetch_and_cache(symbol, tf)
+        elif stale:
+            # Check how old the most recent candle actually is
+            latest_candle = (ChartCandle.query
+                             .filter_by(symbol=symbol, timeframe=tf)
+                             .order_by(ChartCandle.ts.desc())
+                             .first())
+            latest_ts_ms = latest_candle.ts if latest_candle else 0
+            data_age_hours = (datetime.utcnow().timestamp() * 1000 - latest_ts_ms) / 3_600_000
 
-        if data_age_hours > 6:
-            # Data is significantly outdated: wait up to 12s for a live refresh
-            # so the user gets current candles on this very response
-            t = _threading.Thread(target=_background_fetch, args=(app, symbol, tf), daemon=True)
-            t.start()
-            t.join(timeout=12)
-        else:
-            # Only slightly stale: return cache now, refresh quietly in background
-            _threading.Thread(target=_background_fetch, args=(app, symbol, tf), daemon=True).start()
+            if data_age_hours > 6:
+                # Data is significantly outdated: wait up to 12s for a live refresh
+                # so the user gets current candles on this very response
+                t = _threading.Thread(target=_background_fetch, args=(app, symbol, tf), daemon=True)
+                t.start()
+                t.join(timeout=12)
+            else:
+                # Only slightly stale: return cache now, refresh quietly in background
+                _threading.Thread(target=_background_fetch, args=(app, symbol, tf), daemon=True).start()
 
-    candles = (ChartCandle.query
-               .filter_by(symbol=symbol, timeframe=tf)
-               .order_by(ChartCandle.ts.asc())
-               .all())
+        candles = (ChartCandle.query
+                   .filter_by(symbol=symbol, timeframe=tf)
+                   .order_by(ChartCandle.ts.asc())
+                   .all())
+    except _SqlOpErr as _e:
+        try:
+            db.session.remove()
+            import time as _t; _t.sleep(0.4)
+            candles = (ChartCandle.query
+                       .filter_by(symbol=symbol, timeframe=tf)
+                       .order_by(ChartCandle.ts.asc())
+                       .all())
+        except Exception as _e2:
+            return jsonify({"error": f"DB error loading candles: {str(_e2)[:80]}"}), 503
+    except Exception as _e:
+        return jsonify({"error": f"Chart load error: {str(_e)[:120]}"}), 500
 
     data = [{"t": c.ts, "o": round(c.open, 5), "h": round(c.high, 5),
              "l": round(c.low, 5),  "c": round(c.close, 5),

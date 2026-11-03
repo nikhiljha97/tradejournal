@@ -1271,8 +1271,16 @@ async function loadData(sym, tf, resumeAtTimestamp = null) {
   stopPlay();
   try {
     const res  = await fetch(`/api/chart-data?symbol=${sym}&tf=${tf}`);
-    const json = await res.json();
-    if (json.error) { showToast("Error: " + json.error, true); return; }
+    let json;
+    try { json = await res.json(); }
+    catch(parseErr) {
+      if (res.status === 401) { showToast("Session expired — please log in again", true); return; }
+      showToast(`Load failed (HTTP ${res.status}) — please try again`, true); return;
+    }
+    if (json.error) {
+      if (res.status === 401) { showToast("Session expired — please log in again", true); return; }
+      showToast("Load error: " + json.error, true); return;
+    }
     allCandles = json.candles.map(c => ({ timestamp: c.t, open: c.o, high: c.h, low: c.l, close: c.c, volume: c.v }));
 
     if (resumeAtTimestamp && allCandles.length) {
